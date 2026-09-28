@@ -1,6 +1,7 @@
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Database;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Helper;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
@@ -21,20 +22,37 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         }
 
         [HttpPost]
-        public IActionResult DangNhap(DangNhapViewModels model)
+       [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DangNhap(DangNhapViewModels model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var taiKhoan = _context.TaiKhoans.FirstOrDefault(t => t.TenDangNhap == model.TenDangNhap);
-                if (taiKhoan != null && taiKhoan.MatKhau == MatKhauHelper.MaHoa(model.MatKhau))
-                {
-                    HttpContext.Session.SetString("TenDangNhap", taiKhoan.TenDangNhap);
-                    HttpContext.Session.SetString("VaiTro", taiKhoan.VaiTro);
-                    return RedirectToAction("Index", "Home");
-                }
-                ModelState.AddModelError(string.Empty, "Tên đăng nhập hoặc mật khẩu không đúng.");
+                return View(model);
             }
-            return View(model);
+
+            var matKhauMaHoa = MatKhauHelper.MaHoa(model.MatKhau);
+
+            var taiKhoan = await _context.TaiKhoans
+                .FirstOrDefaultAsync(t => t.TenDangNhap == model.TenDangNhap
+                                       && t.MatKhau == matKhauMaHoa);
+
+            if (taiKhoan == null)
+            {
+                ModelState.AddModelError(string.Empty, "Tên đăng nhập hoặc mật khẩu không đúng");
+                return View(model);
+            }
+
+            if (!taiKhoan.TrangThai)
+            {
+                ModelState.AddModelError(string.Empty, "Tài khoản đã bị khóa");
+                return View(model);
+            }
+
+            HttpContext.Session.SetString("MaTaiKhoan", taiKhoan.MaTaiKhoan);
+            HttpContext.Session.SetString("HoTen", taiKhoan.HoTen);
+            HttpContext.Session.SetString("VaiTro", taiKhoan.VaiTro);
+
+            return RedirectToAction("Index", "Home");
         }
 
         public IActionResult DangXuat()
