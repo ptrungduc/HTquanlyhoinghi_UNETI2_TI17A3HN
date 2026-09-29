@@ -1,29 +1,65 @@
 @model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.DangNhapViewModels
+
 @{
     ViewData["Title"] = "Đăng nhập";
 }
-<h2>Đăng nhập</h2>
-<div class="row">
-    <div class="col-md-4">
+
+<div class="login-page">
+    <h1>Hệ Thống Quản Lý Hội Nghị & Sự Kiện</h1>
+    <h3>Quản lý chuyên nghiệp - Tổ chức hiệu quả</h3>
+
+    <div class="login-overlay"></div>
+
+    <div class="login-box">
+
+        <div class="text-center mb-4">
+            <h2>Đăng nhập</h2>
+            <p>Vui lòng nhập thông tin tài khoản của bạn</p>
+        </div>
+
         <form asp-action="DangNhap" method="post">
+
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="mb-3">
-                <label asp-for="TenDangNhap" class="form-label"></label>
-                <input asp-for="TenDangNhap" class="form-control" />
-                <span asp-validation-for="TenDangNhap" class="text-danger"></span>
+                <label asp-for="TenDangNhap" class="form-label">
+                    Tên tài khoản
+                </label>
+
+                <input asp-for="TenDangNhap"
+                       class="form-control"
+                       placeholder="Nhập tên tài khoản" />
+
+                <span asp-validation-for="TenDangNhap"
+                      class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="MatKhau" class="form-label"></label>
-                <input asp-for="MatKhau" class="form-control" />
-                <span asp-validation-for="MatKhau" class="text-danger"></span>
-            </div>
+                <label asp-for="MatKhau" class="form-label">
+                    Mật khẩu
+                </label>
 
-            <button type="submit" class="btn btn-primary">Đăng nhập</button>
+                <input asp-for="MatKhau"
+                       type="password"
+                       class="form-control"
+                       placeholder="Nhập mật khẩu" />
+
+                <span asp-validation-for="MatKhau"
+                      class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <a asp-action="QuenMatKhau" class="text-decoration-none">
+                    Quên mật khẩu?
+                </a>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">
+                Đăng nhập
+            </button>
         </form>
+
     </div>
 </div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
