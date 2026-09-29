@@ -1,0 +1,14 @@
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.SuKien
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<input asp-for="MaSuKien" type="hidden" />
+<div class="mb-3"><label asp-for="TenSuKien" class="form-label"></label><input asp-for="TenSuKien" class="form-control" /><span asp-validation-for="TenSuKien" class="text-danger"></span></div>
+<div class="row">
+    <div class="col-md-6 mb-3"><label asp-for="MaLoaiSuKien" class="form-label">Loại sự kiện</label><select asp-for="MaLoaiSuKien" asp-items="ViewBag.LoaiSuKien" class="form-select"><option value="">-- Chọn loại --</option></select><span asp-validation-for="MaLoaiSuKien" class="text-danger"></span></div>
+    <div class="col-md-6 mb-3"><label asp-for="MaDiaDiem" class="form-label">Địa điểm</label><select asp-for="MaDiaDiem" asp-items="ViewBag.DiaDiem" class="form-select"><option value="">-- Chọn địa điểm --</option></select><span asp-validation-for="MaDiaDiem" class="text-danger"></span></div>
+</div>
+<div class="row">
+    <div class="col-md-6 mb-3"><label asp-for="ThoiGianBatDau" class="form-label"></label><input asp-for="ThoiGianBatDau" type="datetime-local" class="form-control" /><span asp-validation-for="ThoiGianBatDau" class="text-danger"></span></div>
+    <div class="col-md-6 mb-3"><label asp-for="ThoiGianKetThuc" class="form-label"></label><input asp-for="ThoiGianKetThuc" type="datetime-local" class="form-control" /><span asp-validation-for="ThoiGianKetThuc" class="text-danger"></span></div>
+</div>
+<div class="mb-3"><label asp-for="TrangThai" class="form-label">Trạng thái</label><select asp-for="TrangThai" class="form-select"><option value="SapDienRa">Sắp diễn ra</option><option value="DangDienRa">Đang diễn ra</option><option value="DaKetThuc">Đã kết thúc</option><option value="DaHuy">Đã hủy</option></select></div>
+<div class="mb-3"><label asp-for="MoTa" class="form-label"></label><textarea asp-for="MoTa" class="form-control" rows="3"></textarea></div>

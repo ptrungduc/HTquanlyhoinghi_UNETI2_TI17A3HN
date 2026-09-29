@@ -11,6 +11,8 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Database
         public DbSet<TaiKhoan> TaiKhoans { get; set; }
         public DbSet<LoaiSuKien> LoaiSuKiens { get; set; }
         public DbSet<DiaDiem> DiaDiems { get; set; }
+        public DbSet<SuKien> SuKiens { get; set; }
+        public DbSet<PhienSuKien> PhienSuKiens { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<LoaiSuKien>()
@@ -19,7 +21,25 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Database
             modelBuilder.Entity<TaiKhoan>()
                 .HasIndex(t => t.TenDangNhap)
                 .IsUnique();
+
+            modelBuilder.Entity<SuKien>()
+                .HasOne(s => s.LoaiSuKien)
+                .WithMany()
+                .HasForeignKey(s => s.MaLoaiSuKien)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SuKien>()
+                .HasOne(s => s.DiaDiem)
+                .WithMany()
+                .HasForeignKey(s => s.MaDiaDiem)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PhienSuKien>()
+                .HasOne(p => p.SuKien)
+                .WithMany(s => s.PhienSuKiens)
+                .HasForeignKey(p => p.MaSuKien)
+                .OnDelete(DeleteBehavior.Cascade);
         }
-        
+
     }
 }

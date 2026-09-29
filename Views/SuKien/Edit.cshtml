@@ -1,0 +1,5 @@
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.SuKien
+@{ ViewData["Title"] = "Sửa sự kiện"; }
+<h1>Sửa sự kiện</h1>
+<form asp-action="Edit" asp-route-id="@Model.MaSuKien" method="post"><partial name="_Form" model="Model" /><button type="submit" class="btn btn-primary">Lưu thay đổi</button> <a asp-action="Index" class="btn btn-secondary">Hủy</a></form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

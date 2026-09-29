@@ -1,0 +1,4 @@
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.SuKien
+@{ ViewData["Title"] = "Xóa sự kiện"; }
+<h1>Xóa sự kiện</h1><p>Bạn có chắc muốn xóa sự kiện <strong>@Model.TenSuKien</strong> không?</p>
+<form asp-action="Delete" asp-route-id="@Model.MaSuKien" method="post"><button type="submit" class="btn btn-danger">Xóa</button> <a asp-action="Index" class="btn btn-secondary">Hủy</a></form>
