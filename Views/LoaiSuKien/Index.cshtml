@@ -1,0 +1,154 @@
+@model IEnumerable<HTquanlyhoinghi_UNETI2_TI17A3HN.Models.LoaiSuKien>
+
+@{
+    ViewData["Title"] = "Quản lý loại sự kiện";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold">Quản lý loại sự kiện</h2>
+            <p class="text-muted">
+                Quản lý các loại sự kiện trong hệ thống
+            </p>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary">
+            + Thêm loại sự kiện
+        </a>
+    </div>
+
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-light">
+
+                        <tr>
+                            <th>Mã loại</th>
+                            <th>Tên loại sự kiện</th>
+                            <th>Mô tả</th>
+                            <th>Trạng thái</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+
+                                    <td>
+                                        <strong>
+                                            @item.MaLoaiSuKien
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        @item.TenLoaiSuKien
+                                    </td>
+
+                                    <td>
+                                        @(string.IsNullOrEmpty(item.MoTa)
+                                            ? "Không có mô tả"
+                                            : item.MoTa)
+                                    </td>
+
+                                    <td>
+
+                                        @if (item.TrangThai)
+                                        {
+                                            <span class="badge bg-success">
+                                                Hoạt động
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                Ngừng hoạt động
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <td class="text-center">
+
+                                        <a asp-action="Edit"
+                                           asp-route-id="@item.MaLoaiSuKien"
+                                           class="btn btn-sm btn-outline-primary">
+                                            Sửa
+                                        </a>
+
+
+                                        @if (item.TrangThai)
+                                        {
+                                            <form asp-action="NgungHoatDong"
+                                                  asp-route-id="@item.MaLoaiSuKien"
+                                                  method="post"
+                                                  class="d-inline">
+
+                                                @Html.AntiForgeryToken()
+
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-outline-danger"
+                                                        onclick="return confirm('Bạn có chắc muốn ngừng hoạt động loại sự kiện này?');">
+                                                    Ngừng hoạt động
+                                                </button>
+
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <form asp-action="KichHoat"
+                                                  asp-route-id="@item.MaLoaiSuKien"
+                                                  method="post"
+                                                  class="d-inline">
+
+                                                @Html.AntiForgeryToken()
+
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-outline-success">
+                                                    Kích hoạt
+                                                </button>
+
+                                            </form>
+                                        }
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5"
+                                    class="text-center text-muted py-4">
+
+                                    Chưa có loại sự kiện nào.
+
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

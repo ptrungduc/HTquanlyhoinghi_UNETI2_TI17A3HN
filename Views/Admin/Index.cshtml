@@ -2,7 +2,273 @@
 @{
     ViewData["Title"] = "Admin Dashboard";
 }
-<div class="container mt-5">
-    <h1>Welcome</h1>
-    <p>Giao diện Admin</p>
+<div class="admin-page">
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+
+        <div class="admin-logo">
+            <div class="logo-icon">📅</div>
+
+            <div>
+                <strong>Hệ Thống Quản Lý</strong>
+                <span>Sự Kiện & Hội Nghị</span>
+            </div>
+        </div>
+
+        <nav class="admin-menu">
+
+            <a href="#" class="active">
+                🏠
+                <span>Trang chủ</span>
+            </a>
+
+            <a href="/LoaiSuKien/Index">
+                📅
+                <span>Quản lý sự kiện</span>
+            </a>
+
+            <a href="#">
+                📍
+                <span>Địa điểm</span>
+            </a>
+
+            <a href="#">
+                👥
+                <span>Người tham dự</span>
+            </a>
+
+            <a href="#">
+                🕒
+                <span>Lịch trình</span>
+            </a>
+
+            <a href="#">
+                📄
+                <span>Tài liệu & Tài nguyên</span>
+            </a>
+
+            <a href="#">
+                📊
+                <span>Báo cáo</span>
+            </a>
+
+            <a href="#">
+                ⚙️
+                <span>Cài đặt</span>
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- Nội dung chính -->
+    <main class="admin-content">
+
+        <!-- Header -->
+        <header class="admin-header">
+
+            <div>
+                <h2>Trang chủ</h2>
+                <p>Quản lý hệ thống sự kiện & hội nghị</p>
+            </div>
+
+            <div class="admin-account">
+
+                <div class="admin-avatar">
+                    A
+                </div>
+
+                <div>
+                    <strong>Admin</strong>
+                    <small>Quản trị viên</small>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- Xin chào -->
+        <section class="welcome-box">
+
+            <div>
+                <h1>Xin chào, Admin! 👋</h1>
+
+                <p>
+                    Chào mừng bạn quay trở lại hệ thống quản lý
+                    sự kiện và hội nghị.
+                </p>
+            </div>
+
+            <div class="welcome-icon">
+                📅
+            </div>
+
+        </section>
+
+
+        <!-- Thống kê -->
+        <section class="stat-grid">
+
+            <div class="stat-card" onclick="window.location.href='/LoaiSuKien/Index';">
+                <div class="stat-icon blue">
+                    📅
+                </div>
+
+                <div>
+                    <span>Tổng sự kiện</span>
+                    <strong></strong>
+                    <small></small>
+                </div>
+            
+            </div>
+
+
+            <div class="stat-card">
+                <div class="stat-icon purple">
+                    👥
+                </div>
+
+                <div>
+                    <span>Người tham dự</span>
+                    <strong></strong>
+                    <small></small>
+                </div>
+            </div>
+
+
+            <div class="stat-card">
+                <div class="stat-icon green">
+                    📍
+                </div>
+
+                <div>
+                    <span>Địa điểm</span>
+                    <strong></strong>
+                    <small></small>
+                </div>
+            </div>
+
+
+            <div class="stat-card">
+                <div class="stat-icon orange">
+                    📄
+                </div>
+
+                <div>
+                    <span>Tài liệu</span>
+                    <strong></strong>
+                    <small></small>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- Hai khu vực -->
+        <section class="dashboard-grid">
+
+            <!-- Sự kiện sắp tới -->
+            <div class="dashboard-card">
+
+                <div class="card-header">
+                    <h3>📅 Sự kiện sắp tới</h3>
+
+                    <a href="#">
+                        Xem tất cả →
+                    </a>
+                </div>
+
+
+                <div class="event-list">
+
+                </div>
+
+            </div>
+
+
+            <!-- Thao tác nhanh -->
+            <div class="dashboard-card">
+
+                <div class="card-header">
+                    <h3>⚡ Thao tác nhanh</h3>
+                </div>
+
+
+                <div class="quick-actions">
+
+                    <a href="#">
+                        <span>📅</span>
+                        <strong>Tạo sự kiện mới</strong>
+                        <small>Tạo một sự kiện</small>
+                    </a>
+
+                    <a href="#">
+                        <span>📍</span>
+                        <strong>Thêm địa điểm</strong>
+                        <small>Đăng ký địa điểm</small>
+                    </a>
+
+                    <a href="#">
+                        <span>👥</span>
+                        <strong>Quản lý người tham dự</strong>
+                        <small>Xem danh sách</small>
+                    </a>
+
+                    <a href="#">
+                        <span>📊</span>
+                        <strong>Xem báo cáo</strong>
+                        <small>Thống kê hệ thống</small>
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Bảng sự kiện -->
+        <section class="dashboard-card">
+
+            <div class="card-header">
+
+                <h3>📋 Danh sách sự kiện gần đây</h3>
+
+                <a href="#">
+                    Xem tất cả →
+                </a>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table class="event-table">
+
+                    <thead>
+                        <tr>
+                            <th>Tên sự kiện</th>
+                            <th>Thời gian</th>
+                            <th>Địa điểm</th>
+                            <th>Người tham dự</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                    
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+    </main>
+
 </div>

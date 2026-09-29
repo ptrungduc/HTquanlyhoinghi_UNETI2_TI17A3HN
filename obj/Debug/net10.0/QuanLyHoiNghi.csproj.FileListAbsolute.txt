@@ -277,4 +277,4 @@ E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\ref
 E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\QuanLyHoiNghi.pdb
 E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\QuanLyHoiNghi.genruntimeconfig.cache
 E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\ref\QuanLyHoiNghi.dll
-E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\compressed\cwfxmrf80b-{0}-wz4vo5aqlz-wz4vo5aqlz.gz
+E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\compressed\cwfxmrf80b-{0}-cxq543gkag-cxq543gkag.gz
