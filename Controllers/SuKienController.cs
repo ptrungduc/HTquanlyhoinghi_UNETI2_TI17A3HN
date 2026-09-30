@@ -25,10 +25,11 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             if (!string.IsNullOrWhiteSpace(search))
             {
                 search = search.Trim();
-                query = query.Where(s => s.TenSuKien.Contains(search)
+                query = query.Where(s =>
+                    s.TenSuKien.Contains(search)
                     || s.MoTa.Contains(search)
-                    || s.LoaiSuKien!.TenLoaiSuKien.Contains(search)
-                    || s.DiaDiem!.TenDiaDiem.Contains(search));
+                    || (s.LoaiSuKien != null && s.LoaiSuKien.TenLoaiSuKien.Contains(search))
+                    || (s.DiaDiem != null && s.DiaDiem.TenDiaDiem.Contains(search)));
             }
 
             if (!string.IsNullOrWhiteSpace(trangThai))
