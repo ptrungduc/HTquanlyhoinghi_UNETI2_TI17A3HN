@@ -58,7 +58,8 @@ namespace QuanLyHoiNghi.Controllers
             return RedirectToAction("DanhSachDangKy", new { maNguoiThamDu });
         }
 
-        public IActionResult DanhSachDangKy(int maNguoiThamDu, string trangThai, string sapXep)
+               // GET: danh sách đăng ký của một người tham dự (mục 7.8)
+        public IActionResult DanhSachDangKy(int maNguoiThamDu, string trangThai, int? maLoaiSuKien, string sapXep)
         {
             var query = _context.DangKyThamDu
                 .Where(d => d.MaNguoiThamDu == maNguoiThamDu)
@@ -67,6 +68,11 @@ namespace QuanLyHoiNghi.Controllers
             if (!string.IsNullOrEmpty(trangThai) && Enum.TryParse<TrangThaiDangKy>(trangThai, out var tt))
             {
                 query = query.Where(d => d.TrangThai == tt);
+            }
+
+            if (maLoaiSuKien.HasValue)
+            {
+                query = query.Where(d => d.SuKien.MaLoaiSuKien == maLoaiSuKien.Value);
             }
 
             query = sapXep switch
@@ -88,5 +94,46 @@ namespace QuanLyHoiNghi.Controllers
 
             return View(danhSach);
         }
+
+        // GET: Ban tổ chức tìm kiếm đăng ký theo người tham dự hoặc sự kiện (mục 7.8)
+        public IActionResult TimKiem(string tenNguoiThamDu, int? maSuKien, string trangThai, string sapXep)
+        {
+            var query = _context.DangKyThamDu.AsQueryable();
+
+            if (!string.IsNullOrEmpty(tenNguoiThamDu))
+            {
+                query = query.Where(d => d.NguoiThamDu.HoTen.Contains(tenNguoiThamDu));
+            }
+
+            if (maSuKien.HasValue)
+            {
+                query = query.Where(d => d.MaSuKien == maSuKien.Value);
+            }
+
+            if (!string.IsNullOrEmpty(trangThai) && Enum.TryParse<TrangThaiDangKy>(trangThai, out var tt))
+            {
+                query = query.Where(d => d.TrangThai == tt);
+            }
+
+            query = sapXep switch
+            {
+                "ngaytochuc" => query.OrderBy(d => d.SuKien.ThoiGianBatDau),
+                _ => query.OrderByDescending(d => d.NgayDangKy)
+            };
+
+            var danhSach = query
+                .Select(d => new
+                {
+                    d.MaDangKy,
+                    d.NguoiThamDu.HoTen,
+                    d.SuKien.TenSuKien,
+                    d.NgayDangKy,
+                    d.TrangThai
+                })
+                .ToList();
+
+            return View(danhSach);
+        }
+       
     }
 }

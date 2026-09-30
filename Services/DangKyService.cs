@@ -147,5 +147,41 @@ namespace QuanLyHoiNghi.Services
             await _context.SaveChangesAsync();
             return (true, null);
         }
+
+        // ================== ĐĂNG KÝ PHIÊN - LƯU ĐĂNG KÝ SAU KHI KIỂM TRA ==================
+        public async Task<(bool ThanhCong, string LyDo)> DangKyPhienAsync(int maNguoiThamDu, int maPhien)
+        {
+            var phien = await _context.PhienSuKien.FirstOrDefaultAsync(p => p.MaPhien == maPhien);
+            if (phien == null)
+                return (false, "Phiên sự kiện không tồn tại.");
+
+            // Không cho đăng ký trùng phiên đã đăng ký
+            bool daDangKy = await _context.DangKyPhien
+                .AnyAsync(dp => dp.MaNguoiThamDu == maNguoiThamDu
+                             && dp.MaPhien == maPhien
+                             && dp.TrangThai != TrangThaiDangKy.DaHuy
+                             && dp.TrangThai != TrangThaiDangKy.TuChoi);
+
+            if (daDangKy)
+                return (false, "Bạn đã đăng ký phiên này rồi.");
+
+            // Kiểm tra trùng lịch với các phiên khác đã đăng ký (mục 7.6)
+            var (hopLe, lyDo) = await KiemTraTrungLichPhienAsync(maNguoiThamDu, maPhien, phien.BatDau, phien.KetThuc);
+            if (!hopLe)
+                return (false, lyDo);
+
+            var dangKyPhien = new DangKyPhien
+            {
+                MaNguoiThamDu = maNguoiThamDu,
+                MaPhien = maPhien,
+                NgayDangKy = DateTime.Now,
+                TrangThai = TrangThaiDangKy.ChoDuyet
+            };
+
+            _context.DangKyPhien.Add(dangKyPhien);
+            await _context.SaveChangesAsync();
+
+            return (true, null);
+        }
     }
 }
