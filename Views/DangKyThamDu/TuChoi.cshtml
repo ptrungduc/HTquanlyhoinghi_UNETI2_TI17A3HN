@@ -1,0 +1,35 @@
+@* Họ và tên: [TÊN CỦA TÔI] *@
+@* Mã sinh viên: [MSSV CỦA TÔI] *@
+@* Nội dung thực hiện: Module 4 - Xét duyệt đăng ký, mã tham dự, check-in, điểm danh. *@
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module4.TuChoiDangKyViewModel
+
+@{
+    ViewData["Title"] = "Từ chối đăng ký";
+    var ketQua = ViewBag.KetQuaThaoTac as HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module4.KetQuaThaoTacViewModel;
+}
+
+<h1 class="h3 mb-4">Từ chối đăng ký</h1>
+
+@if (ketQua is not null)
+{
+    <div class="alert @(ketQua.ThanhCong ? "alert-success" : "alert-danger")" role="status">@ketQua.ThongBao</div>
+}
+
+<div class="alert alert-info" role="status">Chưa tích hợp Module 3. Trạng thái đăng ký chưa được kiểm tra.</div>
+
+<form asp-action="TuChoi" method="post" class="mt-3">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <div class="mb-3">
+        <label asp-for="MaDangKy" class="form-label"></label>
+        <input asp-for="MaDangKy" class="form-control" />
+        <span asp-validation-for="MaDangKy" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="LyDoTuChoi" class="form-label"></label>
+        <textarea asp-for="LyDoTuChoi" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="LyDoTuChoi" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-danger">Gửi từ chối</button>
+    <a class="btn btn-outline-secondary" asp-action="Index">Hủy</a>
+</form>
