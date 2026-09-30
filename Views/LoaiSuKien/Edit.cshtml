@@ -3,125 +3,142 @@
 @{
     ViewData["Title"] = "Chỉnh sửa loại sự kiện";
 }
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+}
+<div class="admin-page">
 
-<div class="container mt-4">
+    <main class="admin-content">
 
-    <div class="card shadow-sm border-0">
+        <!-- Header -->
+        <header class="admin-header">
 
-        <div class="card-body p-4">
+            <div>
+                <h2>Quản lý loại sự kiện</h2>
+                <p>Quản lý các loại sự kiện trong hệ thống</p>
+            </div>
 
-            <h2 class="fw-bold mb-4">
-                Chỉnh sửa loại sự kiện
-            </h2>
+            <div class="admin-account">
 
-            <form asp-action="Edit"
-                  asp-route-id="@Model.MaLoaiSuKien"
-                  method="post">
-
-                @Html.AntiForgeryToken()
-
-                <div asp-validation-summary="ModelOnly"
-                     class="text-danger mb-3">
+                <div class="admin-avatar">
+                    A
                 </div>
 
-
-                <div class="mb-3">
-
-                    <label class="form-label">
-                        Mã loại sự kiện
-                    </label>
-
-                    <input asp-for="MaLoaiSuKien"
-                           class="form-control"
-                           readonly />
-
+                <div>
+                    <strong>Admin</strong>
+                    <small>Quản trị viên</small>
                 </div>
 
+            </div>
 
-                <div class="mb-3">
+        </header>
 
-                    <label asp-for="TenLoaiSuKien"
-                           class="form-label">
-                        Tên loại sự kiện
-                    </label>
+        <div class="container mt-4">
 
-                    <input asp-for="TenLoaiSuKien"
-                           class="form-control" />
+            <div class="card shadow-sm border-0">
 
-                    <span asp-validation-for="TenLoaiSuKien"
-                          class="text-danger">
-                    </span>
+                <div class="card-body p-4">
 
-                </div>
+                    <h2 class="fw-bold mb-4">
+                        Chỉnh sửa loại sự kiện
+                    </h2>
+
+                    <form asp-action="Edit" asp-route-id="@Model.MaLoaiSuKien" method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3">
+                        </div>
 
 
-                <div class="mb-3">
+                        <div class="mb-3">
 
-                    <label asp-for="MoTa"
-                           class="form-label">
-                        Mô tả
-                    </label>
+                            <label class="form-label">
+                                Mã loại sự kiện
+                            </label>
 
-                    <textarea asp-for="MoTa"
-                              class="form-control"
-                              rows="4">
+                            <input asp-for="MaLoaiSuKien" class="form-control" readonly />
+
+                        </div>
+
+
+                        <div class="mb-3">
+
+                            <label asp-for="TenLoaiSuKien" class="form-label">
+                                Tên loại sự kiện
+                            </label>
+
+                            <input asp-for="TenLoaiSuKien" class="form-control" />
+
+                            <span asp-validation-for="TenLoaiSuKien" class="text-danger">
+                            </span>
+
+                        </div>
+
+
+                        <div class="mb-3">
+
+                            <label asp-for="MoTa" class="form-label">
+                                Mô tả
+                            </label>
+
+                            <textarea asp-for="MoTa" class="form-control" rows="4">
                     </textarea>
 
-                    <span asp-validation-for="MoTa"
-                          class="text-danger">
-                    </span>
-
-                </div>
-
-
-                <div class="mb-3">
-
-                    <label class="form-label">
-                        Trạng thái
-                    </label>
-
-                    <div>
-
-                        @if (Model.TrangThai)
-                        {
-                            <span class="badge bg-success">
-                                Hoạt động
+                            <span asp-validation-for="MoTa" class="text-danger">
                             </span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-secondary">
-                                Ngừng hoạt động
-                            </span>
-                        }
 
-                    </div>
+                        </div>
+
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Trạng thái
+                            </label>
+
+                            <div>
+
+                                @if (Model.TrangThai)
+                                {
+                                    <span class="badge bg-success">
+                                        Hoạt động
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        Ngừng hoạt động
+                                    </span>
+                                }
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="d-flex gap-2">
+
+                            <button type="submit" class="btn btn-primary">
+                                Lưu thay đổi
+                            </button>
+
+                            <a asp-action="Index" class="btn btn-secondary">
+                                Quay lại
+                            </a>
+
+                        </div>
+
+                    </form>
 
                 </div>
 
-
-                <div class="d-flex gap-2">
-
-                    <button type="submit"
-                            class="btn btn-primary">
-                        Lưu thay đổi
-                    </button>
-
-                    <a asp-action="Index"
-                       class="btn btn-secondary">
-                        Quay lại
-                    </a>
-
-                </div>
-
-            </form>
+            </div>
 
         </div>
-
     </div>
 
-</div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+    }

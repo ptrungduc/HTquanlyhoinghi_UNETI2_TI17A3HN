@@ -4,15 +4,32 @@
     ViewData["Title"] = "Quản lý loại sự kiện";
 }
 
+<!-- Header -->
+<header class="admin-header">
+
+    <div>
+        <h2>Quản lý loại sự kiện</h2>
+        <p>Quản lý các loại sự kiện trong hệ thống</p>
+    </div>
+
+    <div class="admin-account">
+
+        <div class="admin-avatar">
+            A
+        </div>
+
+        <div>
+            <strong>Admin</strong>
+            <small>Quản trị viên</small>
+        </div>
+
+    </div>
+
+</header>
+
 <div class="container mt-4">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold">Quản lý loại sự kiện</h2>
-            <p class="text-muted">
-                Quản lý các loại sự kiện trong hệ thống
-            </p>
-        </div>
 
         <a asp-action="Create" class="btn btn-primary">
             + Thêm loại sự kiện
@@ -83,8 +100,7 @@
 
                                     <td class="text-center">
 
-                                        <a asp-action="Edit"
-                                           asp-route-id="@item.MaLoaiSuKien"
+                                        <a asp-action="Edit" asp-route-id="@item.MaLoaiSuKien"
                                            class="btn btn-sm btn-outline-primary">
                                             Sửa
                                         </a>
@@ -92,15 +108,12 @@
 
                                         @if (item.TrangThai)
                                         {
-                                            <form asp-action="NgungHoatDong"
-                                                  asp-route-id="@item.MaLoaiSuKien"
-                                                  method="post"
+                                            <form asp-action="NgungHoatDong" asp-route-id="@item.MaLoaiSuKien" method="post"
                                                   class="d-inline">
 
                                                 @Html.AntiForgeryToken()
 
-                                                <button type="submit"
-                                                        class="btn btn-sm btn-outline-danger"
+                                                <button type="submit" class="btn btn-sm btn-outline-danger"
                                                         onclick="return confirm('Bạn có chắc muốn ngừng hoạt động loại sự kiện này?');">
                                                     Ngừng hoạt động
                                                 </button>
@@ -109,15 +122,12 @@
                                         }
                                         else
                                         {
-                                            <form asp-action="KichHoat"
-                                                  asp-route-id="@item.MaLoaiSuKien"
-                                                  method="post"
+                                            <form asp-action="KichHoat" asp-route-id="@item.MaLoaiSuKien" method="post"
                                                   class="d-inline">
 
                                                 @Html.AntiForgeryToken()
 
-                                                <button type="submit"
-                                                        class="btn btn-sm btn-outline-success">
+                                                <button type="submit" class="btn btn-sm btn-outline-success">
                                                     Kích hoạt
                                                 </button>
 
@@ -132,8 +142,7 @@
                         else
                         {
                             <tr>
-                                <td colspan="5"
-                                    class="text-center text-muted py-4">
+                                <td colspan="5" class="text-center text-muted py-4">
 
                                     Chưa có loại sự kiện nào.
 
