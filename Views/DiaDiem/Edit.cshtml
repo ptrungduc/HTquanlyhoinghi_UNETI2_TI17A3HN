@@ -1,0 +1,247 @@
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.DiaDiem
+
+@{
+    ViewData["Title"] = "Chỉnh sửa địa điểm";
+}
+
+<div class="form-page">
+
+    <!-- Header -->
+    <div class="form-page-header">
+
+        <div>
+            <h2>Chỉnh sửa địa điểm</h2>
+
+            <p>
+                Cập nhật thông tin của địa điểm tổ chức sự kiện
+            </p>
+        </div>
+
+        <div class="admin-account">
+
+            <div class="admin-avatar">
+                A
+            </div>
+
+            <div>
+                <strong>Admin</strong>
+                <small>Quản trị viên</small>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Form -->
+    <div class="form-card">
+
+        <div class="form-card-header">
+
+            <div class="form-icon">
+                ✎
+            </div>
+
+            <div>
+                <h3>Thông tin địa điểm</h3>
+
+                <p>
+                    Kiểm tra và cập nhật thông tin bên dưới
+                </p>
+            </div>
+
+        </div>
+
+
+        <form asp-controller="DiaDiem"
+              asp-action="Edit"
+              asp-route-id="@Model.MaDiaDiem"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+
+            <!-- Validation -->
+            <div asp-validation-summary="ModelOnly"
+                 class="validation-summary">
+            </div>
+
+
+            <div class="form-grid">
+
+                <!-- Mã địa điểm -->
+                <div class="form-field">
+
+                    <label asp-for="MaDiaDiem">
+                        Mã địa điểm
+                    </label>
+
+                    <input asp-for="MaDiaDiem"
+                           class="input-control input-readonly"
+                           readonly />
+
+                    <small class="field-note">
+                        Mã địa điểm không thể thay đổi.
+                    </small>
+
+                </div>
+
+
+                <!-- Tên địa điểm -->
+                <div class="form-field">
+
+                    <label asp-for="TenDiaDiem">
+                        Tên địa điểm
+                        <span class="required">*</span>
+                    </label>
+
+                    <input asp-for="TenDiaDiem"
+                           class="input-control"
+                           placeholder="Nhập tên địa điểm..." />
+
+                    <span asp-validation-for="TenDiaDiem"
+                          class="field-error">
+                    </span>
+
+                </div>
+
+
+                <!-- Địa chỉ -->
+                <div class="form-field full-width">
+
+                    <label asp-for="DiaChi">
+                        Địa chỉ
+                        <span class="required">*</span>
+                    </label>
+
+                    <input asp-for="DiaChi"
+                           class="input-control"
+                           placeholder="Nhập địa chỉ địa điểm..." />
+
+                    <span asp-validation-for="DiaChi"
+                          class="field-error">
+                    </span>
+
+                </div>
+
+
+                <!-- Sức chứa -->
+                <div class="form-field">
+
+                    <label asp-for="SucChuaToiDa">
+                        Sức chứa tối đa
+                        <span class="required">*</span>
+                    </label>
+
+                    <div class="input-with-unit">
+
+                        <input asp-for="SucChuaToiDa"
+                               type="number"
+                               min="1"
+                               class="input-control"
+                               placeholder="Ví dụ: 500" />
+
+                        <span class="input-unit">
+                            người
+                        </span>
+
+                    </div>
+
+                    <span asp-validation-for="SucChuaToiDa"
+                          class="field-error">
+                    </span>
+
+                </div>
+
+
+                <!-- Trạng thái -->
+                <div class="form-field">
+
+                    <label>
+                        Trạng thái
+                    </label>
+
+                    @if (Model.TrangThai)
+                    {
+                        <div class="status-create status-active">
+
+                            <span class="status-create-dot"></span>
+
+                            <span>
+                                Hoạt động
+                            </span>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="status-create status-inactive">
+
+                            <span class="status-create-dot"></span>
+
+                            <span>
+                                Ngừng hoạt động
+                            </span>
+
+                        </div>
+                    }
+
+                    <small class="field-note">
+                        Trạng thái được quản lý riêng bằng nút
+                        Kích hoạt / Ngừng hoạt động.
+                    </small>
+
+                </div>
+
+
+                <!-- Mô tả -->
+                <div class="form-field full-width">
+
+                    <label asp-for="MoTa">
+                        Mô tả
+                    </label>
+
+                    <textarea asp-for="MoTa"
+                              class="input-control textarea-control"
+                              rows="5"
+                              placeholder="Nhập mô tả về địa điểm...">
+                    </textarea>
+
+                    <span asp-validation-for="MoTa"
+                          class="field-error">
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- Buttons -->
+            <div class="form-actions">
+
+                <a asp-controller="DiaDiem"
+                   asp-action="Index"
+                   class="btn-cancel">
+                    Hủy
+                </a>
+
+                <button type="submit"
+                        class="btn-save">
+                    ✓
+                    Lưu thay đổi
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+}

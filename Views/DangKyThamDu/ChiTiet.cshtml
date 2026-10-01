@@ -1,0 +1,28 @@
+@* Họ và tên: [TÊN CỦA TÔI] *@
+@* Mã sinh viên: [MSSV CỦA TÔI] *@
+@* Nội dung thực hiện: Module 4 - Xét duyệt đăng ký, mã tham dự, check-in, điểm danh. *@
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module4.ChiTietDangKyViewModel
+
+@{
+    ViewData["Title"] = "Chi tiết đăng ký";
+}
+
+<h1 class="h3 mb-4">Chi tiết đăng ký</h1>
+<div class="alert alert-info" role="status">@Model.ThongBao</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.MaDangKy))
+{
+    <dl class="row">
+        <dt class="col-sm-3">Mã đăng ký được yêu cầu</dt>
+        <dd class="col-sm-9"><code>@Model.MaDangKy</code></dd>
+    </dl>
+}
+
+<div class="d-flex flex-wrap gap-2">
+    @if (!string.IsNullOrWhiteSpace(Model.MaDangKy))
+    {
+        <a class="btn btn-success" asp-action="Duyet" asp-route-maDangKy="@Model.MaDangKy">Duyệt đăng ký</a>
+        <a class="btn btn-outline-danger" asp-action="TuChoi" asp-route-maDangKy="@Model.MaDangKy">Từ chối</a>
+    }
+    <a class="btn btn-outline-secondary" asp-action="Index">Quay lại danh sách</a>
+</div>
