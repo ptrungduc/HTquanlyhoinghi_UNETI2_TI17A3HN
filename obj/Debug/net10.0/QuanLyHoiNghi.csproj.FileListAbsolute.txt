@@ -203,7 +203,6 @@ E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\rjs
 E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\scopedcss\bundle\QuanLyHoiNghi.styles.css
 E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\scopedcss\projectbundle\QuanLyHoiNghi.bundle.scp.css
-E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\compressed\cwfxmrf80b-{0}-b9sayid5wm-b9sayid5wm.gz
 E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\compressed\wa1c0apqwf-{0}-61n19gt1b8-61n19gt1b8.gz
 E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\compressed\6dddior628-{0}-xtxxf3hu2r-xtxxf3hu2r.gz
 E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\compressed\1rnga0dv4n-{0}-t1cqhe9u97-t1cqhe9u97.gz
@@ -278,3 +277,4 @@ E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\ref
 E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\QuanLyHoiNghi.pdb
 E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\QuanLyHoiNghi.genruntimeconfig.cache
 E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\ref\QuanLyHoiNghi.dll
+E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\compressed\cwfxmrf80b-{0}-5rnqfl6qry-5rnqfl6qry.gz
