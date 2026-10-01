@@ -25,18 +25,11 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             if (!string.IsNullOrWhiteSpace(search))
             {
                 search = search.Trim();
-<<<<<<< HEAD
                 query = query.Where(s =>
                     s.TenSuKien.Contains(search)
                     || s.MoTa.Contains(search)
                     || (s.LoaiSuKien != null && s.LoaiSuKien.TenLoaiSuKien.Contains(search))
                     || (s.DiaDiem != null && s.DiaDiem.TenDiaDiem.Contains(search)));
-=======
-                query = query.Where(s => s.TenSuKien.Contains(search)
-                    || s.MoTa.Contains(search)
-                    || s.LoaiSuKien!.TenLoaiSuKien.Contains(search)
-                    || s.DiaDiem!.TenDiaDiem.Contains(search));
->>>>>>> 19841cd (23103100176HoangQuocDai tao nut tim kiem va quan ly su kien tuan 1)
             }
 
             if (!string.IsNullOrWhiteSpace(trangThai))
