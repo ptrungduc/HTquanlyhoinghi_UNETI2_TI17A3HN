@@ -1,5 +1,0 @@
-@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.SuKien
-@{ ViewData["Title"] = "Chi tiết sự kiện"; }
-<h1>@Model.TenSuKien</h1>
-<dl class="row"><dt class="col-sm-3">Loại sự kiện</dt><dd class="col-sm-9">@Model.LoaiSuKien?.TenLoaiSuKien</dd><dt class="col-sm-3">Địa điểm</dt><dd class="col-sm-9">@Model.DiaDiem?.TenDiaDiem</dd><dt class="col-sm-3">Thời gian</dt><dd class="col-sm-9">@Model.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm") - @Model.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")</dd><dt class="col-sm-3">Trạng thái</dt><dd class="col-sm-9">@Model.TrangThai</dd><dt class="col-sm-3">Mô tả</dt><dd class="col-sm-9">@Model.MoTa</dd></dl>
-<div class="mb-3"><a asp-controller="PhienSuKien" asp-action="Index" asp-route-maSuKien="@Model.MaSuKien" class="btn btn-primary">Quản lý phiên</a> <a asp-action="Edit" asp-route-id="@Model.MaSuKien" class="btn btn-secondary">Sửa</a> <a asp-action="Index" class="btn btn-link">Quay lại</a></div>

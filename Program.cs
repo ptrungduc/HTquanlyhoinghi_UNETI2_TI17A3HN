@@ -1,5 +1,6 @@
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Database;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Helper;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<IDichVuModule4, DichVuModule4>();
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();

@@ -51,8 +51,8 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             HttpContext.Session.SetString("MaTaiKhoan", taiKhoan.MaTaiKhoan);
             HttpContext.Session.SetString("HoTen", taiKhoan.HoTen);
             HttpContext.Session.SetString("VaiTro", taiKhoan.VaiTro);
-
-            return RedirectToAction("Index", "Home");
+            
+            return RedirectToAction("Index", taiKhoan.VaiTro);
         }
 
         public IActionResult DangXuat()
