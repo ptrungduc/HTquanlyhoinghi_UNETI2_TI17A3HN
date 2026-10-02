@@ -7,7 +7,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module4;
 public class DuyetDangKyViewModel
 {
     public List<DangKyChoDuyetViewModel> DanhSachDangKy { get; set; } = [];
-    public string ThongBaoTichHop { get; set; } = string.Empty;
+    public string ThongBao { get; set; } = string.Empty;
 }
 
 public class DangKyChoDuyetViewModel
@@ -16,4 +16,5 @@ public class DangKyChoDuyetViewModel
     public string TenNguoiThamDu { get; set; } = string.Empty;
     public string TenSuKien { get; set; } = string.Empty;
     public string TrangThai { get; set; } = string.Empty;
+    public string? MaThamDu { get; set; }
 }
