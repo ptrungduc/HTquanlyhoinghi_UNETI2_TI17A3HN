@@ -4,6 +4,7 @@ using HTquanlyhoinghi_UNETI2_TI17A3HN.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace QuanLyHoiNghi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261002044049_UpdatePendingChanges")]
+    partial class UpdatePendingChanges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,85 +24,6 @@ namespace QuanLyHoiNghi.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.CheckIn", b =>
-                {
-                    b.Property<string>("MaCheckIn")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("GhiChu")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MaDangKy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("NguoiThucHien")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("ThoiGianCheckIn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("TrangThai")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("MaCheckIn");
-
-                    b.HasIndex("MaDangKy")
-                        .IsUnique();
-
-                    b.ToTable("CheckIns");
-                });
-
-            modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.DangKyThamDu", b =>
-                {
-                    b.Property<string>("MaDangKy")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("GhiChu")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LyDoTuChoiHuy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MaNguoiThamDu")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("MaSuKien")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("MaThamDu")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("NgayDangKy")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("NgayDuyet")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("TrangThai")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("MaDangKy");
-
-                    b.HasIndex("MaNguoiThamDu");
-
-                    b.HasIndex("MaSuKien");
-
-                    b.ToTable("DangKyThamDus");
-                });
 
             modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.DiaDiem", b =>
                 {
@@ -151,43 +75,6 @@ namespace QuanLyHoiNghi.Migrations
                         .IsUnique();
 
                     b.ToTable("LoaiSuKiens");
-                });
-
-            modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.NguoiThamDu", b =>
-                {
-                    b.Property<string>("MaNguoiThamDu")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("DonViCongTac")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("HoTen")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("MaTaiKhoan")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("SoDienThoai")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TrangThai")
-                        .HasColumnType("bit");
-
-                    b.HasKey("MaNguoiThamDu");
-
-                    b.HasIndex("MaTaiKhoan");
-
-                    b.ToTable("NguoiThamDus");
                 });
 
             modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.PhienSuKien", b =>
@@ -308,47 +195,6 @@ namespace QuanLyHoiNghi.Migrations
                     b.ToTable("TaiKhoans");
                 });
 
-            modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.CheckIn", b =>
-                {
-                    b.HasOne("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.DangKyThamDu", "DangKyThamDu")
-                        .WithOne("CheckIn")
-                        .HasForeignKey("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.CheckIn", "MaDangKy")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("DangKyThamDu");
-                });
-
-            modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.DangKyThamDu", b =>
-                {
-                    b.HasOne("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.NguoiThamDu", "NguoiThamDu")
-                        .WithMany("DangKyThamDus")
-                        .HasForeignKey("MaNguoiThamDu")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.SuKien", "SuKien")
-                        .WithMany()
-                        .HasForeignKey("MaSuKien")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("NguoiThamDu");
-
-                    b.Navigation("SuKien");
-                });
-
-            modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.NguoiThamDu", b =>
-                {
-                    b.HasOne("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.TaiKhoan", "TaiKhoan")
-                        .WithMany()
-                        .HasForeignKey("MaTaiKhoan")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("TaiKhoan");
-                });
-
             modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.PhienSuKien", b =>
                 {
                     b.HasOne("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.SuKien", "SuKien")
@@ -377,16 +223,6 @@ namespace QuanLyHoiNghi.Migrations
                     b.Navigation("DiaDiem");
 
                     b.Navigation("LoaiSuKien");
-                });
-
-            modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.DangKyThamDu", b =>
-                {
-                    b.Navigation("CheckIn");
-                });
-
-            modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.NguoiThamDu", b =>
-                {
-                    b.Navigation("DangKyThamDus");
                 });
 
             modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.SuKien", b =>

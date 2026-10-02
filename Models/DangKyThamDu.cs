@@ -1,38 +1,41 @@
+// Entity dùng chung theo tài liệu yêu cầu (Mục 7.2 và Mục 10).
+// Module 3 sử dụng cho nghiệp vụ đăng ký sự kiện.
+// Module 4 sử dụng cho xét duyệt và check-in.
+// Module 5 đọc dữ liệu cho lịch sử và thống kê.
+
 using System.ComponentModel.DataAnnotations;
 
-namespace QuanLyHoiNghi.Models
+namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Models
 {
-    public enum TrangThaiDangKy
-    {
-        ChoDuyet = 0,
-        DaDuyet = 1,
-        DaCheckIn = 2,
-        HoanThanh = 3,
-        TuChoi = 4,
-        DaHuy = 5
-    }
-
     public class DangKyThamDu
     {
         [Key]
-        public int MaDangKy { get; set; }
+        public string MaDangKy { get; set; } = string.Empty;
 
-        public int MaNguoiThamDu { get; set; }
-        public virtual NguoiThamDu NguoiThamDu { get; set; }
+        [Required]
+        public string MaNguoiThamDu { get; set; } = string.Empty;
 
-        public int MaSuKien { get; set; }
-        public virtual SuKien SuKien { get; set; }
+        [Required]
+        public string MaSuKien { get; set; } = string.Empty;
 
         public DateTime NgayDangKy { get; set; } = DateTime.Now;
 
+        // Trạng thái: ChoDuyet, DaDuyet, DaCheckIn, HoanThanh, TuChoi, DaHuy
         public TrangThaiDangKy TrangThai { get; set; } = TrangThaiDangKy.ChoDuyet;
 
-        [StringLength(500)]
-        public string GhiChu { get; set; }
+        public string GhiChu { get; set; } = string.Empty;
 
         public DateTime? NgayDuyet { get; set; }
 
-        [StringLength(500)]
-        public string LyDoTuChoiHuy { get; set; }
+        public string LyDoTuChoiHuy { get; set; } = string.Empty;
+
+        // Mã tham dự duy nhất, được cấp sau khi duyệt (Mục 8.2)
+        [StringLength(100)]
+        public string? MaThamDu { get; set; }
+
+        // Navigation Property
+        public NguoiThamDu? NguoiThamDu { get; set; }
+        public SuKien? SuKien { get; set; }
+        public CheckIn? CheckIn { get; set; }
     }
 }

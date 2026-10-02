@@ -12,7 +12,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IDichVuModule4, DichVuModule4>();
-builder.Services.AddScoped<QuanLyHoiNghi.Services.DangKyService>();
+builder.Services.AddScoped<HTquanlyhoinghi_UNETI2_TI17A3HN.Services.DangKyService>();
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using QuanLyHoiNghi.Services;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Services;
 
-namespace QuanLyHoiNghi.Controllers
+namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
 {
     public class DangKyPhienController : Controller
     {
