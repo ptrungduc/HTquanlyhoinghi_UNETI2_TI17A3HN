@@ -278,3 +278,16 @@ E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\Qua
 E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\QuanLyHoiNghi.genruntimeconfig.cache
 E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\ref\QuanLyHoiNghi.dll
 E:\ThucHanhLapTrinhNodeNet\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\compressed\cwfxmrf80b-{0}-5rnqfl6qry-5rnqfl6qry.gz
+C:\quanlyhoinghi\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\QuanLyHoiNghi.csproj.AssemblyReference.cache
+C:\quanlyhoinghi\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\rpswa.dswa.cache.json
+C:\quanlyhoinghi\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\QuanLyHoiNghi.GeneratedMSBuildEditorConfig.editorconfig
+C:\quanlyhoinghi\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\QuanLyHoiNghi.AssemblyInfoInputs.cache
+C:\quanlyhoinghi\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\QuanLyHoiNghi.AssemblyInfo.cs
+C:\quanlyhoinghi\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\QuanLyHoiNghi.csproj.CoreCompileInputs.cache
+C:\quanlyhoinghi\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\QuanLyHoiNghi.MvcApplicationPartsAssemblyInfo.cache
+C:\quanlyhoinghi\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\QuanLyHoiNghi.RazorAssemblyInfo.cache
+C:\quanlyhoinghi\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\QuanLyHoiNghi.RazorAssemblyInfo.cs
+C:\quanlyhoinghi\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\QuanLyHoiNghi.sourcelink.json
+C:\quanlyhoinghi\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\QuanLyHoiNghi.dll
+C:\quanlyhoinghi\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\refint\QuanLyHoiNghi.dll
+C:\quanlyhoinghi\HTquanlyhoinghi_UNETI2_TI17A3HN\obj\Debug\net10.0\QuanLyHoiNghi.pdb

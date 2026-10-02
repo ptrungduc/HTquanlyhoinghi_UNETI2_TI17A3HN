@@ -1,15 +1,19 @@
 using Microsoft.AspNetCore.Mvc;
-using QuanLyHoiNghi.Models;
-using QuanLyHoiNghi.Services;
+using Microsoft.EntityFrameworkCore;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Database;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Models;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Services;
 
-namespace QuanLyHoiNghi.Controllers
+namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
 {
     public class DangKyController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly AppDbContext _context;
         private readonly DangKyService _dangKyService;
 
-        public DangKyController(ApplicationDbContext context, DangKyService dangKyService)
+        public DangKyController(
+            AppDbContext context,
+            DangKyService dangKyService)
         {
             _context = context;
             _dangKyService = dangKyService;
@@ -23,14 +27,22 @@ namespace QuanLyHoiNghi.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DangKy(int maNguoiThamDu, int maSuKien)
+        public async Task<IActionResult> DangKy(
+            int maNguoiThamDu,
+            int maSuKien)
         {
-            var (hopLe, lyDo) = await _dangKyService.KiemTraDieuKienDangKyAsync(maNguoiThamDu, maSuKien);
+            var (hopLe, lyDo) =
+                await _dangKyService.KiemTraDieuKienDangKyAsync(
+                    maNguoiThamDu,
+                    maSuKien);
 
             if (!hopLe)
             {
                 TempData["Loi"] = lyDo;
-                return RedirectToAction("ChiTiet", "SuKien", new { id = maSuKien });
+                return RedirectToAction(
+                    "ChiTiet",
+                    "SuKien",
+                    new { id = maSuKien });
             }
 
             var dangKy = new DangKyThamDu
@@ -44,41 +56,69 @@ namespace QuanLyHoiNghi.Controllers
             _context.DangKyThamDu.Add(dangKy);
             await _context.SaveChangesAsync();
 
-            TempData["ThongBao"] = "Đăng ký thành công, vui lòng chờ duyệt.";
-            return RedirectToAction("DanhSachDangKy", new { maNguoiThamDu });
+            TempData["ThongBao"] =
+                "Đăng ký thành công, vui lòng chờ duyệt.";
+
+            return RedirectToAction(
+                "DanhSachDangKy",
+                new { maNguoiThamDu });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Huy(int maDangKy, int maNguoiThamDu, string lyDoHuy)
+        public async Task<IActionResult> Huy(
+            int maDangKy,
+            int maNguoiThamDu,
+            string lyDoHuy)
         {
-            var (thanhCong, lyDo) = await _dangKyService.HuyDangKyAsync(maDangKy, maNguoiThamDu, lyDoHuy);
+            var (thanhCong, lyDo) =
+                await _dangKyService.HuyDangKyAsync(
+                    maDangKy,
+                    maNguoiThamDu,
+                    lyDoHuy);
 
-            TempData[thanhCong ? "ThongBao" : "Loi"] = thanhCong ? "Hủy đăng ký thành công." : lyDo;
-            return RedirectToAction("DanhSachDangKy", new { maNguoiThamDu });
+            TempData[thanhCong ? "ThongBao" : "Loi"] =
+                thanhCong
+                    ? "Hủy đăng ký thành công."
+                    : lyDo;
+
+            return RedirectToAction(
+                "DanhSachDangKy",
+                new { maNguoiThamDu });
         }
 
-               // GET: danh sách đăng ký của một người tham dự (mục 7.8)
-        public IActionResult DanhSachDangKy(int maNguoiThamDu, string trangThai, int? maLoaiSuKien, string sapXep)
+        // GET: danh sách đăng ký của một người tham dự
+        public IActionResult DanhSachDangKy(
+            int maNguoiThamDu,
+            string trangThai,
+            int? maLoaiSuKien,
+            string sapXep)
         {
             var query = _context.DangKyThamDu
                 .Where(d => d.MaNguoiThamDu == maNguoiThamDu)
                 .AsQueryable();
 
-            if (!string.IsNullOrEmpty(trangThai) && Enum.TryParse<TrangThaiDangKy>(trangThai, out var tt))
+            if (!string.IsNullOrEmpty(trangThai) &&
+                Enum.TryParse<TrangThaiDangKy>(
+                    trangThai,
+                    out var tt))
             {
                 query = query.Where(d => d.TrangThai == tt);
             }
 
             if (maLoaiSuKien.HasValue)
             {
-                query = query.Where(d => d.SuKien.MaLoaiSuKien == maLoaiSuKien.Value);
+                query = query.Where(
+                    d => d.SuKien.MaLoaiSuKien == maLoaiSuKien.Value);
             }
 
             query = sapXep switch
             {
-                "ngaytochuc" => query.OrderBy(d => d.SuKien.ThoiGianBatDau),
-                _ => query.OrderByDescending(d => d.NgayDangKy)
+                "ngaytochuc" =>
+                    query.OrderBy(d => d.SuKien.ThoiGianBatDau),
+
+                _ =>
+                    query.OrderByDescending(d => d.NgayDangKy)
             };
 
             var danhSach = query
@@ -95,30 +135,47 @@ namespace QuanLyHoiNghi.Controllers
             return View(danhSach);
         }
 
-        // GET: Ban tổ chức tìm kiếm đăng ký theo người tham dự hoặc sự kiện (mục 7.8)
-        public IActionResult TimKiem(string tenNguoiThamDu, int? maSuKien, string trangThai, string sapXep)
+        // GET: Ban tổ chức tìm kiếm đăng ký
+        public IActionResult TimKiem(
+            string tenNguoiThamDu,
+            int? maSuKien,
+            string trangThai,
+            string sapXep)
         {
-            var query = _context.DangKyThamDu.AsQueryable();
+            var query =
+                _context.DangKyThamDu.AsQueryable();
 
             if (!string.IsNullOrEmpty(tenNguoiThamDu))
             {
-                query = query.Where(d => d.NguoiThamDu.HoTen.Contains(tenNguoiThamDu));
+                query = query.Where(
+                    d => d.NguoiThamDu.HoTen
+                        .Contains(tenNguoiThamDu));
             }
 
             if (maSuKien.HasValue)
             {
-                query = query.Where(d => d.MaSuKien == maSuKien.Value);
+                query = query.Where(
+                    d => d.MaSuKien == maSuKien.Value);
             }
 
-            if (!string.IsNullOrEmpty(trangThai) && Enum.TryParse<TrangThaiDangKy>(trangThai, out var tt))
+            if (!string.IsNullOrEmpty(trangThai) &&
+                Enum.TryParse<TrangThaiDangKy>(
+                    trangThai,
+                    out var tt))
             {
-                query = query.Where(d => d.TrangThai == tt);
+                query = query.Where(
+                    d => d.TrangThai == tt);
             }
 
             query = sapXep switch
             {
-                "ngaytochuc" => query.OrderBy(d => d.SuKien.ThoiGianBatDau),
-                _ => query.OrderByDescending(d => d.NgayDangKy)
+                "ngaytochuc" =>
+                    query.OrderBy(
+                        d => d.SuKien.ThoiGianBatDau),
+
+                _ =>
+                    query.OrderByDescending(
+                        d => d.NgayDangKy)
             };
 
             var danhSach = query
@@ -134,6 +191,5 @@ namespace QuanLyHoiNghi.Controllers
 
             return View(danhSach);
         }
-       
     }
 }
