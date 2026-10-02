@@ -3,6 +3,7 @@
 // Nội dung thực hiện: Module 5 - Lịch sử tham dự, Dashboard, thống kê LINQ, báo cáo.
 
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Database;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Models;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module5;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -78,7 +79,7 @@ public class LichSuController : Controller
                 DiaChi = d.SuKien != null && d.SuKien.DiaDiem != null
                     ? d.SuKien.DiaDiem.DiaChi : "",
                 NgayDangKy = d.NgayDangKy,
-                TrangThai = d.TrangThai,
+                TrangThai = d.TrangThai.ToString(),
                 ThoiGianCheckIn = d.CheckIn != null
                     ? d.CheckIn.ThoiGianCheckIn : (DateTime?)null,
                 MaThamDu = d.MaThamDu
@@ -153,7 +154,7 @@ public class LichSuController : Controller
                 Email = d.NguoiThamDu != null
                     ? d.NguoiThamDu.Email : "",
                 NgayDangKy = d.NgayDangKy,
-                TrangThai = d.TrangThai,
+                TrangThai = d.TrangThai.ToString(),
                 NgayDuyet = d.NgayDuyet,
                 ThoiGianCheckIn = d.CheckIn != null
                     ? d.CheckIn.ThoiGianCheckIn : (DateTime?)null,
@@ -191,15 +192,15 @@ public class LichSuController : Controller
             // LINQ Count với predicate
             TongDangKy = danhSachDangKy.Count,
             SoDaDuyet = danhSachDangKy.Count(d =>
-                d.TrangThai == "Đã duyệt"
-                || d.TrangThai == "Đã check-in"
-                || d.TrangThai == "Hoàn thành"),
+                d.TrangThai == nameof(TrangThaiDangKy.DaDuyet)
+                || d.TrangThai == nameof(TrangThaiDangKy.DaCheckIn)
+                || d.TrangThai == nameof(TrangThaiDangKy.HoanThanh)),
             SoDaCheckIn = danhSachDangKy.Count(d =>
                 d.ThoiGianCheckIn.HasValue),
             SoTuChoi = danhSachDangKy.Count(d =>
-                d.TrangThai == "Từ chối"),
+                d.TrangThai == nameof(TrangThaiDangKy.TuChoi)),
             SoDaHuy = danhSachDangKy.Count(d =>
-                d.TrangThai == "Đã hủy"),
+                d.TrangThai == nameof(TrangThaiDangKy.DaHuy)),
 
             DanhSachDangKy = danhSachDangKy,
 
@@ -226,18 +227,19 @@ public class LichSuController : Controller
     /// <summary>
     /// Xác định kết quả tham gia dựa trên trạng thái đăng ký và check-in.
     /// Hàm này chạy trên C# (không dịch sang SQL).
+    /// So sánh bằng nameof(enum) vì TrangThai đã được .ToString() khi Select.
     /// </summary>
     private static string XacDinhKetQua(string trangThai, bool daCheckIn)
     {
         return trangThai switch
         {
-            "Hoàn thành"  => "Đã tham dự",
-            "Đã check-in" => "Đã check-in",
-            "Đã duyệt"   => daCheckIn ? "Đã check-in" : "Chưa check-in",
-            "Chờ duyệt"  => "Đang chờ duyệt",
-            "Từ chối"     => "Bị từ chối",
-            "Đã hủy"     => "Đã hủy",
-            _             => trangThai
+            nameof(TrangThaiDangKy.HoanThanh)  => "Đã tham dự",
+            nameof(TrangThaiDangKy.DaCheckIn)  => "Đã check-in",
+            nameof(TrangThaiDangKy.DaDuyet)    => daCheckIn ? "Đã check-in" : "Chưa check-in",
+            nameof(TrangThaiDangKy.ChoDuyet)   => "Đang chờ duyệt",
+            nameof(TrangThaiDangKy.TuChoi)     => "Bị từ chối",
+            nameof(TrangThaiDangKy.DaHuy)      => "Đã hủy",
+            _                                   => trangThai
         };
     }
 }

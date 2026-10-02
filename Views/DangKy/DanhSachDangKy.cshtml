@@ -1,0 +1,51 @@
+@model IEnumerable<dynamic>
+
+@{
+    ViewData["Title"] = "Đăng ký của tôi";
+}
+
+<h2>Đăng ký của tôi</h2>
+
+@if (TempData["ThongBao"] != null)
+{
+    <div class="alert alert-success">@TempData["ThongBao"]</div>
+}
+@if (TempData["Loi"] != null)
+{
+    <div class="alert alert-danger">@TempData["Loi"]</div>
+}
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Sự kiện</th>
+            <th>Ngày đăng ký</th>
+            <th>Hạn đăng ký</th>
+            <th>Trạng thái</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.TenSuKien</td>
+                <td>@item.NgayDangKy.ToString("dd/MM/yyyy")</td>
+                <td>@item.HanDangKy.ToString("dd/MM/yyyy")</td>
+                <td>@item.TrangThai</td>
+                <td>
+                    @if (item.TrangThai.ToString() != "DaHuy"
+                        && item.TrangThai.ToString() != "DaCheckIn"
+                        && item.TrangThai.ToString() != "HoanThanh")
+                    {
+                        <form asp-action="Huy" method="post" class="d-inline">
+                            <input type="hidden" name="maDangKy" value="@item.MaDangKy" />
+                            <input type="text" name="lyDoHuy" placeholder="Lý do hủy" class="form-control d-inline" style="width: 150px;" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Hủy</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

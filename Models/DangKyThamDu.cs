@@ -20,10 +20,8 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Models
 
         public DateTime NgayDangKy { get; set; } = DateTime.Now;
 
-        // Trạng thái: Chờ duyệt, Đã duyệt, Đã check-in, Hoàn thành, Từ chối, Đã hủy
-        [Required]
-        [StringLength(50)]
-        public string TrangThai { get; set; } = "Chờ duyệt";
+        // Trạng thái: ChoDuyet, DaDuyet, DaCheckIn, HoanThanh, TuChoi, DaHuy
+        public TrangThaiDangKy TrangThai { get; set; } = TrangThaiDangKy.ChoDuyet;
 
         public string GhiChu { get; set; } = string.Empty;
 

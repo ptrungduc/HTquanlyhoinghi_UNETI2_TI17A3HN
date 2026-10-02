@@ -7,16 +7,28 @@
 @{
     ViewData["Title"] = "Lịch sử tham dự";
 
+    // Hàm hiển thị tên trạng thái thân thiện
+    string TenTrangThai(string trangThai) => trangThai switch
+    {
+        "ChoDuyet"  => "Chờ duyệt",
+        "DaDuyet"   => "Đã duyệt",
+        "DaCheckIn" => "Đã check-in",
+        "HoanThanh" => "Hoàn thành",
+        "TuChoi"    => "Từ chối",
+        "DaHuy"     => "Đã hủy",
+        _           => trangThai
+    };
+
     // Hàm trả về CSS class cho badge trạng thái
     string BadgeCss(string trangThai) => trangThai switch
     {
-        "Chờ duyệt"  => "bg-warning text-dark",
-        "Đã duyệt"   => "bg-primary",
-        "Đã check-in" => "bg-info",
-        "Hoàn thành"  => "bg-success",
-        "Từ chối"     => "bg-danger",
-        "Đã hủy"     => "bg-dark",
-        _             => "bg-secondary"
+        "ChoDuyet"  => "bg-warning text-dark",
+        "DaDuyet"   => "bg-primary",
+        "DaCheckIn" => "bg-info",
+        "HoanThanh" => "bg-success",
+        "TuChoi"    => "bg-danger",
+        "DaHuy"     => "bg-dark",
+        _           => "bg-secondary"
     };
 }
 
@@ -98,7 +110,7 @@
 
                                     <td>
                                         <span class="badge @BadgeCss(item.TrangThai)">
-                                            @item.TrangThai
+                                            @TenTrangThai(item.TrangThai)
                                         </span>
                                     </td>
 

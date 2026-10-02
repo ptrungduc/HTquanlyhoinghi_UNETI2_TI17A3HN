@@ -18,9 +18,11 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Models
         [StringLength(100, ErrorMessage = "Họ tên không được vượt quá 100 ký tự")]
         public string HoTen { get; set; } = string.Empty;
 
-        [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
+        [Required(ErrorMessage = "Số điện thoại không được để trống")]
+        [RegularExpression(@"^0\d{9}$", ErrorMessage = "Số điện thoại không hợp lệ (10 số, bắt đầu bằng 0)")]
         public string SoDienThoai { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Email không được để trống")]
         [EmailAddress(ErrorMessage = "Email không hợp lệ")]
         public string Email { get; set; } = string.Empty;
 

@@ -7,16 +7,28 @@
 @{
     ViewData["Title"] = "Chi tiết lịch sử - " + Model.TenSuKien;
 
+    // Hiển thị tên trạng thái thân thiện
+    string TenTrangThai(string trangThai) => trangThai switch
+    {
+        "ChoDuyet"  => "Chờ duyệt",
+        "DaDuyet"   => "Đã duyệt",
+        "DaCheckIn" => "Đã check-in",
+        "HoanThanh" => "Hoàn thành",
+        "TuChoi"    => "Từ chối",
+        "DaHuy"     => "Đã hủy",
+        _           => trangThai
+    };
+
     // Badge CSS cho trạng thái đăng ký
     string BadgeDangKy(string trangThai) => trangThai switch
     {
-        "Chờ duyệt"  => "bg-warning text-dark",
-        "Đã duyệt"   => "bg-primary",
-        "Đã check-in" => "bg-info",
-        "Hoàn thành"  => "bg-success",
-        "Từ chối"     => "bg-danger",
-        "Đã hủy"     => "bg-dark",
-        _             => "bg-secondary"
+        "ChoDuyet"  => "bg-warning text-dark",
+        "DaDuyet"   => "bg-primary",
+        "DaCheckIn" => "bg-info",
+        "HoanThanh" => "bg-success",
+        "TuChoi"    => "bg-danger",
+        "DaHuy"     => "bg-dark",
+        _           => "bg-secondary"
     };
 
     // Badge CSS cho kết quả tham gia
@@ -207,7 +219,7 @@
 
                                     <td>
                                         <span class="badge @BadgeDangKy(dk.TrangThai)">
-                                            @dk.TrangThai
+                                            @TenTrangThai(dk.TrangThai)
                                         </span>
                                     </td>
 
