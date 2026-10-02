@@ -47,14 +47,14 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
 
             var dangKy = new DangKyThamDu
             {
-                MaDangKy = Guid.NewGuid().ToString(),
+                MaDangKy = Guid.NewGuid().ToString("N"),
                 MaNguoiThamDu = maNguoiThamDu,
                 MaSuKien = maSuKien,
                 NgayDangKy = DateTime.Now,
                 TrangThai = TrangThaiDangKy.ChoDuyet
             };
 
-            _context.DangKyThamDus.Add(dangKy);
+            _context.DangKyThamDu.Add(dangKy);
             await _context.SaveChangesAsync();
 
             TempData["ThongBao"] =
@@ -91,11 +91,11 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         // GET: danh sách đăng ký của một người tham dự
         public IActionResult DanhSachDangKy(
             string maNguoiThamDu,
-            string? trangThai,
+            string trangThai,
             string? maLoaiSuKien,
-            string? sapXep)
+            string sapXep)
         {
-            var query = _context.DangKyThamDus
+            var query = _context.DangKyThamDu
                 .Where(d => d.MaNguoiThamDu == maNguoiThamDu)
                 .AsQueryable();
 
@@ -107,16 +107,16 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
                 query = query.Where(d => d.TrangThai == tt);
             }
 
-            if (!string.IsNullOrEmpty(maLoaiSuKien))
+            if (!string.IsNullOrWhiteSpace(maLoaiSuKien))
             {
                 query = query.Where(
-                    d => d.SuKien!.MaLoaiSuKien == maLoaiSuKien);
+                    d => d.SuKien != null && d.SuKien.MaLoaiSuKien == maLoaiSuKien);
             }
 
             query = sapXep switch
             {
                 "ngaytochuc" =>
-                    query.OrderBy(d => d.SuKien!.ThoiGianBatDau),
+                    query.OrderBy(d => d.SuKien == null ? DateTime.MaxValue : d.SuKien.ThoiGianBatDau),
 
                 _ =>
                     query.OrderByDescending(d => d.NgayDangKy)
@@ -126,9 +126,11 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
                 .Select(d => new
                 {
                     d.MaDangKy,
-                    d.SuKien!.TenSuKien,
+                    d.MaNguoiThamDu,
+                    TenSuKien = d.SuKien == null ? string.Empty : d.SuKien.TenSuKien,
                     d.NgayDangKy,
-                    d.TrangThai
+                    d.TrangThai,
+                    ThoiGianBatDau = d.SuKien == null ? (DateTime?)null : d.SuKien.ThoiGianBatDau
                 })
                 .ToList();
 
@@ -137,22 +139,22 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
 
         // GET: Ban tổ chức tìm kiếm đăng ký
         public IActionResult TimKiem(
-            string? tenNguoiThamDu,
+            string tenNguoiThamDu,
             string? maSuKien,
-            string? trangThai,
-            string? sapXep)
+            string trangThai,
+            string sapXep)
         {
             var query =
-                _context.DangKyThamDus.AsQueryable();
+                _context.DangKyThamDu.AsQueryable();
 
             if (!string.IsNullOrEmpty(tenNguoiThamDu))
             {
                 query = query.Where(
-                    d => d.NguoiThamDu!.HoTen
+                    d => d.NguoiThamDu != null && d.NguoiThamDu.HoTen
                         .Contains(tenNguoiThamDu));
             }
 
-            if (!string.IsNullOrEmpty(maSuKien))
+            if (!string.IsNullOrWhiteSpace(maSuKien))
             {
                 query = query.Where(
                     d => d.MaSuKien == maSuKien);
@@ -171,7 +173,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             {
                 "ngaytochuc" =>
                     query.OrderBy(
-                        d => d.SuKien!.ThoiGianBatDau),
+                        d => d.SuKien == null ? DateTime.MaxValue : d.SuKien.ThoiGianBatDau),
 
                 _ =>
                     query.OrderByDescending(
@@ -182,8 +184,8 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
                 .Select(d => new
                 {
                     d.MaDangKy,
-                    d.NguoiThamDu!.HoTen,
-                    d.SuKien!.TenSuKien,
+                    HoTen = d.NguoiThamDu == null ? string.Empty : d.NguoiThamDu.HoTen,
+                    TenSuKien = d.SuKien == null ? string.Empty : d.SuKien.TenSuKien,
                     d.NgayDangKy,
                     d.TrangThai
                 })
