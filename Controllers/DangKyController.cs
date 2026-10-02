@@ -19,7 +19,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             _dangKyService = dangKyService;
         }
 
-        public IActionResult DangKy(int maSuKien)
+        public IActionResult DangKy(string maSuKien)
         {
             ViewBag.MaSuKien = maSuKien;
             return View();
@@ -28,8 +28,8 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DangKy(
-            int maNguoiThamDu,
-            int maSuKien)
+            string maNguoiThamDu,
+            string maSuKien)
         {
             var (hopLe, lyDo) =
                 await _dangKyService.KiemTraDieuKienDangKyAsync(
@@ -47,13 +47,14 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
 
             var dangKy = new DangKyThamDu
             {
+                MaDangKy = Guid.NewGuid().ToString(),
                 MaNguoiThamDu = maNguoiThamDu,
                 MaSuKien = maSuKien,
                 NgayDangKy = DateTime.Now,
                 TrangThai = TrangThaiDangKy.ChoDuyet
             };
 
-            _context.DangKyThamDu.Add(dangKy);
+            _context.DangKyThamDus.Add(dangKy);
             await _context.SaveChangesAsync();
 
             TempData["ThongBao"] =
@@ -67,8 +68,8 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Huy(
-            int maDangKy,
-            int maNguoiThamDu,
+            string maDangKy,
+            string maNguoiThamDu,
             string lyDoHuy)
         {
             var (thanhCong, lyDo) =
@@ -89,12 +90,12 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
 
         // GET: danh sách đăng ký của một người tham dự
         public IActionResult DanhSachDangKy(
-            int maNguoiThamDu,
-            string trangThai,
-            int? maLoaiSuKien,
-            string sapXep)
+            string maNguoiThamDu,
+            string? trangThai,
+            string? maLoaiSuKien,
+            string? sapXep)
         {
-            var query = _context.DangKyThamDu
+            var query = _context.DangKyThamDus
                 .Where(d => d.MaNguoiThamDu == maNguoiThamDu)
                 .AsQueryable();
 
@@ -106,16 +107,16 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
                 query = query.Where(d => d.TrangThai == tt);
             }
 
-            if (maLoaiSuKien.HasValue)
+            if (!string.IsNullOrEmpty(maLoaiSuKien))
             {
                 query = query.Where(
-                    d => d.SuKien.MaLoaiSuKien == maLoaiSuKien.Value);
+                    d => d.SuKien!.MaLoaiSuKien == maLoaiSuKien);
             }
 
             query = sapXep switch
             {
                 "ngaytochuc" =>
-                    query.OrderBy(d => d.SuKien.ThoiGianBatDau),
+                    query.OrderBy(d => d.SuKien!.ThoiGianBatDau),
 
                 _ =>
                     query.OrderByDescending(d => d.NgayDangKy)
@@ -125,10 +126,9 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
                 .Select(d => new
                 {
                     d.MaDangKy,
-                    d.SuKien.TenSuKien,
+                    d.SuKien!.TenSuKien,
                     d.NgayDangKy,
-                    d.TrangThai,
-                    d.SuKien.HanDangKy
+                    d.TrangThai
                 })
                 .ToList();
 
@@ -137,25 +137,25 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
 
         // GET: Ban tổ chức tìm kiếm đăng ký
         public IActionResult TimKiem(
-            string tenNguoiThamDu,
-            int? maSuKien,
-            string trangThai,
-            string sapXep)
+            string? tenNguoiThamDu,
+            string? maSuKien,
+            string? trangThai,
+            string? sapXep)
         {
             var query =
-                _context.DangKyThamDu.AsQueryable();
+                _context.DangKyThamDus.AsQueryable();
 
             if (!string.IsNullOrEmpty(tenNguoiThamDu))
             {
                 query = query.Where(
-                    d => d.NguoiThamDu.HoTen
+                    d => d.NguoiThamDu!.HoTen
                         .Contains(tenNguoiThamDu));
             }
 
-            if (maSuKien.HasValue)
+            if (!string.IsNullOrEmpty(maSuKien))
             {
                 query = query.Where(
-                    d => d.MaSuKien == maSuKien.Value);
+                    d => d.MaSuKien == maSuKien);
             }
 
             if (!string.IsNullOrEmpty(trangThai) &&
@@ -171,7 +171,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             {
                 "ngaytochuc" =>
                     query.OrderBy(
-                        d => d.SuKien.ThoiGianBatDau),
+                        d => d.SuKien!.ThoiGianBatDau),
 
                 _ =>
                     query.OrderByDescending(
@@ -182,8 +182,8 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
                 .Select(d => new
                 {
                     d.MaDangKy,
-                    d.NguoiThamDu.HoTen,
-                    d.SuKien.TenSuKien,
+                    d.NguoiThamDu!.HoTen,
+                    d.SuKien!.TenSuKien,
                     d.NgayDangKy,
                     d.TrangThai
                 })
