@@ -13,13 +13,29 @@
 @if (!string.IsNullOrWhiteSpace(Model.MaDangKy))
 {
     <dl class="row">
-        <dt class="col-sm-3">Mã đăng ký được yêu cầu</dt>
+        <dt class="col-sm-3">Mã đăng ký</dt>
         <dd class="col-sm-9"><code>@Model.MaDangKy</code></dd>
+        <dt class="col-sm-3">Người tham dự</dt>
+        <dd class="col-sm-9">@Model.TenNguoiThamDu</dd>
+        <dt class="col-sm-3">Email</dt>
+        <dd class="col-sm-9">@Model.Email</dd>
+        <dt class="col-sm-3">Số điện thoại</dt>
+        <dd class="col-sm-9">@Model.SoDienThoai</dd>
+        <dt class="col-sm-3">Sự kiện</dt>
+        <dd class="col-sm-9">@Model.TenSuKien</dd>
+        <dt class="col-sm-3">Trạng thái</dt>
+        <dd class="col-sm-9">@Model.TrangThai</dd>
+        <dt class="col-sm-3">Ngày đăng ký</dt>
+        <dd class="col-sm-9">@Model.NgayDangKy?.ToString("dd/MM/yyyy HH:mm")</dd>
+        <dt class="col-sm-3">Ngày duyệt</dt>
+        <dd class="col-sm-9">@(Model.NgayDuyet?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+        <dt class="col-sm-3">Mã tham dự</dt>
+        <dd class="col-sm-9">@(Model.MaThamDu ?? "-")</dd>
     </dl>
 }
 
 <div class="d-flex flex-wrap gap-2">
-    @if (!string.IsNullOrWhiteSpace(Model.MaDangKy))
+    @if (!string.IsNullOrWhiteSpace(Model.MaDangKy) && Model.TrangThai == "ChoDuyet")
     {
         <a class="btn btn-success" asp-action="Duyet" asp-route-maDangKy="@Model.MaDangKy">Duyệt đăng ký</a>
         <a class="btn btn-outline-danger" asp-action="TuChoi" asp-route-maDangKy="@Model.MaDangKy">Từ chối</a>

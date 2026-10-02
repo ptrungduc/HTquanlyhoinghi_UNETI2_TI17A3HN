@@ -13,7 +13,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         }
 
         // GET: hiển thị trang chọn phiên để đăng ký
-        public IActionResult DangKy(int maPhien)
+        public IActionResult DangKy(string maPhien)
         {
             ViewBag.MaPhien = maPhien;
             return View();
@@ -22,7 +22,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         // POST: xử lý đăng ký phiên
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DangKy(int maNguoiThamDu, int maPhien)
+        public async Task<IActionResult> DangKy(string maNguoiThamDu, string maPhien)
         {
             var (thanhCong, lyDo) = await _dangKyService.DangKyPhienAsync(maNguoiThamDu, maPhien);
 

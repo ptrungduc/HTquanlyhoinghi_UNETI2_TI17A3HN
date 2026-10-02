@@ -13,6 +13,7 @@
         <p class="text-muted mb-0">Danh sách đăng ký đang chờ xử lý</p>
     </div>
     <a class="btn btn-outline-primary" asp-controller="CheckIn" asp-action="Index">Mở check-in</a>
+    <a class="btn btn-outline-secondary" asp-controller="DiemDanhPhien" asp-action="Index">Điểm danh phiên</a>
 </div>
 
 @if (TempData["ThongBaoModule4"] is string thongBao)
@@ -20,7 +21,10 @@
     <div class="alert alert-success" role="status">@thongBao</div>
 }
 
-<div class="alert alert-info" role="status">@Model.ThongBaoTichHop</div>
+@if (!string.IsNullOrWhiteSpace(Model.ThongBao))
+{
+    <div class="alert alert-info" role="status">@Model.ThongBao</div>
+}
 
 <div class="table-responsive">
     <table class="table table-striped table-hover align-middle">
@@ -30,6 +34,7 @@
                 <th scope="col">Người tham dự</th>
                 <th scope="col">Sự kiện</th>
                 <th scope="col">Trạng thái</th>
+                <th scope="col">Mã tham dự</th>
                 <th scope="col" class="text-end">Thao tác</th>
             </tr>
         </thead>
@@ -37,7 +42,7 @@
             @if (Model.DanhSachDangKy.Count == 0)
             {
                 <tr>
-                    <td colspan="5" class="text-center text-muted py-4">Chưa tích hợp Module 3.</td>
+                    <td colspan="6" class="text-center text-muted py-4">Không có đăng ký đang chờ duyệt.</td>
                 </tr>
             }
             else
@@ -49,6 +54,7 @@
                         <td>@dangKy.TenNguoiThamDu</td>
                         <td>@dangKy.TenSuKien</td>
                         <td><span class="badge text-bg-warning">@dangKy.TrangThai</span></td>
+                        <td>@(string.IsNullOrWhiteSpace(dangKy.MaThamDu) ? "-" : dangKy.MaThamDu)</td>
                         <td class="text-end text-nowrap">
                             <a class="btn btn-sm btn-outline-secondary" asp-action="ChiTiet" asp-route-maDangKy="@dangKy.MaDangKy">Xem</a>
                             <a class="btn btn-sm btn-success" asp-action="Duyet" asp-route-maDangKy="@dangKy.MaDangKy">Duyệt</a>
