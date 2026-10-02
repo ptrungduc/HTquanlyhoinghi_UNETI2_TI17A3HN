@@ -1,0 +1,60 @@
+@model IEnumerable<QuanLyHoiNghi.Models.NguoiThamDu>
+
+@{
+    ViewData["Title"] = "Danh sách người tham dự";
+}
+
+<h2>Danh sách người tham dự</h2>
+
+@if (TempData["ThongBao"] != null)
+{
+    <div class="alert alert-success">@TempData["ThongBao"]</div>
+}
+
+<form method="get" class="mb-3 d-flex gap-2">
+    <input type="text" name="timKiem" class="form-control" placeholder="Tìm theo tên, email, SĐT..." />
+    <button type="submit" class="btn btn-secondary">Tìm</button>
+    <a asp-action="Create" class="btn btn-primary ms-auto">+ Thêm người tham dự</a>
+</form>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Họ tên</th>
+            <th>Số điện thoại</th>
+            <th>Email</th>
+            <th>Đơn vị công tác</th>
+            <th>Trạng thái</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.HoTen</td>
+                <td>@item.SoDienThoai</td>
+                <td>@item.Email</td>
+                <td>@item.DonViCongTac</td>
+                <td>
+                    @if (item.TrangThai)
+                    {
+                        <span class="badge bg-success">Hoạt động</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Đã khóa</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.MaNguoiThamDu" class="btn btn-sm btn-outline-primary">Sửa</a>
+                    <form asp-action="KhoaMoKhoa" asp-route-id="@item.MaNguoiThamDu" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-warning">
+                            @(item.TrangThai ? "Khóa" : "Mở khóa")
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

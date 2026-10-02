@@ -1,0 +1,27 @@
+@{
+    ViewData["Title"] = "Đăng ký phiên sự kiện";
+    int maPhien = (int)ViewBag.MaPhien;
+}
+
+<h2>Đăng ký phiên sự kiện</h2>
+
+@if (TempData["Loi"] != null)
+{
+    <div class="alert alert-danger">@TempData["Loi"]</div>
+}
+@if (TempData["ThongBao"] != null)
+{
+    <div class="alert alert-success">@TempData["ThongBao"]</div>
+}
+
+<form asp-action="DangKy" method="post">
+    <input type="hidden" name="maPhien" value="@maPhien" />
+
+    <div class="mb-3">
+        <label class="form-label">Mã người tham dự</label>
+        <input type="number" name="maNguoiThamDu" class="form-control" required />
+        <small class="text-muted">(Tạm thời nhập tay — sau khi có đăng nhập từ Module 1 sẽ tự lấy)</small>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Đăng ký phiên này</button>
+</form>
