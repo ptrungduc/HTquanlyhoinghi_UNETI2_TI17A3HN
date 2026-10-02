@@ -13,6 +13,9 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Database
         public DbSet<DiaDiem> DiaDiems { get; set; }
         public DbSet<SuKien> SuKiens { get; set; }
         public DbSet<PhienSuKien> PhienSuKiens { get; set; }
+        public DbSet<NguoiThamDu> NguoiThamDus { get; set; }
+        public DbSet<DangKyThamDu> DangKyThamDus { get; set; }
+        public DbSet<CheckIn> CheckIns { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<LoaiSuKien>()
@@ -39,6 +42,36 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Database
                 .WithMany(s => s.PhienSuKiens)
                 .HasForeignKey(p => p.MaSuKien)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // === Quan hệ cho NguoiThamDu, DangKyThamDu, CheckIn ===
+
+            // TaiKhoan (1) - (0..1) NguoiThamDu
+            modelBuilder.Entity<NguoiThamDu>()
+                .HasOne(n => n.TaiKhoan)
+                .WithMany()
+                .HasForeignKey(n => n.MaTaiKhoan)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // NguoiThamDu (1) - (n) DangKyThamDu
+            modelBuilder.Entity<DangKyThamDu>()
+                .HasOne(d => d.NguoiThamDu)
+                .WithMany(n => n.DangKyThamDus)
+                .HasForeignKey(d => d.MaNguoiThamDu)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // SuKien (1) - (n) DangKyThamDu
+            modelBuilder.Entity<DangKyThamDu>()
+                .HasOne(d => d.SuKien)
+                .WithMany()
+                .HasForeignKey(d => d.MaSuKien)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // DangKyThamDu (1) - (0..1) CheckIn
+            modelBuilder.Entity<CheckIn>()
+                .HasOne(c => c.DangKyThamDu)
+                .WithOne(d => d.CheckIn)
+                .HasForeignKey<CheckIn>(c => c.MaDangKy)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
     }

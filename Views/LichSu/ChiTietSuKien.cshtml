@@ -1,0 +1,271 @@
+@* Họ và tên: [TÊN CỦA TÔI] *@
+@* Mã sinh viên: [MSSV CỦA TÔI] *@
+@* Nội dung thực hiện: Module 5 - Lịch sử tham dự, Dashboard, thống kê LINQ, báo cáo. *@
+
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module5.ChiTietSuKienLichSuViewModel
+
+@{
+    ViewData["Title"] = "Chi tiết lịch sử - " + Model.TenSuKien;
+
+    // Badge CSS cho trạng thái đăng ký
+    string BadgeDangKy(string trangThai) => trangThai switch
+    {
+        "Chờ duyệt"  => "bg-warning text-dark",
+        "Đã duyệt"   => "bg-primary",
+        "Đã check-in" => "bg-info",
+        "Hoàn thành"  => "bg-success",
+        "Từ chối"     => "bg-danger",
+        "Đã hủy"     => "bg-dark",
+        _             => "bg-secondary"
+    };
+
+    // Badge CSS cho kết quả tham gia
+    string BadgeKetQua(string ketQua) => ketQua switch
+    {
+        "Đã tham dự"      => "bg-success",
+        "Đã check-in"     => "bg-info",
+        "Chưa check-in"   => "bg-warning text-dark",
+        "Đang chờ duyệt"  => "bg-secondary",
+        "Bị từ chối"      => "bg-danger",
+        "Đã hủy"          => "bg-dark",
+        _                  => "bg-secondary"
+    };
+}
+
+<!-- Header -->
+<header class="admin-header">
+    <div>
+        <h2>Chi tiết lịch sử sự kiện</h2>
+        <p>Xem danh sách đăng ký, trạng thái duyệt, check-in và kết quả tham dự</p>
+    </div>
+    <div class="admin-account">
+        <div class="admin-avatar">A</div>
+        <div>
+            <strong>Admin</strong>
+            <small>Quản trị viên</small>
+        </div>
+    </div>
+</header>
+
+<div class="container mt-4">
+
+    <!-- Nút quay lại -->
+    <div class="mb-3">
+        <a asp-controller="SuKien" asp-action="Index" class="btn btn-outline-secondary btn-sm">
+            ← Quay lại danh sách sự kiện
+        </a>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- THÔNG TIN SỰ KIỆN                                           -->
+    <!-- ============================================================ -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <h4 class="fw-bold mb-3">📅 @Model.TenSuKien</h4>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Loại sự kiện:</strong> @Model.TenLoaiSuKien</p>
+                    <p><strong>Địa điểm:</strong> @Model.TenDiaDiem</p>
+                    <p>
+                        <strong>Trạng thái:</strong>
+                        <span class="badge bg-secondary">@Model.TrangThaiSuKien</span>
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Bắt đầu:</strong> @Model.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p><strong>Kết thúc:</strong> @Model.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- THỐNG KÊ TỔNG HỢP (đã tính bằng LINQ trong Controller)     -->
+    <!-- ============================================================ -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card text-center border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="text-primary">@Model.TongDangKy</h5>
+                    <small class="text-muted">Tổng đăng ký</small>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card text-center border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="text-success">@Model.SoDaDuyet</h5>
+                    <small class="text-muted">Đã duyệt</small>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card text-center border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="text-info">@Model.SoDaCheckIn</h5>
+                    <small class="text-muted">Đã check-in</small>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card text-center border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="text-danger">@Model.SoTuChoi</h5>
+                    <small class="text-muted">Từ chối</small>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card text-center border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="text-dark">@Model.SoDaHuy</h5>
+                    <small class="text-muted">Đã hủy</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- DANH SÁCH PHIÊN SỰ KIỆN (nếu có)                            -->
+    <!-- ============================================================ -->
+    @if (Model.DanhSachPhien.Any())
+    {
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">🕐 Phiên / Chương trình (@Model.DanhSachPhien.Count phiên)</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tên phiên</th>
+                                <th>Thời gian</th>
+                                <th>Diễn giả</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var phien in Model.DanhSachPhien)
+                            {
+                                <tr>
+                                    <td><strong>@phien.TenPhien</strong></td>
+                                    <td>
+                                        @phien.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm")
+                                        — @phien.ThoiGianKetThuc.ToString("HH:mm")
+                                    </td>
+                                    <td>@(string.IsNullOrEmpty(phien.DienGia) ? "—" : phien.DienGia)</td>
+                                    <td><span class="badge bg-secondary">@phien.TrangThai</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- ============================================================ -->
+    <!-- DANH SÁCH ĐĂNG KÝ THAM DỰ                                   -->
+    <!-- ============================================================ -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">👥 Danh sách đăng ký (@Model.TongDangKy người)</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>STT</th>
+                            <th>Họ tên</th>
+                            <th>Email</th>
+                            <th>Ngày ĐK</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày duyệt</th>
+                            <th>Check-in</th>
+                            <th>Mã tham dự</th>
+                            <th>Kết quả</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.DanhSachDangKy.Any())
+                        {
+                            var stt = 0;
+                            foreach (var dk in Model.DanhSachDangKy)
+                            {
+                                stt++;
+                                <tr>
+                                    <td>@stt</td>
+
+                                    <td><strong>@dk.HoTenNguoiThamDu</strong></td>
+
+                                    <td><small>@dk.Email</small></td>
+
+                                    <td>@dk.NgayDangKy.ToString("dd/MM/yyyy")</td>
+
+                                    <td>
+                                        <span class="badge @BadgeDangKy(dk.TrangThai)">
+                                            @dk.TrangThai
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        @if (dk.NgayDuyet.HasValue)
+                                        {
+                                            @dk.NgayDuyet.Value.ToString("dd/MM/yyyy")
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @if (dk.ThoiGianCheckIn.HasValue)
+                                        {
+                                            <span class="text-success">
+                                                ✓ @dk.ThoiGianCheckIn.Value.ToString("dd/MM/yyyy HH:mm")
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(dk.MaThamDu))
+                                        {
+                                            <code>@dk.MaThamDu</code>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        <span class="badge @BadgeKetQua(dk.KetQuaThamGia)">
+                                            @dk.KetQuaThamGia
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="9" class="text-center text-muted py-4">
+                                    Chưa có đăng ký nào cho sự kiện này.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
