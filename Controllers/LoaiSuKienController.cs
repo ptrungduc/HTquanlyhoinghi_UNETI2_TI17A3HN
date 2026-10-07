@@ -21,18 +21,77 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             return vaiTro == "Admin";
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(
+            string? search,
+            string? trangThai,
+            string sortBy = "TenLoaiSuKien",
+            bool sortDescending = false,
+            int pageNumber = 1,
+            int pageSize = 10)
         {
             if (!LaAdmin())
             {
                 return RedirectToAction("DangNhap", "TaiKhoan");
             }
 
-            var danhSach = await _context.LoaiSuKiens
-                .OrderBy(x => x.MaLoaiSuKien)
+            pageNumber = Math.Max(1, pageNumber);
+            pageSize = Math.Clamp(pageSize, 5, 50);
+
+            var query = _context.LoaiSuKiens.AsNoTracking();
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim();
+                query = query.Where(x =>
+                    x.MaLoaiSuKien.Contains(search)
+                    || x.TenLoaiSuKien.Contains(search)
+                    || x.MoTa.Contains(search));
+            }
+
+            if (!string.IsNullOrWhiteSpace(trangThai)
+                && bool.TryParse(trangThai, out var isActive))
+            {
+                query = query.Where(x => x.TrangThai == isActive);
+            }
+
+            query = ApplySort(query, sortBy, sortDescending);
+            var totalCount = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+            pageNumber = Math.Clamp(pageNumber, 1, Math.Max(1, totalPages));
+
+            ViewBag.Search = search;
+            ViewBag.TrangThai = trangThai;
+            ViewBag.SortBy = sortBy;
+            ViewBag.SortDescending = sortDescending;
+            ViewBag.PageNumber = pageNumber;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalCount = totalCount;
+
+            var danhSach = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
             return View(danhSach);
+        }
+
+        private static IQueryable<LoaiSuKien> ApplySort(
+            IQueryable<LoaiSuKien> query,
+            string sortBy,
+            bool sortDescending)
+        {
+            return sortBy switch
+            {
+                "MaLoaiSuKien" => sortDescending
+                    ? query.OrderByDescending(x => x.MaLoaiSuKien)
+                    : query.OrderBy(x => x.MaLoaiSuKien),
+                "TrangThai" => sortDescending
+                    ? query.OrderByDescending(x => x.TrangThai)
+                    : query.OrderBy(x => x.TrangThai),
+                _ => sortDescending
+                    ? query.OrderByDescending(x => x.TenLoaiSuKien)
+                    : query.OrderBy(x => x.TenLoaiSuKien)
+            };
         }
 
         [HttpGet]

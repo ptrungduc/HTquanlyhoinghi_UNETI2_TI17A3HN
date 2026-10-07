@@ -1,0 +1,107 @@
+@model IEnumerable<HTquanlyhoinghi_UNETI2_TI17A3HN.Models.PhienSuKien>
+@{
+    ViewData["Title"] = "Phiên sự kiện";
+    var suKien = (HTquanlyhoinghi_UNETI2_TI17A3HN.Models.SuKien)ViewBag.SuKien;
+    var sortBy = ViewBag.SortBy as string ?? "ThoiGianBatDau";
+    var sortDescending = ViewBag.SortDescending as bool? ?? false;
+    var pageNumber = (int)(ViewBag.PageNumber ?? 1);
+    var pageSize = (int)(ViewBag.PageSize ?? 10);
+    var totalPages = (int)(ViewBag.TotalPages ?? 1);
+    var totalCount = (int)(ViewBag.TotalCount ?? Model.Count());
+}
+
+<div class="container mt-4">
+    <h1>Phiên sự kiện - @suKien.TenSuKien</h1>
+    <p class="text-muted">Tìm, lọc và sắp xếp các phiên của sự kiện này.</p>
+
+    <form method="get" class="row g-3 mb-3">
+        <input type="hidden" name="maSuKien" value="@suKien.MaSuKien" />
+        <div class="col-md-5">
+            <input name="search" value="@ViewBag.Search" class="form-control"
+                   placeholder="Tìm tên phiên, diễn giả hoặc nội dung" />
+        </div>
+        <div class="col-md-3">
+            <select name="trangThai" class="form-select">
+                <option value="">Tất cả trạng thái</option>
+                <option value="SapDienRa" selected="@(ViewBag.TrangThai == "SapDienRa")">Sắp diễn ra</option>
+                <option value="DangDienRa" selected="@(ViewBag.TrangThai == "DangDienRa")">Đang diễn ra</option>
+                <option value="DaKetThuc" selected="@(ViewBag.TrangThai == "DaKetThuc")">Đã kết thúc</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="sortBy" class="form-select">
+                <option value="ThoiGianBatDau" selected="@(sortBy == "ThoiGianBatDau")">Bắt đầu</option>
+                <option value="TenPhien" selected="@(sortBy == "TenPhien")">Tên phiên</option>
+                <option value="ThoiGianKetThuc" selected="@(sortBy == "ThoiGianKetThuc")">Kết thúc</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <select name="sortDescending" class="form-select">
+                <option value="true" selected="@(sortDescending)">Giảm dần</option>
+                <option value="false" selected="@(!sortDescending)">Tăng dần</option>
+            </select>
+            <button class="btn btn-primary" type="submit">Lọc &amp; sắp</button>
+        </div>
+    </form>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Tên phiên</th>
+                        <th>Thời gian</th>
+                        <th>Diễn giả</th>
+                        <th>Nơi dung</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td><strong>@item.TenPhien</strong></td>
+                                <td>@item.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm") -
+                                    @item.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@item.DienGia</td>
+                                    <td>@item.NoiDung</td>
+                                    <td>@item.TrangThai</td>
+                                </tr>
+                            }
+                        }
+                    else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">Không có phiên nào khớp.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        @if (totalPages > 1)
+        {
+            <nav class="mt-3" aria-label="Phân trang">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(pageNumber <= 1 ? "disabled" : "")">
+                        <a class="page-link" asp-route-pageNumber="@(pageNumber - 1)" asp-route-search="@ViewBag.Search"
+                           asp-route-trangThai="@ViewBag.TrangThai" asp-route-sortBy="@sortBy"
+                           asp-route-sortDescending="@sortDescending" asp-route-maSuKien="@suKien.MaSuKien"
+                           asp-route-pageSize="@pageSize">Trước</a>
+                    </li>
+                    <li class="page-item active"><span class="page-link">Trang @pageNumber / @totalPages</span></li>
+                    <li class="page-item @(pageNumber >= totalPages ? "disabled" : "")">
+                        <a class="page-link" asp-route-pageNumber="@(pageNumber + 1)" asp-route-search="@ViewBag.Search"
+                           asp-route-trangThai="@ViewBag.TrangThai" asp-route-sortBy="@sortBy"
+                           asp-route-sortDescending="@sortDescending" asp-route-maSuKien="@suKien.MaSuKien"
+                           asp-route-pageSize="@pageSize">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        }
+
+        <a asp-action="Index" asp-controller="SuKien" class="btn btn-secondary mt-3">Quay lại sự kiện</a>
+    </div>

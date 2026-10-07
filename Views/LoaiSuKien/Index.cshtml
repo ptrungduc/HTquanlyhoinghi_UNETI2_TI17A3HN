@@ -2,6 +2,12 @@
 
 @{
     ViewData["Title"] = "Quản lý loại sự kiện";
+    var sortBy = ViewBag.SortBy as string ?? "TenLoaiSuKien";
+    var sortDescending = ViewBag.SortDescending as bool? ?? false;
+    var pageNumber = (int)(ViewBag.PageNumber ?? 1);
+    var pageSize = (int)(ViewBag.PageSize ?? 10);
+    var totalPages = (int)(ViewBag.TotalPages ?? 1);
+    var totalCount = (int)(ViewBag.TotalCount ?? Model.Count());
 }
 
 <!-- Header -->
@@ -36,6 +42,33 @@
         </a>
     </div>
 
+    <form method="get" class="row g-3 mb-3">
+        <div class="col-md-5">
+            <input name="search" value="@ViewBag.Search" class="form-control"
+                   placeholder="Tìm mã, tên hoặc mô tả loại sự kiện" />
+        </div>
+        <div class="col-md-3">
+            <select name="trangThai" class="form-select">
+                <option value="">Tất cả trạng thái</option>
+                <option value="true" selected="@(ViewBag.TrangThai == "true")">Đang hoạt động</option>
+                <option value="false" selected="@(ViewBag.TrangThai == "false")">Đã ngừng hoạt động</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="sortBy" class="form-select">
+                <option value="TenLoaiSuKien" selected="@(sortBy == "TenLoaiSuKien")">Tên loại sự kiện</option>
+                <option value="MaLoaiSuKien" selected="@(sortBy == "MaLoaiSuKien")">Mã loại sự kiện</option>
+                <option value="TrangThai" selected="@(sortBy == "TrangThai")">Trạng thái</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <select name="sortDescending" class="form-select">
+                <option value="false" selected="@(!sortDescending)">Tăng dần</option>
+                <option value="true" selected="@(sortDescending)">Giảm dần</option>
+            </select>
+            <button class="btn btn-primary" type="submit">Lọc &amp; sắp</button>
+        </div>
+    </form>
 
     <div class="card shadow-sm border-0">
 
@@ -159,5 +192,24 @@
         </div>
 
     </div>
+
+    @if (totalPages > 1)
+    {
+        <nav class="mt-3" aria-label="Phân trang loại sự kiện">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(pageNumber <= 1 ? "disabled" : "")">
+                    <a class="page-link" asp-route-pageNumber="@(pageNumber - 1)" asp-route-search="@ViewBag.Search"
+                       asp-route-trangThai="@ViewBag.TrangThai" asp-route-sortBy="@sortBy"
+                       asp-route-sortDescending="@sortDescending">Trước</a>
+                </li>
+                <li class="page-item active"><span class="page-link">Trang @pageNumber / @totalPages</span></li>
+                <li class="page-item @(pageNumber >= totalPages ? "disabled" : "")">
+                    <a class="page-link" asp-route-pageNumber="@(pageNumber + 1)" asp-route-search="@ViewBag.Search"
+                       asp-route-trangThai="@ViewBag.TrangThai" asp-route-sortBy="@sortBy"
+                       asp-route-sortDescending="@sortDescending">Sau</a>
+                </li>
+            </ul>
+        </nav>
+    }
 
 </div>
