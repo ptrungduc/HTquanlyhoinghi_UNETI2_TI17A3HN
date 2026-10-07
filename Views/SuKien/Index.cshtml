@@ -21,7 +21,7 @@
     <form method="get" class="row g-3 mb-3">
         <div class="col-md-5">
             <input name="search" value="@ViewBag.Search" class="form-control"
-                   placeholder="Tìm tên, mô tả, loại sự kiện hoặc địa điểm" />
+                   placeholder="Tìm sự kiện, loại, địa điểm hoặc phiên" />
         </div>
         <div class="col-md-3">
             <select name="trangThai" class="form-select">
@@ -31,6 +31,26 @@
                 <option value="DaKetThuc" selected="@(ViewBag.TrangThai == "DaKetThuc")">Đã kết thúc</option>
                 <option value="DaHuy" selected="@(ViewBag.TrangThai == "DaHuy")">Đã hủy</option>
             </select>
+        </div>
+        <div class="col-md-3">
+            <select name="maLoaiSuKien" asp-items="ViewBag.LoaiSuKien" class="form-select">
+                <option value="">Tất cả loại sự kiện</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="maDiaDiem" asp-items="ViewBag.DiaDiem" class="form-select">
+                <option value="">Tất cả địa điểm</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="ngayBatDauTu" class="form-label">Tổ chức từ ngày</label>
+            <input id="ngayBatDauTu" name="ngayBatDauTu" type="date"
+                   value="@ViewBag.NgayBatDauTu" class="form-control" />
+        </div>
+        <div class="col-md-3">
+            <label for="ngayBatDauDen" class="form-label">Đến ngày</label>
+            <input id="ngayBatDauDen" name="ngayBatDauDen" type="date"
+                   value="@ViewBag.NgayBatDauDen" class="form-control" />
         </div>
         <div class="col-md-2">
             <select name="sortBy" class="form-select">
@@ -104,13 +124,17 @@
                     <li class="page-item @(pageNumber <= 1 ? "disabled" : "")">
                         <a class="page-link" asp-route-pageNumber="@(pageNumber - 1)" asp-route-search="@ViewBag.Search"
                            asp-route-trangThai="@ViewBag.TrangThai" asp-route-sortBy="@sortBy"
-                           asp-route-sortDescending="@sortDescending">Trước</a>
+                           asp-route-sortDescending="@sortDescending" asp-route-maLoaiSuKien="@ViewBag.MaLoaiSuKien"
+                           asp-route-maDiaDiem="@ViewBag.MaDiaDiem" asp-route-ngayBatDauTu="@ViewBag.NgayBatDauTu"
+                           asp-route-ngayBatDauDen="@ViewBag.NgayBatDauDen" asp-route-pageSize="@pageSize">Trước</a>
                     </li>
                     <li class="page-item active"><span class="page-link">Trang @pageNumber / @totalPages</span></li>
                     <li class="page-item @(pageNumber >= totalPages ? "disabled" : "")">
                         <a class="page-link" asp-route-pageNumber="@(pageNumber + 1)" asp-route-search="@ViewBag.Search"
                            asp-route-trangThai="@ViewBag.TrangThai" asp-route-sortBy="@sortBy"
-                           asp-route-sortDescending="@sortDescending">Sau</a>
+                           asp-route-sortDescending="@sortDescending" asp-route-maLoaiSuKien="@ViewBag.MaLoaiSuKien"
+                           asp-route-maDiaDiem="@ViewBag.MaDiaDiem" asp-route-ngayBatDauTu="@ViewBag.NgayBatDauTu"
+                           asp-route-ngayBatDauDen="@ViewBag.NgayBatDauDen" asp-route-pageSize="@pageSize">Sau</a>
                     </li>
                 </ul>
             </nav>

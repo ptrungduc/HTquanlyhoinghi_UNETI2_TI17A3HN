@@ -18,7 +18,12 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         public async Task<IActionResult> Index(
             string? search,
             string? trangThai,
+            string? maLoaiSuKien,
+            string? maDiaDiem,
+            DateTime? ngayBatDauTu,
+            DateTime? ngayBatDauDen,
             string sortBy = "ThoiGianBatDau",
+
             bool sortDescending = true,
             int pageNumber = 1,
             int pageSize = 10)
@@ -26,7 +31,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             pageNumber = Math.Max(1, pageNumber);
             pageSize = Math.Clamp(pageSize, 5, 50);
 
-            var query = _context.SuKiens
+            IQueryable<SuKien> query = _context.SuKiens
                 .Include(s => s.LoaiSuKien)
                 .Include(s => s.DiaDiem)
                 .AsNoTracking();
@@ -38,12 +43,35 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
                     s.TenSuKien.Contains(search)
                     || s.MoTa.Contains(search)
                     || (s.LoaiSuKien != null && s.LoaiSuKien.TenLoaiSuKien.Contains(search))
-                    || (s.DiaDiem != null && s.DiaDiem.TenDiaDiem.Contains(search)));
+                    || (s.DiaDiem != null && s.DiaDiem.TenDiaDiem.Contains(search))
+                    || s.PhienSuKiens.Any(p => p.TenPhien.Contains(search)));
             }
 
             if (!string.IsNullOrWhiteSpace(trangThai))
             {
                 query = query.Where(s => s.TrangThai == trangThai);
+            }
+
+            if (!string.IsNullOrWhiteSpace(maLoaiSuKien))
+            {
+                query = query.Where(s => s.MaLoaiSuKien == maLoaiSuKien);
+            }
+
+            if (!string.IsNullOrWhiteSpace(maDiaDiem))
+            {
+                query = query.Where(s => s.MaDiaDiem == maDiaDiem);
+            }
+
+            if (ngayBatDauTu.HasValue)
+            {
+                var ngayTu = ngayBatDauTu.Value.Date;
+                query = query.Where(s => s.ThoiGianKetThuc.Date >= ngayTu);
+            }
+
+            if (ngayBatDauDen.HasValue)
+            {
+                var ngayDen = ngayBatDauDen.Value.Date;
+                query = query.Where(s => s.ThoiGianBatDau.Date <= ngayDen);
             }
 
             query = ApplySort(query, sortBy, sortDescending);
@@ -53,6 +81,16 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
 
             ViewBag.Search = search;
             ViewBag.TrangThai = trangThai;
+            ViewBag.MaLoaiSuKien = maLoaiSuKien;
+            ViewBag.MaDiaDiem = maDiaDiem;
+            ViewBag.NgayBatDauTu = ngayBatDauTu?.ToString("yyyy-MM-dd");
+            ViewBag.NgayBatDauDen = ngayBatDauDen?.ToString("yyyy-MM-dd");
+            ViewBag.LoaiSuKien = new SelectList(
+                await _context.LoaiSuKiens.AsNoTracking().OrderBy(l => l.TenLoaiSuKien).ToListAsync(),
+                "MaLoaiSuKien", "TenLoaiSuKien", maLoaiSuKien);
+            ViewBag.DiaDiem = new SelectList(
+                await _context.DiaDiems.AsNoTracking().OrderBy(d => d.TenDiaDiem).ToListAsync(),
+                "MaDiaDiem", "TenDiaDiem", maDiaDiem);
             ViewBag.SortBy = sortBy;
             ViewBag.SortDescending = sortDescending;
             ViewBag.PageNumber = pageNumber;
@@ -191,13 +229,36 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
                 ModelState.AddModelError(string.Empty, "Loại sự kiện và địa điểm phải đang hoạt động.");
             }
 
+            if (await _context.PhienSuKiens.AnyAsync(p =>
+                    p.MaSuKien == id
+                    && (p.ThoiGianBatDau < suKien.ThoiGianBatDau
+                        || p.ThoiGianKetThuc > suKien.ThoiGianKetThuc)))
+            {
+                ModelState.AddModelError(
+                    nameof(SuKien.ThoiGianBatDau),
+                    "Khoảng thời gian sự kiện không được loại bỏ các phiên đã có.");
+            }
+
             if (!ModelState.IsValid)
             {
                 await LoadSelections();
                 return View(suKien);
             }
 
-            _context.Update(suKien);
+            var existingSuKien = await _context.SuKiens
+                .FirstOrDefaultAsync(s => s.MaSuKien == id);
+            if (existingSuKien == null)
+            {
+                return NotFound();
+            }
+
+            existingSuKien.TenSuKien = suKien.TenSuKien;
+            existingSuKien.MaLoaiSuKien = suKien.MaLoaiSuKien;
+            existingSuKien.MaDiaDiem = suKien.MaDiaDiem;
+            existingSuKien.ThoiGianBatDau = suKien.ThoiGianBatDau;
+            existingSuKien.ThoiGianKetThuc = suKien.ThoiGianKetThuc;
+            existingSuKien.MoTa = suKien.MoTa;
+            existingSuKien.TrangThai = suKien.TrangThai;
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
@@ -219,12 +280,19 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var suKien = await _context.SuKiens.FindAsync(id);
-            if (suKien != null)
+            if (suKien == null)
             {
-                _context.SuKiens.Remove(suKien);
-                await _context.SaveChangesAsync();
+                return NotFound();
             }
 
+            if (await _context.PhienSuKiens.AnyAsync(p => p.MaSuKien == id))
+            {
+                TempData["ThongBao"] = "Không thể xóa sự kiện đã có phiên chương trình.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            _context.SuKiens.Remove(suKien);
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
@@ -249,14 +317,14 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             return sortBy switch
             {
                 "TenSuKien" => sortDescending
-                    ? query.OrderByDescending(s => s.TenSuKien)
-                    : query.OrderBy(s => s.TenSuKien),
+                    ? query.OrderByDescending(s => s.TenSuKien).ThenBy(s => s.MaSuKien)
+                    : query.OrderBy(s => s.TenSuKien).ThenBy(s => s.MaSuKien),
                 "ThoiGianKetThuc" => sortDescending
-                    ? query.OrderByDescending(s => s.ThoiGianKetThuc)
-                    : query.OrderBy(s => s.ThoiGianKetThuc),
+                    ? query.OrderByDescending(s => s.ThoiGianKetThuc).ThenBy(s => s.MaSuKien)
+                    : query.OrderBy(s => s.ThoiGianKetThuc).ThenBy(s => s.MaSuKien),
                 _ => sortDescending
-                    ? query.OrderByDescending(s => s.ThoiGianBatDau)
-                    : query.OrderBy(s => s.ThoiGianBatDau)
+                    ? query.OrderByDescending(s => s.ThoiGianBatDau).ThenBy(s => s.MaSuKien)
+                    : query.OrderBy(s => s.ThoiGianBatDau).ThenBy(s => s.MaSuKien)
             };
         }
 
@@ -281,9 +349,9 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
 
         private void ValidateTimeRange(SuKien suKien)
         {
-            if (suKien.ThoiGianKetThuc <= suKien.ThoiGianBatDau)
+            if (suKien.ThoiGianKetThuc < suKien.ThoiGianBatDau)
             {
-                ModelState.AddModelError(nameof(SuKien.ThoiGianKetThuc), "Thời gian kết thúc phải sau thời gian bắt đầu.");
+                ModelState.AddModelError(nameof(SuKien.ThoiGianKetThuc), "Ngày kết thúc phải bằng hoặc sau ngày bắt đầu.");
             }
         }
 
