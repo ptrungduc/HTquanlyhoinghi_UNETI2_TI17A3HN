@@ -54,7 +54,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
                 TrangThai = TrangThaiDangKy.ChoDuyet
             };
 
-            _context.DangKyThamDu.Add(dangKy);
+            _context.DangKyThamDus.Add(dangKy);
             await _context.SaveChangesAsync();
 
             TempData["ThongBao"] =
@@ -95,7 +95,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             string? maLoaiSuKien,
             string sapXep)
         {
-            var query = _context.DangKyThamDu
+            var query = _context.DangKyThamDus
                 .Where(d => d.MaNguoiThamDu == maNguoiThamDu)
                 .AsQueryable();
 
@@ -145,7 +145,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             string sapXep)
         {
             var query =
-                _context.DangKyThamDu.AsQueryable();
+                _context.DangKyThamDus.AsQueryable();
 
             if (!string.IsNullOrEmpty(tenNguoiThamDu))
             {

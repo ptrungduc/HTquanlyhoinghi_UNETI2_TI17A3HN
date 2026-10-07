@@ -27,7 +27,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Services
             string maNguoiThamDu,
             string maSuKien)
         {
-            var nguoiThamDu = await _context.NguoiThamDu
+            var nguoiThamDu = await _context.NguoiThamDus
                 .FirstOrDefaultAsync(n => n.MaNguoiThamDu == maNguoiThamDu);
 
             if (nguoiThamDu == null)
@@ -36,7 +36,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Services
             if (!nguoiThamDu.TrangThai)
                 return (false, "Tài khoản đã bị khóa/ngừng hoạt động, không thể đăng ký.");
 
-            var suKien = await _context.SuKien
+            var suKien = await _context.SuKiens
                 .Include(s => s.DiaDiem)
                 .FirstOrDefaultAsync(s => s.MaSuKien == maSuKien);
 
@@ -49,7 +49,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Services
             if (DateTime.Now >= suKien.ThoiGianBatDau)
                 return (false, "Sự kiện đã bắt đầu, không thể đăng ký.");
 
-            bool daDangKyHieuLuc = await _context.DangKyThamDu
+            bool daDangKyHieuLuc = await _context.DangKyThamDus
                 .AnyAsync(d =>
                     d.MaNguoiThamDu == maNguoiThamDu &&
                     d.MaSuKien == maSuKien &&
@@ -72,7 +72,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Services
 
         public async Task<int> DemSoDangKyHieuLucAsync(string maSuKien)
         {
-            return await _context.DangKyThamDu
+            return await _context.DangKyThamDus
                 .Where(d =>
                     d.MaSuKien == maSuKien &&
                     TrangThaiHieuLuc.Contains(d.TrangThai))
@@ -84,7 +84,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Services
             string maDiaDiem,
                 int soLuongToiDa)
         {
-            var diaDiem = await _context.DiaDiem
+            var diaDiem = await _context.DiaDiems
                 .FirstOrDefaultAsync(d => d.MaDiaDiem == maDiaDiem);
 
             if (diaDiem == null)
@@ -104,7 +104,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Services
                 DateTime batDauMoi,
                 DateTime ketThucMoi)
         {
-            var cacPhienDaDangKy = await _context.DangKyPhien
+            var cacPhienDaDangKy = await _context.DangKyPhiens
                 .Where(dp =>
                     dp.MaNguoiThamDu == maNguoiThamDu &&
                     dp.MaPhien != maPhienMoi &&
@@ -146,7 +146,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Services
             string maNguoiThamDu,
                 string lyDoHuy)
         {
-            var dangKy = await _context.DangKyThamDu
+            var dangKy = await _context.DangKyThamDus
                 .Include(d => d.SuKien)
                 .FirstOrDefaultAsync(d => d.MaDangKy == maDangKy);
 
@@ -190,13 +190,13 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Services
                 string maNguoiThamDu,
                 string maPhien)
         {
-            var phien = await _context.PhienSuKien
+            var phien = await _context.PhienSuKiens
                 .FirstOrDefaultAsync(p => p.MaPhienSuKien == maPhien);
 
             if (phien == null)
                 return (false, "Phiên sự kiện không tồn tại.");
 
-            bool coDangKySuKienHieuLuc = await _context.DangKyThamDu
+            bool coDangKySuKienHieuLuc = await _context.DangKyThamDus
                 .AnyAsync(d =>
                     d.MaNguoiThamDu == maNguoiThamDu &&
                     d.MaSuKien == phien.MaSuKien &&
@@ -205,7 +205,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Services
             if (!coDangKySuKienHieuLuc)
                 return (false, "Bạn cần có đăng ký hợp lệ cho sự kiện trước khi đăng ký phiên.");
 
-            bool daDangKy = await _context.DangKyPhien
+            bool daDangKy = await _context.DangKyPhiens
                 .AnyAsync(dp =>
                     dp.MaNguoiThamDu == maNguoiThamDu &&
                     dp.MaPhien == maPhien &&
@@ -234,7 +234,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Services
                 TrangThai = TrangThaiDangKy.ChoDuyet
             };
 
-            _context.DangKyPhien.Add(dangKyPhien);
+            _context.DangKyPhiens.Add(dangKyPhien);
 
             await _context.SaveChangesAsync();
 

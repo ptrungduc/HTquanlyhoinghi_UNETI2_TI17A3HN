@@ -22,14 +22,6 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Database
         public DbSet<DangKyPhien> DangKyPhiens { get; set; }
         public DbSet<CheckIn> CheckIns { get; set; }
 
-        // === Alias không "s" - Module 3 sử dụng tên này ===
-        public DbSet<NguoiThamDu> NguoiThamDu => NguoiThamDus;
-        public DbSet<DangKyThamDu> DangKyThamDu => DangKyThamDus;
-        public DbSet<DangKyPhien> DangKyPhien => DangKyPhiens;
-        public DbSet<DiaDiem> DiaDiem => DiaDiems;
-        public DbSet<SuKien> SuKien => SuKiens;
-        public DbSet<PhienSuKien> PhienSuKien => PhienSuKiens;
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<LoaiSuKien>()
