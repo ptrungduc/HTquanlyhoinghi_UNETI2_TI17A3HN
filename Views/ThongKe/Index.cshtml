@@ -1,0 +1,531 @@
+@* Họ và tên: [TÊN CỦA TÔI] *@
+@* Mã sinh viên: [MSSV CỦA TÔI] *@
+@* Nội dung thực hiện: Module 5 - Lịch sử tham dự, Dashboard, thống kê LINQ, báo cáo. *@
+
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module5.ThongKeViewModel
+
+@{
+    ViewData["Title"] = "Thống kê LINQ";
+}
+
+<!-- Header -->
+<header class="admin-header">
+    <div>
+        <h2>📈 Thống kê tổng hợp</h2>
+        <p>Dữ liệu được tính từ database bằng EF Core + LINQ</p>
+    </div>
+</header>
+
+<div class="container mt-4">
+
+    <!-- ============================================================ -->
+    <!-- BỘ LỌC                                                       -->
+    <!-- ============================================================ -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white"><h5 class="mb-0">🔍 Bộ lọc</h5></div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-2">
+                    <label class="form-label">Tháng</label>
+                    <select name="thang" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        @for (int m = 1; m <= 12; m++)
+                        {
+                            <option value="@m" selected="@(Model.ThangLoc == m)">Tháng @m</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Năm</label>
+                    <input type="number" name="nam" class="form-control"
+                           value="@Model.NamLoc" placeholder="@DateTime.Now.Year" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Từ ngày</label>
+                    <input type="date" name="tuNgay" class="form-control"
+                           value="@(Model.TuNgay?.ToString("yyyy-MM-dd"))" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Đến ngày</label>
+                    <input type="date" name="denNgay" class="form-control"
+                           value="@(Model.DenNgay?.ToString("yyyy-MM-dd"))" />
+                </div>
+                <div class="col-md-2 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary">Lọc</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Xóa lọc</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- TỔNG QUAN                                                     -->
+    <!-- ============================================================ -->
+    <div class="row mb-4">
+        <div class="col-md-2 mb-2">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body py-2">
+                    <h4 class="text-primary mb-0">@Model.TongSuKien</h4>
+                    <small class="text-muted">Sự kiện</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-2">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body py-2">
+                    <h4 class="text-success mb-0">@Model.TongDangKy</h4>
+                    <small class="text-muted">Đăng ký</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-2">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body py-2">
+                    <h4 class="text-info mb-0">@Model.TongCheckIn</h4>
+                    <small class="text-muted">Check-in</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body py-2">
+                    <h4 class="text-warning mb-0">@Model.TyLeCheckInTrungBinh%</h4>
+                    <small class="text-muted">TB Check-in Rate</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-2">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body py-2">
+                    <h4 class="text-danger mb-0">@Model.TyLeHuyTrungBinh%</h4>
+                    <small class="text-muted">TB Hủy Rate</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- THỐNG KÊ NỔI BẬT (Bước 4)                                    -->
+    <!-- ============================================================ -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white"><h5 class="mb-0">🏆 Thống kê nổi bật</h5></div>
+        <div class="card-body">
+            <div class="row">
+
+                <!-- NB1: SK nhiều đăng ký nhất -->
+                <div class="col-md-4 mb-3">
+                    <div class="card border-0 h-100" style="background: #f8f9fa;">
+                        <div class="card-body text-center py-3">
+                            <div class="fs-3 mb-1">📋</div>
+                            <small class="text-muted d-block mb-2">SK nhiều đăng ký nhất</small>
+                            @if (Model.SuKienNhieuDangKyNhat != null)
+                            {
+                                <h6 class="fw-bold mb-1 text-primary">@Model.SuKienNhieuDangKyNhat.Ten</h6>
+                                <span class="badge bg-primary">@Model.SuKienNhieuDangKyNhat.ChiTiet</span>
+                            }
+                            else { <p class="text-muted mb-0"><em>Chưa có dữ liệu</em></p> }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NB2: SK tỷ lệ tham dự cao nhất -->
+                <div class="col-md-4 mb-3">
+                    <div class="card border-0 h-100" style="background: #f8f9fa;">
+                        <div class="card-body text-center py-3">
+                            <div class="fs-3 mb-1">🎯</div>
+                            <small class="text-muted d-block mb-2">SK tỷ lệ tham dự cao nhất</small>
+                            @if (Model.SuKienTyLeThamDuCaoNhat != null)
+                            {
+                                <h6 class="fw-bold mb-1 text-success">@Model.SuKienTyLeThamDuCaoNhat.Ten</h6>
+                                <span class="badge bg-success">@Model.SuKienTyLeThamDuCaoNhat.ChiTiet</span>
+                            }
+                            else { <p class="text-muted mb-0"><em>Chưa có dữ liệu</em></p> }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NB3: Loại SK nhiều tham dự nhất -->
+                <div class="col-md-4 mb-3">
+                    <div class="card border-0 h-100" style="background: #f8f9fa;">
+                        <div class="card-body text-center py-3">
+                            <div class="fs-3 mb-1">🏷️</div>
+                            <small class="text-muted d-block mb-2">Loại SK nhiều tham dự nhất</small>
+                            @if (Model.LoaiSuKienNhieuThamDuNhat != null)
+                            {
+                                <h6 class="fw-bold mb-1" style="color: #6f42c1;">@Model.LoaiSuKienNhieuThamDuNhat.Ten</h6>
+                                <span class="badge" style="background: #6f42c1;">@Model.LoaiSuKienNhieuThamDuNhat.ChiTiet</span>
+                            }
+                            else { <p class="text-muted mb-0"><em>Chưa có dữ liệu</em></p> }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NB4: Địa điểm sử dụng nhiều nhất -->
+                <div class="col-md-4 mb-3">
+                    <div class="card border-0 h-100" style="background: #f8f9fa;">
+                        <div class="card-body text-center py-3">
+                            <div class="fs-3 mb-1">📍</div>
+                            <small class="text-muted d-block mb-2">Địa điểm sử dụng nhiều nhất</small>
+                            @if (Model.DiaDiemSuDungNhieuNhat != null)
+                            {
+                                <h6 class="fw-bold mb-1" style="color: #fd7e14;">@Model.DiaDiemSuDungNhieuNhat.Ten</h6>
+                                <span class="badge" style="background: #fd7e14;">@Model.DiaDiemSuDungNhieuNhat.ChiTiet</span>
+                            }
+                            else { <p class="text-muted mb-0"><em>Chưa có dữ liệu</em></p> }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NB5: Phiên nhiều người nhất -->
+                <div class="col-md-4 mb-3">
+                    <div class="card border-0 h-100" style="background: #f8f9fa;">
+                        <div class="card-body text-center py-3">
+                            <div class="fs-3 mb-1">🕐</div>
+                            <small class="text-muted d-block mb-2">Phiên nhiều người nhất</small>
+                            @if (Model.PhienNhieuNguoiNhat != null)
+                            {
+                                <h6 class="fw-bold mb-1 text-info">@Model.PhienNhieuNguoiNhat.Ten</h6>
+                                <span class="badge bg-info">@Model.PhienNhieuNguoiNhat.ChiTiet</span>
+                            }
+                            else { <p class="text-muted mb-0"><em>Chưa có dữ liệu</em></p> }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NB6: Người tham dự nhiều SK nhất -->
+                <div class="col-md-4 mb-3">
+                    <div class="card border-0 h-100" style="background: #f8f9fa;">
+                        <div class="card-body text-center py-3">
+                            <div class="fs-3 mb-1">👤</div>
+                            <small class="text-muted d-block mb-2">Người tham dự nhiều SK nhất</small>
+                            @if (Model.NguoiThamDuNhieuNhat != null)
+                            {
+                                <h6 class="fw-bold mb-1 text-danger">@Model.NguoiThamDuNhieuNhat.Ten</h6>
+                                <span class="badge bg-danger">@Model.NguoiThamDuNhieuNhat.ChiTiet</span>
+                            }
+                            else { <p class="text-muted mb-0"><em>Chưa có dữ liệu</em></p> }
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- ============================================================ -->
+        <!-- 1a. ĐĂNG KÝ THEO SỰ KIỆN                                    -->
+        <!-- ============================================================ -->
+        <div class="col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white"><h6 class="mb-0">📋 Đăng ký theo sự kiện</h6></div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-light">
+                                <tr><th>Sự kiện</th><th class="text-end">Số ĐK</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.DangKyTheoSuKien)
+                                {
+                                    <tr><td>@item.TenSuKien</td><td class="text-end fw-bold">@item.SoDangKy</td></tr>
+                                }
+                                @if (!Model.DangKyTheoSuKien.Any())
+                                {
+                                    <tr><td colspan="2" class="text-center text-muted py-3">Chưa có dữ liệu</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 1b. ĐĂNG KÝ THEO LOẠI SỰ KIỆN                               -->
+        <!-- ============================================================ -->
+        <div class="col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white"><h6 class="mb-0">🏷️ Đăng ký theo loại sự kiện</h6></div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-light">
+                                <tr><th>Loại SK</th><th class="text-end">Số SK</th><th class="text-end">Tổng ĐK</th><th class="text-end">TB/SK</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.DangKyTheoLoaiSuKien)
+                                {
+                                    <tr>
+                                        <td>@item.TenLoaiSuKien</td>
+                                        <td class="text-end">@item.SoSuKien</td>
+                                        <td class="text-end fw-bold">@item.SoDangKy</td>
+                                        <td class="text-end text-muted">@item.TrungBinhDangKy</td>
+                                    </tr>
+                                }
+                                @if (!Model.DangKyTheoLoaiSuKien.Any())
+                                {
+                                    <tr><td colspan="4" class="text-center text-muted py-3">Chưa có dữ liệu</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- ============================================================ -->
+        <!-- 1c. ĐĂNG KÝ THEO ĐỊA ĐIỂM                                   -->
+        <!-- ============================================================ -->
+        <div class="col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white"><h6 class="mb-0">📍 Đăng ký theo địa điểm</h6></div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-light">
+                                <tr><th>Địa điểm</th><th class="text-end">Số SK</th><th class="text-end">Tổng ĐK</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.DangKyTheoDiaDiem)
+                                {
+                                    <tr>
+                                        <td>@item.TenDiaDiem</td>
+                                        <td class="text-end">@item.SoSuKien</td>
+                                        <td class="text-end fw-bold">@item.SoDangKy</td>
+                                    </tr>
+                                }
+                                @if (!Model.DangKyTheoDiaDiem.Any())
+                                {
+                                    <tr><td colspan="3" class="text-center text-muted py-3">Chưa có dữ liệu</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 2. THỐNG KÊ DUYỆT                                            -->
+        <!-- ============================================================ -->
+        <div class="col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white"><h6 class="mb-0">✅ Duyệt theo sự kiện</h6></div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-light">
+                                <tr><th>Sự kiện</th><th class="text-end">Tổng ĐK</th><th class="text-end">Đã duyệt</th><th class="text-end">Tỷ lệ</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.DuyetTheoSuKien)
+                                {
+                                    <tr>
+                                        <td>@item.TenSuKien</td>
+                                        <td class="text-end">@item.TongDangKy</td>
+                                        <td class="text-end fw-bold text-success">@item.SoDaDuyet</td>
+                                        <td class="text-end"><span class="badge bg-success">@item.TyLeDuyet%</span></td>
+                                    </tr>
+                                }
+                                @if (!Model.DuyetTheoSuKien.Any())
+                                {
+                                    <tr><td colspan="4" class="text-center text-muted py-3">Chưa có dữ liệu</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- ============================================================ -->
+        <!-- 3a. CHECK-IN THEO SỰ KIỆN                                    -->
+        <!-- ============================================================ -->
+        <div class="col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white"><h6 class="mb-0">🔑 Check-in theo sự kiện</h6></div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-light">
+                                <tr><th>Sự kiện</th><th class="text-end">Đã duyệt</th><th class="text-end">Check-in</th><th class="text-end">Attendance</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.CheckInTheoSuKien)
+                                {
+                                    <tr>
+                                        <td>@item.TenSuKien</td>
+                                        <td class="text-end">@item.SoDaDuyet</td>
+                                        <td class="text-end fw-bold text-info">@item.SoCheckIn</td>
+                                        <td class="text-end"><span class="badge bg-info">@item.TyLeCheckIn%</span></td>
+                                    </tr>
+                                }
+                                @if (!Model.CheckInTheoSuKien.Any())
+                                {
+                                    <tr><td colspan="4" class="text-center text-muted py-3">Chưa có dữ liệu</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 3b. THAM GIA THEO PHIÊN                                       -->
+        <!-- ============================================================ -->
+        <div class="col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white"><h6 class="mb-0">🕐 Tham gia theo phiên</h6></div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-light">
+                                <tr><th>Phiên</th><th>Sự kiện</th><th class="text-end">Số ĐK</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.ThamGiaTheoPhien)
+                                {
+                                    <tr>
+                                        <td><strong>@item.TenPhien</strong></td>
+                                        <td><small class="text-muted">@item.TenSuKien</small></td>
+                                        <td class="text-end fw-bold">@item.SoDangKy</td>
+                                    </tr>
+                                }
+                                @if (!Model.ThamGiaTheoPhien.Any())
+                                {
+                                    <tr><td colspan="3" class="text-center text-muted py-3">Chưa có dữ liệu</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 4. THỐNG KÊ THEO THỜI GIAN                                    -->
+    <!-- ============================================================ -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white"><h5 class="mb-0">📅 Thống kê theo tháng</h5></div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-start">Loại</th>
+                            @{
+                                // Lấy tất cả tháng duy nhất từ cả 3 dataset
+                                var allMonths = Model.SuKienTheoThang.Select(t => t.NhanThang)
+                                    .Union(Model.DangKyTheoThang.Select(t => t.NhanThang))
+                                    .Union(Model.CheckInTheoThang.Select(t => t.NhanThang))
+                                    .Distinct()
+                                    .OrderBy(t => t)
+                                    .ToList();
+                            }
+                            @foreach (var m in allMonths)
+                            {
+                                <th>@m</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-start"><strong>Sự kiện</strong></td>
+                            @foreach (var m in allMonths)
+                            {
+                                var val = Model.SuKienTheoThang.FirstOrDefault(t => t.NhanThang == m)?.SoLuong ?? 0;
+                                <td class="fw-bold text-primary">@val</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td class="text-start"><strong>Đăng ký</strong></td>
+                            @foreach (var m in allMonths)
+                            {
+                                var val = Model.DangKyTheoThang.FirstOrDefault(t => t.NhanThang == m)?.SoLuong ?? 0;
+                                <td class="fw-bold text-success">@val</td>
+                            }
+                        </tr>
+                        <tr>
+                            <td class="text-start"><strong>Check-in</strong></td>
+                            @foreach (var m in allMonths)
+                            {
+                                var val = Model.CheckInTheoThang.FirstOrDefault(t => t.NhanThang == m)?.SoLuong ?? 0;
+                                <td class="fw-bold text-info">@val</td>
+                            }
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            @if (!allMonths.Any())
+            {
+                <p class="text-muted text-center">Chưa có dữ liệu theo tháng.</p>
+            }
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 6. TỶ LỆ                                                      -->
+    <!-- ============================================================ -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white"><h5 class="mb-0">📊 Tỷ lệ theo sự kiện</h5></div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Sự kiện</th>
+                            <th class="text-end">Tổng ĐK</th>
+                            <th class="text-end">Duyệt</th>
+                            <th class="text-end">Check-in</th>
+                            <th class="text-end">Hủy</th>
+                            <th class="text-end">Sức chứa</th>
+                            <th class="text-end">Attendance</th>
+                            <th class="text-end">Cancel</th>
+                            <th class="text-end">Fill</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.TyLeTheoSuKien)
+                        {
+                            <tr>
+                                <td><strong>@item.TenSuKien</strong></td>
+                                <td class="text-end">@item.TongDangKy</td>
+                                <td class="text-end text-success">@item.SoDaDuyet</td>
+                                <td class="text-end text-info">@item.SoCheckIn</td>
+                                <td class="text-end text-danger">@item.SoDaHuy</td>
+                                <td class="text-end text-muted">@item.SucChua</td>
+                                <td class="text-end">
+                                    <span class="badge @(item.TyLeCheckIn >= 80 ? "bg-success" : item.TyLeCheckIn >= 50 ? "bg-warning text-dark" : "bg-danger")">
+                                        @item.TyLeCheckIn%
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <span class="badge @(item.TyLeHuy <= 10 ? "bg-success" : item.TyLeHuy <= 30 ? "bg-warning text-dark" : "bg-danger")">
+                                        @item.TyLeHuy%
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <span class="badge @(item.TyLeLapDay >= 80 ? "bg-success" : item.TyLeLapDay >= 50 ? "bg-info" : "bg-secondary")">
+                                        @item.TyLeLapDay%
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.TyLeTheoSuKien.Any())
+                        {
+                            <tr><td colspan="9" class="text-center text-muted py-3">Chưa có dữ liệu</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>

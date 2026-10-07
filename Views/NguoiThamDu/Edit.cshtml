@@ -1,0 +1,45 @@
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.NguoiThamDu
+
+@{
+    ViewData["Title"] = "Sửa thông tin người tham dự";
+}
+
+<h2>Sửa thông tin người tham dự</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="MaNguoiThamDu" />
+    <input type="hidden" asp-for="MaTaiKhoan" />
+    <input type="hidden" asp-for="TrangThai" />
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="HoTen" class="form-label"></label>
+        <input asp-for="HoTen" class="form-control" />
+        <span asp-validation-for="HoTen" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="SoDienThoai" class="form-label"></label>
+        <input asp-for="SoDienThoai" class="form-control" />
+        <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="DonViCongTac" class="form-label"></label>
+        <input asp-for="DonViCongTac" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

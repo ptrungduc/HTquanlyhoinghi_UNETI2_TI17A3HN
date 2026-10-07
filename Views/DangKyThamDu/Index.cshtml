@@ -1,0 +1,68 @@
+@* Họ và tên: [TÊN CỦA TÔI] *@
+@* Mã sinh viên: [MSSV CỦA TÔI] *@
+@* Nội dung thực hiện: Module 4 - Xét duyệt đăng ký, mã tham dự, check-in, điểm danh. *@
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module4.DuyetDangKyViewModel
+
+@{
+    ViewData["Title"] = "Xét duyệt đăng ký";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Xét duyệt đăng ký</h1>
+        <p class="text-muted mb-0">Danh sách đăng ký đang chờ xử lý</p>
+    </div>
+    <a class="btn btn-outline-primary" asp-controller="CheckIn" asp-action="Index">Mở check-in</a>
+    <a class="btn btn-outline-secondary" asp-controller="DiemDanhPhien" asp-action="Index">Điểm danh phiên</a>
+</div>
+
+@if (TempData["ThongBaoModule4"] is string thongBao)
+{
+    <div class="alert alert-success" role="status">@thongBao</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.ThongBao))
+{
+    <div class="alert alert-info" role="status">@Model.ThongBao</div>
+}
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead>
+            <tr>
+                <th scope="col">Mã đăng ký</th>
+                <th scope="col">Người tham dự</th>
+                <th scope="col">Sự kiện</th>
+                <th scope="col">Trạng thái</th>
+                <th scope="col">Mã tham dự</th>
+                <th scope="col" class="text-end">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.DanhSachDangKy.Count == 0)
+            {
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">Không có đăng ký đang chờ duyệt.</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var dangKy in Model.DanhSachDangKy)
+                {
+                    <tr>
+                        <td>@dangKy.MaDangKy</td>
+                        <td>@dangKy.TenNguoiThamDu</td>
+                        <td>@dangKy.TenSuKien</td>
+                        <td><span class="badge text-bg-warning">@dangKy.TrangThai</span></td>
+                        <td>@(string.IsNullOrWhiteSpace(dangKy.MaThamDu) ? "-" : dangKy.MaThamDu)</td>
+                        <td class="text-end text-nowrap">
+                            <a class="btn btn-sm btn-outline-secondary" asp-action="ChiTiet" asp-route-maDangKy="@dangKy.MaDangKy">Xem</a>
+                            <a class="btn btn-sm btn-success" asp-action="Duyet" asp-route-maDangKy="@dangKy.MaDangKy">Duyệt</a>
+                            <a class="btn btn-sm btn-outline-danger" asp-action="TuChoi" asp-route-maDangKy="@dangKy.MaDangKy">Từ chối</a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
