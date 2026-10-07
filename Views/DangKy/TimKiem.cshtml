@@ -1,0 +1,52 @@
+@model IEnumerable<dynamic>
+
+@{
+    ViewData["Title"] = "Tìm kiếm đăng ký (Ban tổ chức)";
+}
+
+<h2>Tìm kiếm đăng ký</h2>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="text" name="tenNguoiThamDu" class="form-control" placeholder="Tên người tham dự" />
+    </div>
+    <div class="col-auto">
+        <input type="text" name="maSuKien" class="form-control" placeholder="Mã sự kiện" />
+    </div>
+    <div class="col-auto">
+        <select name="trangThai" class="form-select">
+            <option value="">-- Tất cả trạng thái --</option>
+            <option value="ChoDuyet">Chờ duyệt</option>
+            <option value="DaDuyet">Đã duyệt</option>
+            <option value="DaCheckIn">Đã check-in</option>
+            <option value="HoanThanh">Hoàn thành</option>
+            <option value="TuChoi">Từ chối</option>
+            <option value="DaHuy">Đã hủy</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Tìm</button>
+    </div>
+</form>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Người tham dự</th>
+            <th>Sự kiện</th>
+            <th>Ngày đăng ký</th>
+            <th>Trạng thái</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.HoTen</td>
+                <td>@item.TenSuKien</td>
+                <td>@item.NgayDangKy.ToString("dd/MM/yyyy")</td>
+                <td>@item.TrangThai</td>
+            </tr>
+        }
+    </tbody>
+</table>

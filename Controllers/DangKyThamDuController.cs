@@ -19,7 +19,7 @@ public class DangKyThamDuController : Controller
     }
 
     [HttpGet]
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
         var ketQuaPhanQuyen = KiemTraQuyenQuanTri();
         if (ketQuaPhanQuyen is not null)
@@ -27,14 +27,11 @@ public class DangKyThamDuController : Controller
             return ketQuaPhanQuyen;
         }
 
-        return View(new DuyetDangKyViewModel
-        {
-            ThongBaoTichHop = "Chưa tích hợp Module 3."
-        });
+        return View(await _dichVuModule4.LayDanhSachChoDuyetAsync());
     }
 
     [HttpGet]
-    public IActionResult ChiTiet(string? maDangKy)
+    public async Task<IActionResult> ChiTiet(string? maDangKy)
     {
         var ketQuaPhanQuyen = KiemTraQuyenQuanTri();
         if (ketQuaPhanQuyen is not null)
@@ -42,11 +39,12 @@ public class DangKyThamDuController : Controller
             return ketQuaPhanQuyen;
         }
 
-        return View(new ChiTietDangKyViewModel
+        if (string.IsNullOrWhiteSpace(maDangKy))
         {
-            MaDangKy = maDangKy,
-            ThongBao = "Chưa tích hợp Module 3."
-        });
+            return View(new ChiTietDangKyViewModel { ThongBao = "Mã đăng ký không hợp lệ." });
+        }
+
+        return View(await _dichVuModule4.LayChiTietDangKyAsync(maDangKy));
     }
 
     [HttpGet]

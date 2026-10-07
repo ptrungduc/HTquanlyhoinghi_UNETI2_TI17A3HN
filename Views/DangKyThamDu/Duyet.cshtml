@@ -15,15 +15,14 @@
     <div class="alert @(ketQua.ThanhCong ? "alert-success" : "alert-danger")" role="status">@ketQua.ThongBao</div>
 }
 
-<div class="alert alert-warning" role="status">Chưa tích hợp Module 3. Thao tác chưa được thực hiện.</div>
+<div class="alert alert-warning" role="status">Service sẽ kiểm tra lại trạng thái đăng ký và sức chứa trước khi duyệt.</div>
 
 <form asp-action="Duyet" method="post" class="mt-3">
     @Html.AntiForgeryToken()
     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
     <div class="mb-3">
-        <label asp-for="MaDangKy" class="form-label"></label>
-        <input asp-for="MaDangKy" class="form-control" />
-        <span asp-validation-for="MaDangKy" class="text-danger"></span>
+        <span>Mã đăng ký: <code>@Model.MaDangKy</code></span>
+        <input asp-for="MaDangKy" type="hidden" />
     </div>
     <button type="submit" class="btn btn-success">Xác nhận duyệt</button>
     <a class="btn btn-outline-secondary" asp-action="Index">Hủy</a>

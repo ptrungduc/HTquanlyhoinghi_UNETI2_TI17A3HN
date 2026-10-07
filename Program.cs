@@ -7,13 +7,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddScoped<IDichVuModule4, DichVuModule4>();
+builder.Services.AddScoped<HTquanlyhoinghi_UNETI2_TI17A3HN.Services.DangKyService>();
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
-
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {

@@ -22,6 +22,85 @@ namespace QuanLyHoiNghi.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.CheckIn", b =>
+                {
+                    b.Property<string>("MaCheckIn")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("GhiChu")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MaDangKy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("NguoiThucHien")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("ThoiGianCheckIn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("MaCheckIn");
+
+                    b.HasIndex("MaDangKy")
+                        .IsUnique();
+
+                    b.ToTable("CheckIns");
+                });
+
+            modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.DangKyThamDu", b =>
+                {
+                    b.Property<string>("MaDangKy")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("GhiChu")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LyDoTuChoiHuy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MaNguoiThamDu")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("MaSuKien")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("MaThamDu")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("NgayDangKy")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayDuyet")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("MaDangKy");
+
+                    b.HasIndex("MaNguoiThamDu");
+
+                    b.HasIndex("MaSuKien");
+
+                    b.ToTable("DangKyThamDus");
+                });
+
             modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.DiaDiem", b =>
                 {
                     b.Property<string>("MaDiaDiem")
@@ -74,87 +153,6 @@ namespace QuanLyHoiNghi.Migrations
                     b.ToTable("LoaiSuKiens");
                 });
 
-            modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.PhienSuKien", b =>
-                {
-                    b.Property<string>("MaPhienSuKien")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("DienGia")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MaSuKien")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("NoiDung")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TenPhien")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<DateTime>("ThoiGianBatDau")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ThoiGianKetThuc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("TrangThai")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("MaPhienSuKien");
-
-                    b.HasIndex("MaSuKien");
-
-                    b.ToTable("PhienSuKiens");
-                });
-
-            modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.SuKien", b =>
-                {
-                    b.Property<string>("MaSuKien")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("MaDiaDiem")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("MaLoaiSuKien")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("MoTa")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TenSuKien")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<DateTime>("ThoiGianBatDau")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("ThoiGianKetThuc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("TrangThai")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("MaSuKien");
-
-                    b.HasIndex("MaDiaDiem");
-
-                    b.HasIndex("MaLoaiSuKien")
-                        .IsUnique();
-
-                    b.ToTable("SuKiens");
-                });
-
             modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.TaiKhoan", b =>
                 {
                     b.Property<string>("MaTaiKhoan")
@@ -191,46 +189,6 @@ namespace QuanLyHoiNghi.Migrations
                         .IsUnique();
 
                     b.ToTable("TaiKhoans");
-                });
-
-            modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.PhienSuKien", b =>
-                {
-                    b.HasOne("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.SuKien", "SuKien")
-                        .WithMany("PhienSuKiens")
-                        .HasForeignKey("MaSuKien")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("SuKien");
-                });
-
-            modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.SuKien", b =>
-                {
-                    b.HasOne("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.DiaDiem", "DiaDiem")
-                        .WithMany()
-                        .HasForeignKey("MaDiaDiem")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.LoaiSuKien", "LoaiSuKien")
-                        .WithOne("SuKien")
-                        .HasForeignKey("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.SuKien", "MaLoaiSuKien")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("DiaDiem");
-
-                    b.Navigation("LoaiSuKien");
-                });
-
-            modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.LoaiSuKien", b =>
-                {
-                    b.Navigation("SuKien");
-                });
-
-            modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.SuKien", b =>
-                {
-                    b.Navigation("PhienSuKiens");
                 });
 #pragma warning restore 612, 618
         }

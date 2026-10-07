@@ -1,0 +1,157 @@
+@* Họ và tên: [TÊN CỦA TÔI] *@
+@* Mã sinh viên: [MSSV CỦA TÔI] *@
+@* Nội dung thực hiện: Module 5 - Lịch sử tham dự, Dashboard, thống kê LINQ, báo cáo. *@
+
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module5.LichSuThamDuViewModel
+
+@{
+    ViewData["Title"] = "Lịch sử tham dự";
+
+    // Hàm hiển thị tên trạng thái thân thiện
+    string TenTrangThai(string trangThai) => trangThai switch
+    {
+        "ChoDuyet"  => "Chờ duyệt",
+        "DaDuyet"   => "Đã duyệt",
+        "DaCheckIn" => "Đã check-in",
+        "HoanThanh" => "Hoàn thành",
+        "TuChoi"    => "Từ chối",
+        "DaHuy"     => "Đã hủy",
+        _           => trangThai
+    };
+
+    // Hàm trả về CSS class cho badge trạng thái
+    string BadgeCss(string trangThai) => trangThai switch
+    {
+        "ChoDuyet"  => "bg-warning text-dark",
+        "DaDuyet"   => "bg-primary",
+        "DaCheckIn" => "bg-info",
+        "HoanThanh" => "bg-success",
+        "TuChoi"    => "bg-danger",
+        "DaHuy"     => "bg-dark",
+        _           => "bg-secondary"
+    };
+}
+
+<!-- Header -->
+<header class="admin-header">
+    <div>
+        <h2>Lịch sử tham dự</h2>
+        <p>Xem lại các sự kiện bạn đã đăng ký</p>
+    </div>
+    <div class="admin-account">
+        <div class="admin-avatar">
+            @(Model.HoTenNguoiThamDu.Length > 0
+                ? Model.HoTenNguoiThamDu[0].ToString().ToUpper()
+                : "?")
+        </div>
+        <div>
+            <strong>@Model.HoTenNguoiThamDu</strong>
+            <small>Người tham dự</small>
+        </div>
+    </div>
+</header>
+
+<div class="container mt-4">
+
+    <!-- Tổng số đăng ký -->
+    <div class="alert alert-info">
+        📋 Bạn có tổng cộng <strong>@Model.DanhSachDangKy.Count</strong> lượt đăng ký sự kiện.
+    </div>
+
+    <!-- Bảng lịch sử -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>STT</th>
+                            <th>Tên sự kiện</th>
+                            <th>Thời gian</th>
+                            <th>Địa điểm</th>
+                            <th>Ngày đăng ký</th>
+                            <th>Trạng thái</th>
+                            <th>Check-in</th>
+                            <th>Mã tham dự</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.DanhSachDangKy.Any())
+                        {
+                            var stt = 0;
+                            foreach (var item in Model.DanhSachDangKy)
+                            {
+                                stt++;
+                                <tr>
+                                    <td>@stt</td>
+
+                                    <td>
+                                        <strong>@item.TenSuKien</strong>
+                                    </td>
+
+                                    <td>
+                                        <small>
+                                            @item.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm")
+                                            <br />→ @item.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")
+                                        </small>
+                                    </td>
+
+                                    <td>
+                                        @item.TenDiaDiem
+                                        @if (!string.IsNullOrEmpty(item.DiaChi))
+                                        {
+                                            <br /><small class="text-muted">@item.DiaChi</small>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @item.NgayDangKy.ToString("dd/MM/yyyy")
+                                    </td>
+
+                                    <td>
+                                        <span class="badge @BadgeCss(item.TrangThai)">
+                                            @TenTrangThai(item.TrangThai)
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        @if (item.ThoiGianCheckIn.HasValue)
+                                        {
+                                            <span class="text-success">
+                                                ✓ @item.ThoiGianCheckIn.Value.ToString("dd/MM/yyyy HH:mm")
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.MaThamDu))
+                                        {
+                                            <code>@item.MaThamDu</code>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-4">
+                                    Bạn chưa đăng ký tham dự sự kiện nào.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
