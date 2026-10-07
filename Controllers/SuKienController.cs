@@ -15,8 +15,17 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(string? search, string? trangThai)
+        public async Task<IActionResult> Index(
+            string? search,
+            string? trangThai,
+            string sortBy = "ThoiGianBatDau",
+            bool sortDescending = true,
+            int pageNumber = 1,
+            int pageSize = 10)
         {
+            pageNumber = Math.Max(1, pageNumber);
+            pageSize = Math.Clamp(pageSize, 5, 50);
+
             var query = _context.SuKiens
                 .Include(s => s.LoaiSuKien)
                 .Include(s => s.DiaDiem)
@@ -37,9 +46,76 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
                 query = query.Where(s => s.TrangThai == trangThai);
             }
 
+            query = ApplySort(query, sortBy, sortDescending);
+            var totalCount = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+            pageNumber = Math.Clamp(pageNumber, 1, Math.Max(1, totalPages));
+
             ViewBag.Search = search;
             ViewBag.TrangThai = trangThai;
-            return View(await query.OrderByDescending(s => s.ThoiGianBatDau).ToListAsync());
+            ViewBag.SortBy = sortBy;
+            ViewBag.SortDescending = sortDescending;
+            ViewBag.PageNumber = pageNumber;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalCount = totalCount;
+            return View(await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync());
+        }
+
+        public async Task<IActionResult> Phien(
+            string maSuKien,
+            string? search,
+            string? trangThai,
+            string sortBy = "ThoiGianBatDau",
+            bool sortDescending = false,
+            int pageNumber = 1,
+            int pageSize = 10)
+        {
+            var suKien = await _context.SuKiens
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.MaSuKien == maSuKien);
+
+            if (suKien == null)
+            {
+                return NotFound();
+            }
+
+            pageNumber = Math.Max(1, pageNumber);
+            pageSize = Math.Clamp(pageSize, 5, 50);
+
+            var query = _context.PhienSuKiens
+                .Where(p => p.MaSuKien == maSuKien)
+                .AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim();
+                query = query.Where(p =>
+                    p.TenPhien.Contains(search)
+                    || p.DienGia.Contains(search)
+                    || p.NoiDung.Contains(search));
+            }
+
+            if (!string.IsNullOrWhiteSpace(trangThai))
+            {
+                query = query.Where(p => p.TrangThai == trangThai);
+            }
+
+            query = ApplyPhienSort(query, sortBy, sortDescending);
+            var totalCount = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+            pageNumber = Math.Clamp(pageNumber, 1, Math.Max(1, totalPages));
+
+            ViewBag.SuKien = suKien;
+            ViewBag.Search = search;
+            ViewBag.TrangThai = trangThai;
+            ViewBag.SortBy = sortBy;
+            ViewBag.SortDescending = sortDescending;
+            ViewBag.PageNumber = pageNumber;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalCount = totalCount;
+            return View("Phien", await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync());
         }
 
         public async Task<IActionResult> Details(string id)
@@ -166,6 +242,41 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         {
             return await _context.LoaiSuKiens.AnyAsync(l => l.MaLoaiSuKien == maLoaiSuKien && l.TrangThai)
                 && await _context.DiaDiems.AnyAsync(d => d.MaDiaDiem == maDiaDiem && d.TrangThai);
+        }
+
+        private static IQueryable<SuKien> ApplySort(IQueryable<SuKien> query, string sortBy, bool sortDescending)
+        {
+            return sortBy switch
+            {
+                "TenSuKien" => sortDescending
+                    ? query.OrderByDescending(s => s.TenSuKien)
+                    : query.OrderBy(s => s.TenSuKien),
+                "ThoiGianKetThuc" => sortDescending
+                    ? query.OrderByDescending(s => s.ThoiGianKetThuc)
+                    : query.OrderBy(s => s.ThoiGianKetThuc),
+                _ => sortDescending
+                    ? query.OrderByDescending(s => s.ThoiGianBatDau)
+                    : query.OrderBy(s => s.ThoiGianBatDau)
+            };
+        }
+
+        private static IQueryable<PhienSuKien> ApplyPhienSort(
+            IQueryable<PhienSuKien> query,
+            string sortBy,
+            bool sortDescending)
+        {
+            return sortBy switch
+            {
+                "TenPhien" => sortDescending
+                    ? query.OrderByDescending(p => p.TenPhien)
+                    : query.OrderBy(p => p.TenPhien),
+                "ThoiGianKetThuc" => sortDescending
+                    ? query.OrderByDescending(p => p.ThoiGianKetThuc)
+                    : query.OrderBy(p => p.ThoiGianKetThuc),
+                _ => sortDescending
+                    ? query.OrderByDescending(p => p.ThoiGianBatDau)
+                    : query.OrderBy(p => p.ThoiGianBatDau)
+            };
         }
 
         private void ValidateTimeRange(SuKien suKien)

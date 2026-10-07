@@ -19,5 +19,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Models
         public string TenLoaiSuKien { get; set; } = string.Empty;
         public string MoTa { get; set; } = string.Empty;
         public bool TrangThai { get; set; } = true;
+
+        public SuKien? SuKien { get; set; }
     }
 }

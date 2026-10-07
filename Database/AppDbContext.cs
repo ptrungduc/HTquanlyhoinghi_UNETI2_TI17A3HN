@@ -24,8 +24,9 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Database
 
             modelBuilder.Entity<SuKien>()
                 .HasOne(s => s.LoaiSuKien)
-                .WithMany()
-                .HasForeignKey(s => s.MaLoaiSuKien)
+                .WithOne(l => l.SuKien)
+                .HasForeignKey<SuKien>(s => s.MaLoaiSuKien)
+                .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<SuKien>()

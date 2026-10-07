@@ -1,8 +1,9 @@
-@model IEnumerable<HTquanlyhoinghi_UNETI2_TI17A3HN.Models.SuKien>
+@model IEnumerable<HTquanlyhoinghi_UNETI2_TI17A3HN.Models.PhienSuKien>
 @{
-    ViewData["Title"] = "Quản lý sự kiện";
+    ViewData["Title"] = "Phiên sự kiện";
+    var suKien = (HTquanlyhoinghi_UNETI2_TI17A3HN.Models.SuKien)ViewBag.SuKien;
     var sortBy = ViewBag.SortBy as string ?? "ThoiGianBatDau";
-    var sortDescending = ViewBag.SortDescending as bool? ?? true;
+    var sortDescending = ViewBag.SortDescending as bool? ?? false;
     var pageNumber = (int)(ViewBag.PageNumber ?? 1);
     var pageSize = (int)(ViewBag.PageSize ?? 10);
     var totalPages = (int)(ViewBag.TotalPages ?? 1);
@@ -10,18 +11,14 @@
 }
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-            <h1>Quản lý sự kiện</h1>
-            <p class="mb-0 text-muted">Tìm, lọc và sắp xếp các sự kiện.</p>
-        </div>
-        <a asp-action="Create" class="btn btn-success">+ Thêm sự kiện</a>
-    </div>
+    <h1>Phiên sự kiện - @suKien.TenSuKien</h1>
+    <p class="text-muted">Tìm, lọc và sắp xếp các phiên của sự kiện này.</p>
 
     <form method="get" class="row g-3 mb-3">
+        <input type="hidden" name="maSuKien" value="@suKien.MaSuKien" />
         <div class="col-md-5">
             <input name="search" value="@ViewBag.Search" class="form-control"
-                   placeholder="Tìm tên, mô tả, loại sự kiện hoặc địa điểm" />
+                   placeholder="Tìm tên phiên, diễn giả hoặc nội dung" />
         </div>
         <div class="col-md-3">
             <select name="trangThai" class="form-select">
@@ -29,13 +26,12 @@
                 <option value="SapDienRa" selected="@(ViewBag.TrangThai == "SapDienRa")">Sắp diễn ra</option>
                 <option value="DangDienRa" selected="@(ViewBag.TrangThai == "DangDienRa")">Đang diễn ra</option>
                 <option value="DaKetThuc" selected="@(ViewBag.TrangThai == "DaKetThuc")">Đã kết thúc</option>
-                <option value="DaHuy" selected="@(ViewBag.TrangThai == "DaHuy")">Đã hủy</option>
             </select>
         </div>
         <div class="col-md-2">
             <select name="sortBy" class="form-select">
                 <option value="ThoiGianBatDau" selected="@(sortBy == "ThoiGianBatDau")">Bắt đầu</option>
-                <option value="TenSuKien" selected="@(sortBy == "TenSuKien")">Tên sự kiện</option>
+                <option value="TenPhien" selected="@(sortBy == "TenPhien")">Tên phiên</option>
                 <option value="ThoiGianKetThuc" selected="@(sortBy == "ThoiGianKetThuc")">Kết thúc</option>
             </select>
         </div>
@@ -53,12 +49,11 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th>Tên sự kiện</th>
-                        <th>Loại sự kiện</th>
-                        <th>Địa điểm</th>
+                        <th>Tên phiên</th>
                         <th>Thời gian</th>
+                        <th>Diễn giả</th>
+                        <th>Nơi dung</th>
                         <th>Trạng thái</th>
-                        <th class="text-center">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -67,29 +62,19 @@
                         foreach (var item in Model)
                         {
                             <tr>
-                                <td><strong>@item.TenSuKien</strong></td>
-                                <td>@item.LoaiSuKien?.TenLoaiSuKien</td>
-                                <td>@item.DiaDiem?.TenDiaDiem</td>
+                                <td><strong>@item.TenPhien</strong></td>
                                 <td>@item.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm") -
                                     @item.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@item.DienGia</td>
+                                    <td>@item.NoiDung</td>
                                     <td>@item.TrangThai</td>
-                                    <td class="text-center text-nowrap">
-                                        <a asp-action="Phien" asp-route-maSuKien="@item.MaSuKien"
-                                           class="btn btn-sm btn-outline-info">Phiên</a>
-                                        <a asp-action="Details" asp-route-id="@item.MaSuKien"
-                                           class="btn btn-sm btn-outline-primary">Chi tiết</a>
-                                        <a asp-action="Edit" asp-route-id="@item.MaSuKien"
-                                           class="btn btn-sm btn-outline-secondary">Sửa</a>
-                                        <a asp-action="Delete" asp-route-id="@item.MaSuKien"
-                                           class="btn btn-sm btn-outline-danger">Xóa</a>
-                                    </td>
                                 </tr>
                             }
                         }
                     else
                         {
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-4">Không có sự kiện nào khớp.</td>
+                                <td colspan="5" class="text-center text-muted py-4">Không có phiên nào khớp.</td>
                             </tr>
                         }
                     </tbody>
@@ -115,4 +100,6 @@
                 </ul>
             </nav>
         }
+
+        <a asp-action="Index" asp-controller="SuKien" class="btn btn-secondary mt-3">Quay lại sự kiện</a>
     </div>
