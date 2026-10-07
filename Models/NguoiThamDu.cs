@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace QuanLyHoiNghi.Models
+namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Models
 {
     public class NguoiThamDu
     {

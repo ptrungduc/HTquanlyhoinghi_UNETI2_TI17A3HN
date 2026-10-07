@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace QuanLyHoiNghi.Models
+namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Models
 {
     public enum TrangThaiDangKy
     {
@@ -20,7 +20,7 @@ namespace QuanLyHoiNghi.Models
         public int MaNguoiThamDu { get; set; }
         public virtual NguoiThamDu NguoiThamDu { get; set; }
 
-        public int MaSuKien { get; set; }
+      public string MaSuKien { get; set; }
         public virtual SuKien SuKien { get; set; }
 
         public DateTime NgayDangKy { get; set; } = DateTime.Now;

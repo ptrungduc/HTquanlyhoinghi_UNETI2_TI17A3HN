@@ -7,25 +7,52 @@
 <h2>Tìm kiếm đăng ký</h2>
 
 <form method="get" class="row g-2 mb-3">
-    <div class="col-auto">
-        <input type="text" name="tenNguoiThamDu" class="form-control" placeholder="Tên người tham dự" />
+    <div class="col-md-3">
+        <input type="text"
+               name="tenNguoiThamDu"
+               class="form-control"
+               value="@Context.Request.Query["tenNguoiThamDu"]"
+               placeholder="Tên người tham dự" />
     </div>
-    <div class="col-auto">
-        <input type="number" name="maSuKien" class="form-control" placeholder="Mã sự kiện" />
+    <div class="col-md-2">
+        <input type="text"
+               name="maSuKien"
+               class="form-control"
+               value="@Context.Request.Query["maSuKien"]"
+               placeholder="Mã sự kiện" />
     </div>
-    <div class="col-auto">
+    <div class="col-md-3">
         <select name="trangThai" class="form-select">
             <option value="">-- Tất cả trạng thái --</option>
-            <option value="ChoDuyet">Chờ duyệt</option>
-            <option value="DaDuyet">Đã duyệt</option>
-            <option value="DaCheckIn">Đã check-in</option>
-            <option value="HoanThanh">Hoàn thành</option>
-            <option value="TuChoi">Từ chối</option>
-            <option value="DaHuy">Đã hủy</option>
+            <option value="ChoDuyet" selected="@(Context.Request.Query["trangThai"] == "ChoDuyet")">Chờ duyệt</option>
+            <option value="DaDuyet" selected="@(Context.Request.Query["trangThai"] == "DaDuyet")">Đã duyệt</option>
+            <option value="DaCheckIn" selected="@(Context.Request.Query["trangThai"] == "DaCheckIn")">Đã check-in</option>
+            <option value="HoanThanh" selected="@(Context.Request.Query["trangThai"] == "HoanThanh")">Hoàn thành</option>
+            <option value="TuChoi" selected="@(Context.Request.Query["trangThai"] == "TuChoi")">Từ chối</option>
+            <option value="DaHuy" selected="@(Context.Request.Query["trangThai"] == "DaHuy")">Đã hủy</option>
         </select>
     </div>
-    <div class="col-auto">
+    <div class="col-md-2">
+        <select name="maLoaiSuKien" class="form-select">
+            <option value="">-- Tất cả loại --</option>
+            @foreach (var loai in ViewBag.LoaiSuKien)
+            {
+                <option value="@loai.MaLoaiSuKien"
+                        selected="@(Context.Request.Query["maLoaiSuKien"] == loai.MaLoaiSuKien)">
+                    @loai.TenLoaiSuKien
+                </option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select name="sapXep" class="form-select">
+            <option value="ngaydangky" selected="@(Context.Request.Query["sapXep"] == "ngaydangky")">Ngày đăng ký</option>
+            <option value="ngaytochuc" selected="@(Context.Request.Query["sapXep"] == "ngaytochuc")">Ngày tổ chức</option>
+        </select>
+    </div>
+    <div class="col-12">
         <button type="submit" class="btn btn-primary">Tìm</button>
+        <a asp-action="TimKiem" class="btn btn-secondary">Đặt lại</a>
     </div>
 </form>
 
@@ -35,6 +62,7 @@
             <th>Người tham dự</th>
             <th>Sự kiện</th>
             <th>Ngày đăng ký</th>
+            <th>Ngày tổ chức</th>
             <th>Trạng thái</th>
         </tr>
     </thead>
@@ -45,8 +73,16 @@
                 <td>@item.HoTen</td>
                 <td>@item.TenSuKien</td>
                 <td>@item.NgayDangKy.ToString("dd/MM/yyyy")</td>
+                <td>@item.ThoiGianBatDau.ToString("dd/MM/yyyy")</td>
                 <td>@item.TrangThai</td>
             </tr>
         }
     </tbody>
 </table>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        Không tìm thấy đăng ký phù hợp.
+    </div>
+}

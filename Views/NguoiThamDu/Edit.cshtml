@@ -1,4 +1,4 @@
-@model QuanLyHoiNghi.Models.NguoiThamDu
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.NguoiThamDu
 
 @{
     ViewData["Title"] = "Sửa thông tin người tham dự";
@@ -7,6 +7,8 @@
 <h2>Sửa thông tin người tham dự</h2>
 
 <form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+
     <input type="hidden" asp-for="MaNguoiThamDu" />
     <input type="hidden" asp-for="MaTaiKhoan" />
     <input type="hidden" asp-for="TrangThai" />

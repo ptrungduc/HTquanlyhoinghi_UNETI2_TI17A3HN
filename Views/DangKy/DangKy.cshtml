@@ -1,9 +1,9 @@
 @{
-    ViewData["Title"] = "Đăng ký phiên sự kiện";
-    string maPhien = ViewBag.MaPhien?.ToString() ?? "";
+    ViewData["Title"] = "Đăng ký sự kiện";
+    string maSuKien = ViewBag.MaSuKien?.ToString() ?? "";
 }
 
-<h2>Đăng ký phiên sự kiện</h2>
+<h2>Đăng ký sự kiện</h2>
 
 @if (TempData["Loi"] != null)
 {
@@ -23,26 +23,32 @@
     @Html.AntiForgeryToken()
 
     <input type="hidden"
-           name="maPhien"
-           value="@maPhien" />
+           name="maSuKien"
+           value="@maSuKien" />
 
     <div class="mb-3">
-        <label class="form-label">
+        <label class="form-label" for="maNguoiThamDu">
             Mã người tham dự
         </label>
 
         <input type="number"
+               id="maNguoiThamDu"
                name="maNguoiThamDu"
                class="form-control"
+               min="1"
                required />
 
         <small class="text-muted">
-            Tạm thời nhập mã người tham dự bằng tay.
+            Nhập mã người tham dự đã được tạo trong hệ thống.
         </small>
     </div>
 
-    <button type="submit"
-            class="btn btn-primary">
-        Đăng ký phiên này
+    <button type="submit" class="btn btn-primary">
+        Đăng ký sự kiện
     </button>
+
+    <a asp-controller="SuKien" asp-action="Index"
+       class="btn btn-secondary">
+        Quay lại
+    </a>
 </form>

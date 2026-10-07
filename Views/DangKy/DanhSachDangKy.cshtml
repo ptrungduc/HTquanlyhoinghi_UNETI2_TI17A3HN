@@ -8,41 +8,135 @@
 
 @if (TempData["ThongBao"] != null)
 {
-    <div class="alert alert-success">@TempData["ThongBao"]</div>
+    <div class="alert alert-success">
+        @TempData["ThongBao"]
+    </div>
 }
+
 @if (TempData["Loi"] != null)
 {
-    <div class="alert alert-danger">@TempData["Loi"]</div>
+    <div class="alert alert-danger">
+        @TempData["Loi"]
+    </div>
 }
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <select name="trangThai" class="form-select">
+            <option value="">-- Tất cả trạng thái --</option>
+            <option value="ChoDuyet" selected="@(Context.Request.Query["trangThai"] == "ChoDuyet")">Chờ duyệt</option>
+            <option value="DaDuyet" selected="@(Context.Request.Query["trangThai"] == "DaDuyet")">Đã duyệt</option>
+            <option value="DaCheckIn" selected="@(Context.Request.Query["trangThai"] == "DaCheckIn")">Đã check-in</option>
+            <option value="HoanThanh" selected="@(Context.Request.Query["trangThai"] == "HoanThanh")">Hoàn thành</option>
+            <option value="TuChoi" selected="@(Context.Request.Query["trangThai"] == "TuChoi")">Từ chối</option>
+            <option value="DaHuy" selected="@(Context.Request.Query["trangThai"] == "DaHuy")">Đã hủy</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select name="maLoaiSuKien" class="form-select">
+            <option value="">-- Tất cả loại sự kiện --</option>
+            @foreach (var loai in ViewBag.LoaiSuKien)
+            {
+                <option value="@loai.MaLoaiSuKien"
+                        selected="@(Context.Request.Query["maLoaiSuKien"] == loai.MaLoaiSuKien)">
+                    @loai.TenLoaiSuKien
+                </option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <input type="date"
+               name="tuNgayDangKy"
+               class="form-control"
+               value="@Context.Request.Query["tuNgayDangKy"]" />
+    </div>
+    <div class="col-md-2">
+        <input type="date"
+               name="denNgayDangKy"
+               class="form-control"
+               value="@Context.Request.Query["denNgayDangKy"]" />
+    </div>
+    <div class="col-md-2">
+        <select name="sapXep" class="form-select">
+            <option value="ngaydangky" selected="@(Context.Request.Query["sapXep"] == "ngaydangky")">Ngày đăng ký</option>
+            <option value="ngaytochuc" selected="@(Context.Request.Query["sapXep"] == "ngaytochuc")">Ngày tổ chức</option>
+        </select>
+    </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Lọc</button>
+        <a asp-action="DanhSachDangKy" asp-route-maNguoiThamDu="@ViewBag.MaNguoiThamDu" class="btn btn-secondary">Đặt lại</a>
+    </div>
+</form>
 
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
             <th>Sự kiện</th>
             <th>Ngày đăng ký</th>
-            <th>Hạn đăng ký</th>
+            <th>Thời gian tổ chức</th>
             <th>Trạng thái</th>
-            <th></th>
+            <th>Thao tác</th>
         </tr>
     </thead>
+
     <tbody>
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.TenSuKien</td>
-                <td>@item.NgayDangKy.ToString("dd/MM/yyyy")</td>
-                <td>@item.HanDangKy.ToString("dd/MM/yyyy")</td>
-                <td>@item.TrangThai</td>
+                <td>
+                    @item.TenSuKien
+                </td>
+
+                <td>
+                    @item.NgayDangKy.ToString("dd/MM/yyyy HH:mm")
+                </td>
+
+                <td>
+                    @item.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm")
+                    -
+                    @item.ThoiGianKetThuc.ToString("HH:mm")
+                </td>
+
+                <td>
+                    @item.TrangThai
+                </td>
+
                 <td>
                     @if (item.TrangThai.ToString() != "DaHuy"
                         && item.TrangThai.ToString() != "DaCheckIn"
                         && item.TrangThai.ToString() != "HoanThanh")
                     {
-                        <form asp-action="Huy" method="post" class="d-inline">
-                            <input type="hidden" name="maDangKy" value="@item.MaDangKy" />
-                            <input type="text" name="lyDoHuy" placeholder="Lý do hủy" class="form-control d-inline" style="width: 150px;" />
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Hủy</button>
+                        <form asp-action="Huy"
+                              method="post"
+                              class="d-inline">
+
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="maDangKy"
+                                   value="@item.MaDangKy" />
+
+                            <input type="hidden"
+       name="maNguoiThamDu"
+       value="@ViewBag.MaNguoiThamDu" />
+                            <input type="text"
+                                   name="lyDoHuy"
+                                   placeholder="Lý do hủy"
+                                   class="form-control d-inline"
+                                   style="width: 180px;"
+                                   required />
+
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-danger">
+                                Hủy
+                            </button>
                         </form>
+                    }
+                    else
+                    {
+                        <span class="text-muted">
+                            Không thể hủy
+                        </span>
                     }
                 </td>
             </tr>
