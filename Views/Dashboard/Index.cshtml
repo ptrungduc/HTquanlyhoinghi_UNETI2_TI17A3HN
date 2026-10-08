@@ -1,0 +1,171 @@
+@* Họ và tên: [TÊN CỦA TÔI] *@
+@* Mã sinh viên: [MSSV CỦA TÔI] *@
+@* Nội dung thực hiện: Module 5 - Lịch sử tham dự, Dashboard, thống kê LINQ, báo cáo. *@
+
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module5.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard Quản trị";
+    var maxCheckIn = Model.ThamDuTheoThang.Any() ? Model.ThamDuTheoThang.Max(t => t.SoLuotCheckIn) : 0;
+    if (maxCheckIn == 0) { maxCheckIn = 1; }
+}
+
+<header class="admin-header">
+    <div>
+        <h2>📊 Dashboard Quản trị</h2>
+        <p>Tổng quan hệ thống quản lý hội nghị</p>
+    </div>
+</header>
+
+<div class="container mt-4">
+
+    <!-- 1. Card tổng quan -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm text-center"><div class="card-body">
+                <h3 class="text-primary fw-bold">@Model.TongSuKien</h3><small class="text-muted">Tổng sự kiện</small>
+            </div></div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm text-center"><div class="card-body">
+                <h3 class="text-success fw-bold">@Model.TongDangKy</h3><small class="text-muted">Tổng đăng ký</small>
+            </div></div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm text-center"><div class="card-body">
+                <h3 class="text-info fw-bold">@Model.CheckInHomNay</h3><small class="text-muted">Check-in hôm nay</small>
+            </div></div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm text-center"><div class="card-body">
+                <h3 class="text-warning fw-bold">@Model.DangKyChoDuyet</h3><small class="text-muted">Chờ duyệt</small>
+            </div></div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- 2. Sự kiện theo trạng thái -->
+        <div class="col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white"><h5 class="mb-0">📅 Sự kiện theo trạng thái</h5></div>
+                <div class="card-body">
+                    <table class="table table-sm mb-0"><tbody>
+                        <tr><td><span class="badge bg-secondary">Nháp</span></td><td class="text-end fw-bold">@Model.SuKienNhap</td></tr>
+                        <tr><td><span class="badge bg-primary">Mở đăng ký</span></td><td class="text-end fw-bold">@Model.SuKienMoDangKy</td></tr>
+                        <tr><td><span class="badge bg-warning text-dark">Đóng đăng ký</span></td><td class="text-end fw-bold">@Model.SuKienDongDangKy</td></tr>
+                        <tr><td><span class="badge bg-info">Đang diễn ra</span></td><td class="text-end fw-bold">@Model.SuKienDangDienRa</td></tr>
+                        <tr><td><span class="badge bg-success">Hoàn thành</span></td><td class="text-end fw-bold">@Model.SuKienHoanThanh</td></tr>
+                        <tr><td><span class="badge bg-dark">Đã hủy</span></td><td class="text-end fw-bold">@Model.SuKienDaHuy</td></tr>
+                    </tbody></table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Đăng ký theo trạng thái -->
+        <div class="col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white"><h5 class="mb-0">📋 Đăng ký theo trạng thái</h5></div>
+                <div class="card-body">
+                    <table class="table table-sm mb-0"><tbody>
+                        <tr><td><span class="badge bg-warning text-dark">Chờ duyệt</span></td><td class="text-end fw-bold">@Model.DangKyChoDuyet</td></tr>
+                        <tr><td><span class="badge bg-primary">Đã duyệt</span></td><td class="text-end fw-bold">@Model.DangKyDaDuyet</td></tr>
+                        <tr><td><span class="badge bg-info">Đã check-in</span></td><td class="text-end fw-bold">@Model.DangKyDaCheckIn</td></tr>
+                        <tr><td><span class="badge bg-success">Hoàn thành</span></td><td class="text-end fw-bold">@Model.DangKyHoanThanh</td></tr>
+                        <tr><td><span class="badge bg-danger">Từ chối</span></td><td class="text-end fw-bold">@Model.DangKyTuChoi</td></tr>
+                        <tr><td><span class="badge bg-dark">Đã hủy</span></td><td class="text-end fw-bold">@Model.DangKyDaHuy</td></tr>
+                    </tbody></table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Tham dự theo tháng -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white"><h5 class="mb-0">📈 Số lượt check-in theo tháng (12 tháng gần nhất)</h5></div>
+        <div class="card-body">
+            @if (Model.ThamDuTheoThang.Any())
+            {
+                <div class="d-flex align-items-end justify-content-center gap-2" style="height: 180px;">
+                    @foreach (var t in Model.ThamDuTheoThang)
+                    {
+                        var chieuCao = (int)((double)t.SoLuotCheckIn / maxCheckIn * 140);
+                        <div class="text-center">
+                            <small class="d-block mb-1 fw-bold">@t.SoLuotCheckIn</small>
+                            <div style="width: 36px; height: @(chieuCao)px; background: #0d6efd; border-radius: 4px 4px 0 0;"></div>
+                            <small class="d-block mt-1 text-muted">@t.NhanThang</small>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-muted text-center py-3">Chưa có dữ liệu check-in.</p>
+            }
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- 5. Sự kiện sắp diễn ra -->
+        <div class="col-md-7 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white"><h5 class="mb-0">🔜 Sự kiện sắp diễn ra</h5></div>
+                <div class="card-body">
+                    @if (Model.SuKienSapDienRa.Any())
+                    {
+                        <table class="table table-sm table-hover align-middle">
+                            <thead class="table-light"><tr><th>Tên sự kiện</th><th>Thời gian</th><th>Địa điểm</th><th>Đăng ký</th><th></th></tr></thead>
+                            <tbody>
+                                @foreach (var sk in Model.SuKienSapDienRa)
+                                {
+                                    <tr>
+                                        <td><strong>@sk.TenSuKien</strong></td>
+                                        <td><small>@sk.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm")</small></td>
+                                        <td><small>@sk.TenDiaDiem</small></td>
+                                        <td><span class="badge bg-primary">@sk.SoDangKy</span></td>
+                                        <td><a asp-controller="LichSu" asp-action="ChiTietSuKien" asp-route-id="@sk.MaSuKien" class="btn btn-outline-primary btn-sm">Chi tiết</a></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center py-3">Không có sự kiện sắp diễn ra.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. Gần hạn đăng ký -->
+        <div class="col-md-5 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white"><h5 class="mb-0">⏰ Gần hạn đăng ký (7 ngày tới)</h5></div>
+                <div class="card-body">
+                    @if (Model.SuKienGanHan.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var sk in Model.SuKienGanHan)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div>
+                                        <strong>@sk.TenSuKien</strong><br />
+                                        <small class="text-muted">@sk.ThoiGianBatDau.ToString("dd/MM/yyyy") • @sk.SoDangKy đăng ký</small>
+                                    </div>
+                                    <span class="badge @(sk.SoNgayConLai <= 2 ? "bg-danger" : "bg-warning text-dark")">
+                                        @(sk.SoNgayConLai <= 0 ? "Hôm nay" : $"Còn {sk.SoNgayConLai} ngày")
+                                    </span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center py-3">Không có sự kiện nào gần hạn.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+

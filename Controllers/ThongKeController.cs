@@ -138,24 +138,24 @@ public class ThongKeController : Controller
             .ToList();
 
         // --- 1b. Số đăng ký theo loại sự kiện ---
-        // GroupBy()  — Nhóm theo TenLoaiSuKien
-        // Sum()     — Tính tổng đăng ký qua các sự kiện cùng loại
+        // GroupBy()  — Nhóm sự kiện theo Loại Sự Kiện
+        // Sum()     — Tính tổng đăng ký qua các sự kiện cùng loại (BẮT BUỘC)
         // Average() — Tính trung bình đăng ký/sự kiện
-        viewModel.DangKyTheoLoaiSuKien = dsDangKy
-            .Where(d => d.SuKien?.LoaiSuKien != null)
-            .GroupBy(d => d.SuKien!.LoaiSuKien!.TenLoaiSuKien)
+        viewModel.DangKyTheoLoaiSuKien = dsSuKien
+            .Where(s => s.LoaiSuKien != null)
+            .GroupBy(s => s.LoaiSuKien!.TenLoaiSuKien)
             .Select(g =>
             {
-                var danhSachSuKien = g.Select(d => d.MaSuKien).Distinct().ToList();
+                // Lấy mảng số lượng đăng ký của từng sự kiện trong nhóm này
+                var dangKyTungSuKien = g.Select(s => dsDangKy.Count(d => d.MaSuKien == s.MaSuKien)).ToList();
+                
                 return new ThongKeDangKyTheoLoai
                 {
                     TenLoaiSuKien = g.Key,
-                    SoDangKy = g.Count(),
-                    SoSuKien = danhSachSuKien.Count,
-                    // Average() — Trung bình đăng ký trên mỗi sự kiện
-                    // Xử lý mẫu số = 0: danhSachSuKien.Count luôn >= 1 (vì GroupBy)
-                    TrungBinhDangKy = Math.Round(
-                        (double)g.Count() / danhSachSuKien.Count, 1)
+                    SoDangKy = dangKyTungSuKien.Sum(), // Sử dụng Sum()
+                    SoSuKien = g.Count(),
+                    // Xử lý mẫu số = 0 cho Average
+                    TrungBinhDangKy = dangKyTungSuKien.Any() ? Math.Round(dangKyTungSuKien.Average(), 1) : 0
                 };
             })
             .OrderByDescending(x => x.SoDangKy)
