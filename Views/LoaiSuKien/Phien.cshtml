@@ -1,0 +1,55 @@
+@model IEnumerable<HTquanlyhoinghi_UNETI2_TI17A3HN.Models.PhienSuKien>
+@{
+    ViewData["Title"] = "Phiên sự kiện";
+    var suKien = (HTquanlyhoinghi_UNETI2_TI17A3HN.Models.SuKien)ViewBag.SuKien;
+    var sortBy = ViewBag.SortBy as string ?? "ThoiGianBatDau";
+    var sortDescending = ViewBag.SortDescending as bool? ?? false;
+}
+<h1>Phiên sự kiện - @suKien.TenSuKien</h1>
+<form method="get" class="row g-2 mb-3">
+    <input type="hidden" name="maSuKien" value="@suKien.MaSuKien" />
+    <div class="col-md-5">
+        <input name="search" value="@ViewBag.Search" class="form-control"
+               placeholder="Tìm tên phiên, diễn giả hoặc nội dung" />
+    </div>
+    <div class="col-md-3">
+        <select name="trangThai" class="form-select">
+            <option value="">Tất cả trạng thái</option>
+            <option value="SapDienRa" selected="@(ViewBag.TrangThai == "SapDienRa")">Sắp diễn ra</option>
+            <option value="DangDienRa" selected="@(ViewBag.TrangThai == "DangDienRa")">Đang diễn ra</option>
+            <option value="DaKetThuc" selected="@(ViewBag.TrangThai == "DaKetThuc")">Đã kết thúc</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select name="sortBy" class="form-select">
+            <option value="ThoiGianBatDau" selected="@(sortBy == "ThoiGianBatDau")">Bắt đầu</option>
+            <option value="TenPhien" selected="@(sortBy == "TenPhien")">Tên phiên</option>
+            <option value="ThoiGianKetThuc" selected="@(sortBy == "ThoiGianKetThuc")">Kết thúc</option>
+        </select>
+    </div>
+    <div class="col-md-2 d-flex gap-2">
+        <select name="sortDescending" class="form-select">
+            <option value="true" selected="@(sortDescending)">Giảm dần</option>
+            <option value="false" selected="@(!sortDescending)">Tăng dần</option>
+        </select>
+        <button class="btn btn-primary" type="submit">Lọc & sắp</button>
+    </div>
+</form>
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr><th>Tên phiên</th><th>Thời gian</th><th>Diễn giả</th><th>Nơi dung</th><th>Trạng thái</th></tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.TenPhien</td>
+                <td>@item.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm") - @item.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@item.DienGia</td>
+                <td>@item.NoiDung</td>
+                <td>@item.TrangThai</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<a asp-action="Index" class="btn btn-secondary">Quay lại sự kiện</a>
