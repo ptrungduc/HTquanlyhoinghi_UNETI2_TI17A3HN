@@ -109,7 +109,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         // 4. HIỂN THỊ FORM SỬA
         // =========================================================
         [HttpGet]
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(string id)
         {
             var nguoiThamDu =
                 await _context.NguoiThamDus
@@ -129,7 +129,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
-            int id,
+            string id,
             NguoiThamDu nguoiThamDu)
         {
             // Kiểm tra ID trên URL và ID trong Model
@@ -206,7 +206,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> KhoaMoKhoa(int id)
+        public async Task<IActionResult> KhoaMoKhoa(string id)
         {
             var nguoiThamDu =
                 await _context.NguoiThamDus
@@ -242,7 +242,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(string id)
         {
             var nguoiThamDu =
                 await _context.NguoiThamDus

@@ -1,0 +1,293 @@
+@* Họ và tên: [TÊN CỦA TÔI] *@
+@* Mã sinh viên: [MSSV CỦA TÔI] *@
+@* Nội dung thực hiện: Module 5 - Báo cáo theo thời gian (Mục 9.6). *@
+
+@using HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module5
+@model BaoCaoViewModel
+
+@{
+    ViewData["Title"] = "Báo cáo theo thời gian";
+    int namHienTai = DateTime.Now.Year;
+
+    var bieuDo = new (string TieuDe, List<BaoCaoTheoThangItem> DuLieu, string MauSac)[]
+    {
+        ("📅 Sự kiện theo tháng", Model.SuKienTheoThang, "#0d6efd"),
+        ("📋 Đăng ký theo tháng", Model.DangKyTheoThang, "#198754"),
+        ("✅ Check-in theo tháng", Model.CheckInTheoThang, "#0dcaf0")
+    };
+
+    var tatCaThang = Model.SuKienTheoThang.Select(x => (x.Nam, x.Thang))
+        .Union(Model.DangKyTheoThang.Select(x => (x.Nam, x.Thang)))
+        .Union(Model.CheckInTheoThang.Select(x => (x.Nam, x.Thang)))
+        .OrderBy(x => x.Nam).ThenBy(x => x.Thang)
+        .ToList();
+}
+
+<header class="admin-header">
+    <div>
+        <h2>📊 Báo cáo theo thời gian</h2>
+        <p>Thống kê sự kiện, đăng ký và check-in theo tháng hoặc khoảng ngày</p>
+    </div>
+</header>
+
+<div class="container mt-4">
+
+    <!-- BỘ LỌC -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">🔍 Bộ lọc thời gian</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" asp-controller="BaoCao" asp-action="Index">
+                <div class="row g-3 align-items-end">
+
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Tháng</label>
+                        <select name="thang" class="form-select">
+                            <option value="">-- Không lọc --</option>
+                            @for (int m = 1; m <= 12; m++)
+                            {
+                                <option value="@m" selected="@(Model.Thang == m)">Tháng @m</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Năm</label>
+                        <select name="nam" class="form-select">
+                            <option value="">-- Không lọc --</option>
+                            @for (int y = namHienTai; y >= namHienTai - 5; y--)
+                            {
+                                <option value="@y" selected="@(Model.Nam == y)">@y</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-1 text-center pt-4">
+                        <span class="text-muted fw-bold">HOẶC</span>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Từ ngày</label>
+                        <input type="date" name="tuNgay" class="form-control"
+                               value="@(Model.TuNgay?.ToString("yyyy-MM-dd"))" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Đến ngày</label>
+                        <input type="date" name="denNgay" class="form-control"
+                               value="@(Model.DenNgay?.ToString("yyyy-MM-dd"))" />
+                    </div>
+
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-primary w-100">Lọc</button>
+                    </div>
+                </div>
+                <small class="text-muted d-block mt-2">
+                    Chỉ chọn một kiểu lọc: Tháng/Năm hoặc Từ ngày/Đến ngày.
+                    Chọn tháng mà không chọn năm thì mặc định năm hiện tại.
+                </small>
+            </form>
+        </div>
+    </div>
+
+    <!-- LỖI VALIDATION -->
+    @if (!string.IsNullOrEmpty(Model.LoiValidation))
+    {
+        <div class="alert alert-danger">
+            ⚠️ @Model.LoiValidation
+        </div>
+    }
+
+    <!-- NỘI DUNG BÁO CÁO -->
+    @if (Model.DaLoc && string.IsNullOrEmpty(Model.LoiValidation))
+    {
+        <div class="alert alert-info">
+            📅 Kết quả cho: <strong>@Model.MoTaKhoangThoiGian</strong>
+        </div>
+
+        @if (Model.TongSuKien == 0 && Model.TongDangKy == 0 && Model.TongCheckIn == 0)
+        {
+            <div class="alert alert-warning">
+                Không có dữ liệu trong khoảng thời gian này. Các số liệu hiển thị là 0.
+            </div>
+        }
+
+        <!-- CARD TỔNG HỢP -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 shadow-sm text-center">
+                    <div class="card-body">
+                        <h3 class="text-primary fw-bold">@Model.TongSuKien</h3>
+                        <small class="text-muted">Sự kiện</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 shadow-sm text-center">
+                    <div class="card-body">
+                        <h3 class="text-success fw-bold">@Model.TongDangKy</h3>
+                        <small class="text-muted">Lượt đăng ký</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 shadow-sm text-center">
+                    <div class="card-body">
+                        <h3 class="text-info fw-bold">@Model.TongCheckIn</h3>
+                        <small class="text-muted">Lượt check-in</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BIỂU ĐỒ THEO THÁNG -->
+        <div class="row mb-4">
+            @foreach (var (tieuDe, duLieu, mau) in bieuDo)
+            {
+                int max = duLieu.Count == 0 ? 1 : Math.Max(1, duLieu.Max(x => x.SoLuong));
+
+                <div class="col-md-4 mb-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-white">
+                            <h6 class="mb-0">@tieuDe</h6>
+                        </div>
+                        <div class="card-body">
+                            @if (duLieu.Count > 0)
+                            {
+                                <div class="d-flex align-items-end justify-content-center gap-2" style="height: 170px;">
+                                    @foreach (var item in duLieu)
+                                    {
+                                        int h = (int)Math.Round((double)item.SoLuong / max * 110);
+                                        <div class="text-center">
+                                            <small class="d-block mb-1 fw-bold">@item.SoLuong</small>
+                                            <div style="width:30px;height:@(h)px;background:@mau;border-radius:4px 4px 0 0;"></div>
+                                            <small class="d-block mt-1 text-muted" style="font-size:0.65rem;">@item.NhanThang</small>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted text-center py-3">Không có dữ liệu.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- BẢNG SO SÁNH THEO THÁNG -->
+        @if (tatCaThang.Count > 0)
+        {
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">📈 Bảng so sánh theo tháng</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-hover table-bordered align-middle text-center">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tháng</th>
+                                <th>Sự kiện</th>
+                                <th>Đăng ký</th>
+                                <th>Check-in</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var (y, m) in tatCaThang)
+                            {
+                                int sk = Model.SuKienTheoThang.FirstOrDefault(x => x.Nam == y && x.Thang == m)?.SoLuong ?? 0;
+                                int dk = Model.DangKyTheoThang.FirstOrDefault(x => x.Nam == y && x.Thang == m)?.SoLuong ?? 0;
+                                int ci = Model.CheckInTheoThang.FirstOrDefault(x => x.Nam == y && x.Thang == m)?.SoLuong ?? 0;
+                                <tr>
+                                    <td class="fw-bold">@($"{m:D2}/{y}")</td>
+                                    <td><span class="badge bg-primary">@sk</span></td>
+                                    <td><span class="badge bg-success">@dk</span></td>
+                                    <td><span class="badge bg-info">@ci</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr class="fw-bold">
+                                <td>Tổng</td>
+                                <td>@Model.TongSuKien</td>
+                                <td>@Model.TongDangKy</td>
+                                <td>@Model.TongCheckIn</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        }
+
+        <!-- CHI TIẾT SỰ KIỆN -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">📃 Chi tiết sự kiện trong khoảng thời gian</h5>
+                <small class="text-muted">Số đăng ký và check-in được đếm trong cùng khoảng thời gian đã lọc.</small>
+            </div>
+            <div class="card-body">
+                @if (Model.DanhSachSuKien.Count > 0)
+                {
+                    <table class="table table-sm table-hover table-striped align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Tên sự kiện</th>
+                                <th>Thời gian bắt đầu</th>
+                                <th>Trạng thái</th>
+                                <th class="text-center">Đăng ký</th>
+                                <th class="text-center">Check-in</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ int stt = 0; }
+                            @foreach (var sk in Model.DanhSachSuKien)
+                            {
+                                stt++;
+                                var badgeClass = sk.TrangThai switch
+                                {
+                                    "HoanThanh" => "bg-success",
+                                    "DangDienRa" => "bg-info",
+                                    "MoDangKy" => "bg-primary",
+                                    "DongDangKy" => "bg-warning text-dark",
+                                    "DaHuy" => "bg-dark",
+                                    _ => "bg-secondary"
+                                };
+                                var trangThaiText = sk.TrangThai switch
+                                {
+                                    "HoanThanh" => "Hoàn thành",
+                                    "DangDienRa" => "Đang diễn ra",
+                                    "MoDangKy" => "Mở đăng ký",
+                                    "DongDangKy" => "Đóng đăng ký",
+                                    "DaHuy" => "Đã hủy",
+                                    "SapDienRa" => "Nháp",
+                                    _ => sk.TrangThai
+                                };
+                                <tr>
+                                    <td>@stt</td>
+                                    <td><strong>@sk.TenSuKien</strong></td>
+                                    <td>@sk.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td><span class="badge @badgeClass">@trangThaiText</span></td>
+                                    <td class="text-center"><span class="badge bg-success">@sk.SoDangKy</span></td>
+                                    <td class="text-center"><span class="badge bg-info">@sk.SoCheckIn</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted text-center py-3">Không có sự kiện nào trong khoảng thời gian này.</p>
+                }
+            </div>
+        </div>
+    }
+    else if (!Model.DaLoc)
+    {
+        <div class="alert alert-secondary text-center">
+            👆 Vui lòng chọn khoảng thời gian rồi bấm <strong>Lọc</strong> để xem báo cáo.
+        </div>
+    }
+</div>

@@ -1,8 +1,9 @@
 // Họ và tên: [TÊN CỦA TÔI]
 // Mã sinh viên: [MSSV CỦA TÔI]
-// Nội dung thực hiện: Module 5 - Lịch sử tham dự, Dashboard, thống kê LINQ, báo cáo.
+// Nội dung thực hiện: Module 5 - Thống kê LINQ và thống kê nổi bật (Bước 3 + Bước 4).
 
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Database;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Helper;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module5;
 using Microsoft.AspNetCore.Mvc;
@@ -14,96 +15,33 @@ public class ThongKeController : Controller
 {
     private readonly AppDbContext _context;
 
+    // Approved theo quy tắc Module 5
+    private static readonly TrangThaiDangKy[] TrangThaiDaDuyet =
+    {
+        TrangThaiDangKy.DaDuyet,
+        TrangThaiDangKy.DaCheckIn,
+        TrangThaiDangKy.HoanThanh
+    };
+
     public ThongKeController(AppDbContext context)
     {
         _context = context;
     }
 
-    // =================================================================
-    // THỐNG KÊ - Admin xem thống kê tổng hợp
-    // =================================================================
     [HttpGet]
-    public async Task<IActionResult> Index(int? thang, int? nam, DateTime? tuNgay, DateTime? denNgay)
+    public async Task<IActionResult> Index(
+        int? thang,
+        int? nam,
+        DateTime? tuNgay,
+        DateTime? denNgay)
     {
-        // -------------------------------------------------------
-        // Bước 1: Kiểm tra quyền Admin
-        // -------------------------------------------------------
-        var vaiTro = HttpContext.Session.GetString("VaiTro");
-        if (vaiTro != "Admin")
+        // 1. KIỂM TRA QUYỀN Ở SERVER
+        if (!KiemTraQuyenModule4.CoQuyenQuanTri(HttpContext.Session.GetString("VaiTro")))
         {
             return RedirectToAction("DangNhap", "TaiKhoan");
         }
 
-        // -------------------------------------------------------
-        // Bước 2: Lấy toàn bộ dữ liệu gốc (IQueryable)
-        //         IQueryable cho phép thêm điều kiện Where()
-        //         trước khi thực thi SQL → tối ưu hiệu năng.
-        // -------------------------------------------------------
-        IQueryable<DangKyThamDu> queryDangKy = _context.DangKyThamDus.AsNoTracking();
-        IQueryable<CheckIn> queryCheckIn = _context.CheckIns.AsNoTracking();
-        IQueryable<SuKien> querySuKien = _context.SuKiens.AsNoTracking();
-
-        // -------------------------------------------------------
-        // Bước 3: ÁP DỤNG BỘ LỌC (Where)
-        //         Lọc TRƯỚC GroupBy → giảm dữ liệu cần xử lý.
-        // -------------------------------------------------------
-        if (thang.HasValue && nam.HasValue)
-        {
-            // Where() — Lọc đăng ký theo tháng/năm
-            queryDangKy = queryDangKy
-                .Where(d => d.NgayDangKy.Month == thang.Value
-                         && d.NgayDangKy.Year == nam.Value);
-
-            queryCheckIn = queryCheckIn
-                .Where(c => c.ThoiGianCheckIn.Month == thang.Value
-                          && c.ThoiGianCheckIn.Year == nam.Value);
-
-            querySuKien = querySuKien
-                .Where(s => s.ThoiGianBatDau.Month == thang.Value
-                          && s.ThoiGianBatDau.Year == nam.Value);
-        }
-        else if (tuNgay.HasValue && denNgay.HasValue)
-        {
-            var denNgayCuoi = denNgay.Value.Date.AddDays(1);
-
-            // Where() — Lọc theo khoảng ngày
-            queryDangKy = queryDangKy
-                .Where(d => d.NgayDangKy >= tuNgay.Value.Date
-                         && d.NgayDangKy < denNgayCuoi);
-
-            queryCheckIn = queryCheckIn
-                .Where(c => c.ThoiGianCheckIn >= tuNgay.Value.Date
-                          && c.ThoiGianCheckIn < denNgayCuoi);
-
-            querySuKien = querySuKien
-                .Where(s => s.ThoiGianBatDau >= tuNgay.Value.Date
-                          && s.ThoiGianBatDau < denNgayCuoi);
-        }
-
-        // Materialize data (ToList) - chuyển sang C# để xử lý GroupBy phức tạp
-        var dsDangKy = await queryDangKy
-            .Include(d => d.SuKien).ThenInclude(s => s!.LoaiSuKien)
-            .Include(d => d.SuKien).ThenInclude(s => s!.DiaDiem)
-            .ToListAsync();
-
-        var dsCheckIn = await queryCheckIn
-            .Include(c => c.DangKyThamDu).ThenInclude(d => d!.SuKien)
-            .ToListAsync();
-
-        var dsSuKien = await querySuKien
-            .Include(s => s.DiaDiem)
-            .Include(s => s.LoaiSuKien)
-            .ToListAsync();
-
-        var dsDangKyPhien = await _context.DangKyPhiens
-            .AsNoTracking()
-            .Include(dp => dp.Phien).ThenInclude(p => p!.SuKien)
-            .ToListAsync();
-
-        // -------------------------------------------------------
-        // Bước 4: TÍNH TOÁN THỐNG KÊ BẰNG LINQ
-        // -------------------------------------------------------
-        var viewModel = new ThongKeViewModel
+        var vm = new ThongKeViewModel
         {
             ThangLoc = thang,
             NamLoc = nam,
@@ -111,22 +49,127 @@ public class ThongKeController : Controller
             DenNgay = denNgay
         };
 
-        // === TỔNG HỢP ===
-        // Count() — Đếm tổng số
-        viewModel.TongSuKien = dsSuKien.Count;
-        viewModel.TongDangKy = dsDangKy.Count;
-        viewModel.TongCheckIn = dsCheckIn.Count;
+        // 2. VALIDATION VÀ KHOẢNG LỌC
+        bool coThangNam = thang.HasValue || nam.HasValue;
+        bool coKhoangNgay = tuNgay.HasValue || denNgay.HasValue;
 
-        // =====================================================
+        if (coThangNam && coKhoangNgay)
+        {
+            vm.LoiValidation = "Chỉ chọn một kiểu lọc: hoặc Tháng/Năm, hoặc Từ ngày/Đến ngày.";
+            return View(vm);
+        }
+
+        DateTime? tu = null;   // bao gồm
+        DateTime? den = null;  // không bao gồm
+
+        if (coThangNam)
+        {
+            int y = nam ?? DateTime.Now.Year;
+            if (y < 1900 || y > 2100)
+            {
+                vm.LoiValidation = "Năm không hợp lệ (1900 - 2100).";
+                return View(vm);
+            }
+
+            if (thang.HasValue)
+            {
+                if (thang.Value < 1 || thang.Value > 12)
+                {
+                    vm.LoiValidation = "Tháng phải nằm trong khoảng 1 đến 12.";
+                    return View(vm);
+                }
+                tu = new DateTime(y, thang.Value, 1);
+                den = tu.Value.AddMonths(1);
+                vm.MoTaKhoangThoiGian = $"Tháng {thang.Value:D2}/{y}";
+            }
+            else
+            {
+                tu = new DateTime(y, 1, 1);
+                den = tu.Value.AddYears(1);
+                vm.MoTaKhoangThoiGian = $"Năm {y}";
+            }
+        }
+        else if (coKhoangNgay)
+        {
+            if (tuNgay.HasValue && denNgay.HasValue && tuNgay.Value.Date > denNgay.Value.Date)
+            {
+                vm.LoiValidation = "\"Từ ngày\" phải nhỏ hơn hoặc bằng \"Đến ngày\".";
+                return View(vm);
+            }
+
+            tu = tuNgay?.Date;
+            den = denNgay?.Date.AddDays(1);
+
+            vm.MoTaKhoangThoiGian = (tuNgay, denNgay) switch
+            {
+                (not null, not null) => $"Từ {tuNgay.Value:dd/MM/yyyy} đến {denNgay.Value:dd/MM/yyyy}",
+                (not null, null) => $"Từ {tuNgay.Value:dd/MM/yyyy} đến nay",
+                _ => $"Đến {denNgay!.Value:dd/MM/yyyy}"
+            };
+        }
+
+        vm.DaLoc = coThangNam || coKhoangNgay;
+
+        // 3. WHERE() - IQueryable, lọc từng điều kiện riêng (kể cả chỉ có một đầu mút)
+        IQueryable<SuKien> querySuKien = _context.SuKiens.AsNoTracking();
+        IQueryable<DangKyThamDu> queryDangKy = _context.DangKyThamDus.AsNoTracking();
+        IQueryable<CheckIn> queryCheckIn = _context.CheckIns.AsNoTracking();
+        IQueryable<DangKyPhien> queryDangKyPhien = _context.DangKyPhiens.AsNoTracking();
+
+        if (tu.HasValue)
+        {
+            querySuKien = querySuKien.Where(s => s.ThoiGianBatDau >= tu.Value);
+            queryDangKy = queryDangKy.Where(d => d.NgayDangKy >= tu.Value);
+            queryCheckIn = queryCheckIn.Where(c => c.ThoiGianCheckIn >= tu.Value);
+            queryDangKyPhien = queryDangKyPhien.Where(dp =>
+                dp.Phien != null && dp.Phien.ThoiGianBatDau >= tu.Value);
+        }
+
+        if (den.HasValue)
+        {
+            querySuKien = querySuKien.Where(s => s.ThoiGianBatDau < den.Value);
+            queryDangKy = queryDangKy.Where(d => d.NgayDangKy < den.Value);
+            queryCheckIn = queryCheckIn.Where(c => c.ThoiGianCheckIn < den.Value);
+            queryDangKyPhien = queryDangKyPhien.Where(dp =>
+                dp.Phien != null && dp.Phien.ThoiGianBatDau < den.Value);
+        }
+
+        // 4. MATERIALIZE - Include lấy navigation property cần cho GroupBy
+        var dsDangKy = await queryDangKy
+            .Include(d => d.SuKien).ThenInclude(s => s!.LoaiSuKien)
+            .Include(d => d.SuKien).ThenInclude(s => s!.DiaDiem)
+            .Include(d => d.NguoiThamDu)
+            .Include(d => d.CheckIn)
+            .ToListAsync();
+
+        var dsSuKien = await querySuKien
+            .Include(s => s.DiaDiem)
+            .ToListAsync();
+
+        var dsDangKyPhien = await queryDangKyPhien
+            .Include(dp => dp.Phien).ThenInclude(p => p!.SuKien)
+            .ToListAsync();
+
+        // Tập con trong bộ nhớ dùng cho nhiều thống kê
+        var dangKyDaDuyet = dsDangKy
+            .Where(d => TrangThaiDaDuyet.Contains(d.TrangThai))
+            .ToList();
+
+        var dangKyDaCheckIn = dangKyDaDuyet
+            .Where(d => d.CheckIn != null)
+            .ToList();
+
+        // 5. COUNT() - tổng hợp
+        vm.TongSuKien = dsSuKien.Count;
+        vm.TongDangKy = dsDangKy.Count;
+        vm.TongCheckIn = await queryCheckIn.CountAsync();
+
+        // =============================================================
         // 1. THỐNG KÊ ĐĂNG KÝ
-        // =====================================================
+        // =============================================================
 
-        // --- 1a. Số đăng ký theo sự kiện ---
-        // GroupBy()  — Nhóm đăng ký theo MaSuKien
-        // Select()  — Chuyển mỗi nhóm thành ViewModel
-        // Count()   — Đếm số phần tử trong nhóm
-        // OrderByDescending() — Sự kiện nhiều đăng ký nhất lên đầu
-        viewModel.DangKyTheoSuKien = dsDangKy
+        // 1a. Đăng ký theo sự kiện: GroupBy(MaSuKien) -> Count -> OrderByDescending
+        vm.DangKyTheoSuKien = dsDangKy
             .GroupBy(d => d.MaSuKien)
             .Select(g => new ThongKeDangKyTheoSuKien
             {
@@ -135,133 +178,117 @@ public class ThongKeController : Controller
                 SoDangKy = g.Count()
             })
             .OrderByDescending(x => x.SoDangKy)
+            .ThenBy(x => x.TenSuKien)
             .ToList();
 
-        // --- 1b. Số đăng ký theo loại sự kiện ---
-        // GroupBy()  — Nhóm theo TenLoaiSuKien
-        // Sum()     — Tính tổng đăng ký qua các sự kiện cùng loại
-        // Average() — Tính trung bình đăng ký/sự kiện
-        viewModel.DangKyTheoLoaiSuKien = dsDangKy
+        // 1b. Đăng ký theo loại: GroupBy(MaLoaiSuKien) -> Sum, Average
+        vm.DangKyTheoLoaiSuKien = dsDangKy
             .Where(d => d.SuKien?.LoaiSuKien != null)
-            .GroupBy(d => d.SuKien!.LoaiSuKien!.TenLoaiSuKien)
+            .GroupBy(d => d.SuKien!.LoaiSuKien!.MaLoaiSuKien)
             .Select(g =>
             {
-                var danhSachSuKien = g.Select(d => d.MaSuKien).Distinct().ToList();
+                var soDkMoiSuKien = g
+                    .GroupBy(d => d.MaSuKien)
+                    .Select(x => x.Count())
+                    .ToList();
+
                 return new ThongKeDangKyTheoLoai
                 {
-                    TenLoaiSuKien = g.Key,
-                    SoDangKy = g.Count(),
-                    SoSuKien = danhSachSuKien.Count,
-                    // Average() — Trung bình đăng ký trên mỗi sự kiện
-                    // Xử lý mẫu số = 0: danhSachSuKien.Count luôn >= 1 (vì GroupBy)
-                    TrungBinhDangKy = Math.Round(
-                        (double)g.Count() / danhSachSuKien.Count, 1)
+                    MaLoaiSuKien = g.Key,
+                    TenLoaiSuKien = g.First().SuKien!.LoaiSuKien!.TenLoaiSuKien,
+                    SoSuKien = soDkMoiSuKien.Count,
+                    SoDangKy = soDkMoiSuKien.Sum(),
+                    TrungBinhDangKy = soDkMoiSuKien.Count == 0
+                        ? 0
+                        : Math.Round(soDkMoiSuKien.Average(), 1)
                 };
             })
             .OrderByDescending(x => x.SoDangKy)
+            .ThenBy(x => x.TenLoaiSuKien)
             .ToList();
 
-        // --- 1c. Số đăng ký theo địa điểm ---
-        // GroupBy() — Nhóm theo tên địa điểm
-        viewModel.DangKyTheoDiaDiem = dsDangKy
+        // 1c. Đăng ký theo địa điểm: GroupBy(MaDiaDiem) -> Count
+        vm.DangKyTheoDiaDiem = dsDangKy
             .Where(d => d.SuKien?.DiaDiem != null)
-            .GroupBy(d => d.SuKien!.DiaDiem!.TenDiaDiem)
+            .GroupBy(d => d.SuKien!.DiaDiem!.MaDiaDiem)
             .Select(g => new ThongKeDangKyTheoDiaDiem
             {
-                TenDiaDiem = g.Key,
-                SoDangKy = g.Count(),
-                SoSuKien = g.Select(d => d.MaSuKien).Distinct().Count()
-            })
-            .OrderByDescending(x => x.SoDangKy)
-            .ToList();
-
-        // =====================================================
-        // 2. THỐNG KÊ DUYỆT
-        // =====================================================
-
-        // GroupBy() — Nhóm đăng ký theo sự kiện
-        // Count() với predicate — Đếm theo điều kiện (trạng thái đã duyệt)
-        var trangThaiDuyet = new[]
-        {
-            TrangThaiDangKy.DaDuyet,
-            TrangThaiDangKy.DaCheckIn,
-            TrangThaiDangKy.HoanThanh
-        };
-
-        viewModel.DuyetTheoSuKien = dsDangKy
-            .GroupBy(d => d.SuKien?.TenSuKien ?? "")
-            .Select(g =>
-            {
-                int tongDK = g.Count();
-                int soDuyet = g.Count(d => trangThaiDuyet.Contains(d.TrangThai));
-                return new ThongKeDuyetTheoSuKien
-                {
-                    TenSuKien = g.Key,
-                    TongDangKy = tongDK,
-                    SoDaDuyet = soDuyet,
-                    // Xử lý mẫu số = 0: nếu tongDK = 0 → tỷ lệ = 0
-                    TyLeDuyet = tongDK > 0
-                        ? Math.Round((double)soDuyet / tongDK * 100, 1)
-                        : 0
-                };
-            })
-            .OrderByDescending(x => x.SoDaDuyet)
-            .ToList();
-
-        // =====================================================
-        // 3. THỐNG KÊ CHECK-IN
-        // =====================================================
-
-        // --- 3a. Check-in thực tế theo sự kiện ---
-        // GroupBy() — Nhóm check-in theo sự kiện
-        viewModel.CheckInTheoSuKien = dsCheckIn
-            .Where(c => c.DangKyThamDu?.SuKien != null)
-            .GroupBy(c => c.DangKyThamDu!.SuKien!.TenSuKien)
-            .Select(g =>
-            {
-                int soCI = g.Count();
-                // Đếm số người được duyệt của sự kiện này
-                string maSK = g.First().DangKyThamDu!.MaSuKien;
-                int soDuyet = dsDangKy
-                    .Count(d => d.MaSuKien == maSK
-                             && trangThaiDuyet.Contains(d.TrangThai));
-                return new ThongKeCheckInTheoSuKien
-                {
-                    TenSuKien = g.Key,
-                    SoDaDuyet = soDuyet,
-                    SoCheckIn = soCI,
-                    // Attendance Rate = CheckIn / Approved * 100
-                    // Xử lý mẫu số = 0
-                    TyLeCheckIn = soDuyet > 0
-                        ? Math.Round((double)soCI / soDuyet * 100, 1)
-                        : 0
-                };
-            })
-            .OrderByDescending(x => x.SoCheckIn)
-            .ToList();
-
-        // --- 3b. Số người tham gia theo phiên ---
-        // GroupBy() — Nhóm đăng ký phiên theo phiên
-        viewModel.ThamGiaTheoPhien = dsDangKyPhien
-            .Where(dp => dp.Phien != null)
-            .GroupBy(dp => dp.Phien!.TenPhien)
-            .Select(g => new ThongKeThamGiaPhien
-            {
-                TenPhien = g.Key,
-                TenSuKien = g.First().Phien?.SuKien?.TenSuKien ?? "",
+                MaDiaDiem = g.Key,
+                TenDiaDiem = g.First().SuKien!.DiaDiem!.TenDiaDiem,
+                SoSuKien = g.Select(d => d.MaSuKien).Distinct().Count(),
                 SoDangKy = g.Count()
             })
             .OrderByDescending(x => x.SoDangKy)
+            .ThenBy(x => x.TenDiaDiem)
             .ToList();
 
-        // =====================================================
-        // 4. THỐNG KÊ THEO THỜI GIAN
-        // =====================================================
+        // =============================================================
+        // 2. THỐNG KÊ DUYỆT - số người được duyệt theo sự kiện
+        // =============================================================
+        vm.DuyetTheoSuKien = dsDangKy
+            .GroupBy(d => d.MaSuKien)
+            .Select(g =>
+            {
+                int tongDK = g.Count();
+                int soDuyet = g.Count(d => TrangThaiDaDuyet.Contains(d.TrangThai));
 
-        // --- 4a. Số sự kiện theo tháng ---
-        // GroupBy() — Nhóm theo (Year, Month)
-        // OrderBy() — Sắp xếp tăng dần theo thời gian
-        viewModel.SuKienTheoThang = dsSuKien
+                return new ThongKeDuyetTheoSuKien
+                {
+                    MaSuKien = g.Key,
+                    TenSuKien = g.First().SuKien?.TenSuKien ?? "",
+                    TongDangKy = tongDK,
+                    SoDaDuyet = soDuyet,
+                    TyLeDuyet = TinhTyLe(soDuyet, tongDK)
+                };
+            })
+            .OrderByDescending(x => x.SoDaDuyet)
+            .ThenBy(x => x.TenSuKien)
+            .ToList();
+
+        // =============================================================
+        // 3. THỐNG KÊ CHECK-IN
+        // =============================================================
+        var soCheckInTheoSuKien = dangKyDaCheckIn
+            .GroupBy(d => d.MaSuKien)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        // 3a. Số người check-in thực tế theo sự kiện
+        vm.CheckInTheoSuKien = vm.DuyetTheoSuKien
+            .Select(x =>
+            {
+                int soCI = soCheckInTheoSuKien.GetValueOrDefault(x.MaSuKien, 0);
+                return new ThongKeCheckInTheoSuKien
+                {
+                    MaSuKien = x.MaSuKien,
+                    TenSuKien = x.TenSuKien,
+                    SoDaDuyet = x.SoDaDuyet,
+                    SoCheckIn = soCI,
+                    TyLeCheckIn = TinhTyLe(soCI, x.SoDaDuyet)
+                };
+            })
+            .OrderByDescending(x => x.SoCheckIn)
+            .ThenBy(x => x.TenSuKien)
+            .ToList();
+
+        // 3b. Số người tham gia từng phiên: GroupBy(MaPhien) -> Count
+        vm.ThamGiaTheoPhien = dsDangKyPhien
+            .Where(dp => dp.Phien != null)
+            .GroupBy(dp => dp.MaPhien)
+            .Select(g => new ThongKeThamGiaPhien
+            {
+                MaPhienSuKien = g.Key,
+                TenPhien = g.First().Phien!.TenPhien,
+                TenSuKien = g.First().Phien!.SuKien?.TenSuKien ?? "",
+                SoNguoiThamGia = g.Count()
+            })
+            .OrderByDescending(x => x.SoNguoiThamGia)
+            .ThenBy(x => x.TenPhien)
+            .ToList();
+
+        // =============================================================
+        // 4. THỐNG KÊ THEO THỜI GIAN
+        // =============================================================
+        vm.SuKienTheoThang = dsSuKien
             .GroupBy(s => new { s.ThoiGianBatDau.Year, s.ThoiGianBatDau.Month })
             .Select(g => new ThongKeTheoThang
             {
@@ -273,8 +300,7 @@ public class ThongKeController : Controller
             .ThenBy(t => t.Thang)
             .ToList();
 
-        // --- 4b. Số đăng ký theo tháng ---
-        viewModel.DangKyTheoThang = dsDangKy
+        vm.DangKyTheoThang = dsDangKy
             .GroupBy(d => new { d.NgayDangKy.Year, d.NgayDangKy.Month })
             .Select(g => new ThongKeTheoThang
             {
@@ -286,8 +312,8 @@ public class ThongKeController : Controller
             .ThenBy(t => t.Thang)
             .ToList();
 
-        // --- 4c. Số check-in theo tháng ---
-        viewModel.CheckInTheoThang = dsCheckIn
+        // Check-in theo tháng: GROUP BY trên SQL Server
+        vm.CheckInTheoThang = await queryCheckIn
             .GroupBy(c => new { c.ThoiGianCheckIn.Year, c.ThoiGianCheckIn.Month })
             .Select(g => new ThongKeTheoThang
             {
@@ -297,185 +323,172 @@ public class ThongKeController : Controller
             })
             .OrderBy(t => t.Nam)
             .ThenBy(t => t.Thang)
-            .ToList();
+            .ToListAsync();
 
-        // =====================================================
-        // 6. TỶ LỆ
-        // =====================================================
+        // =============================================================
+        // 5. TỶ LỆ - mọi phép chia đều qua TinhTyLe
+        // =============================================================
+        var tongDkTheoSuKien = vm.DangKyTheoSuKien
+            .ToDictionary(x => x.MaSuKien, x => x.SoDangKy);
 
-        // Tính tỷ lệ cho từng sự kiện:
-        // - Attendance Rate = CheckIn / Approved * 100
-        // - Cancellation Rate = Canceled / Total * 100
-        // - Fill Rate = Approved / MaxCapacity * 100
-        viewModel.TyLeTheoSuKien = dsSuKien
+        var soDuyetTheoSuKien = vm.DuyetTheoSuKien
+            .ToDictionary(x => x.MaSuKien, x => x.SoDaDuyet);
+
+        var soHuyTheoSuKien = dsDangKy
+            .Where(d => d.TrangThai == TrangThaiDangKy.DaHuy)
+            .GroupBy(d => d.MaSuKien)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        // Sức chứa lấy từ sự kiện trong phạm vi lọc (kể cả sự kiện chưa có đăng ký)
+        var sucChuaTheoSuKien = dsSuKien
+            .ToDictionary(s => s.MaSuKien, s => s.DiaDiem?.SucChuaToiDa ?? 0);
+
+        vm.TyLeTheoSuKien = dsSuKien
             .Select(s =>
             {
-                var dkSuKien = dsDangKy.Where(d => d.MaSuKien == s.MaSuKien).ToList();
-                int tongDK = dkSuKien.Count;
-                int soDuyet = dkSuKien.Count(d => trangThaiDuyet.Contains(d.TrangThai));
-                int soCI = dsCheckIn.Count(c => c.DangKyThamDu?.MaSuKien == s.MaSuKien);
-                int soHuy = dkSuKien.Count(d => d.TrangThai == TrangThaiDangKy.DaHuy);
-                int sucChua = s.DiaDiem?.SucChuaToiDa ?? 0;
+                int tongDK = tongDkTheoSuKien.GetValueOrDefault(s.MaSuKien, 0);
+                int soDuyet = soDuyetTheoSuKien.GetValueOrDefault(s.MaSuKien, 0);
+                int soCI = soCheckInTheoSuKien.GetValueOrDefault(s.MaSuKien, 0);
+                int soHuy = soHuyTheoSuKien.GetValueOrDefault(s.MaSuKien, 0);
+                int sucChua = sucChuaTheoSuKien.GetValueOrDefault(s.MaSuKien, 0);
 
                 return new ThongKeTyLeSuKien
                 {
+                    MaSuKien = s.MaSuKien,
                     TenSuKien = s.TenSuKien,
                     TongDangKy = tongDK,
                     SoDaDuyet = soDuyet,
                     SoCheckIn = soCI,
                     SoDaHuy = soHuy,
                     SucChua = sucChua,
-
-                    // BẮT BUỘC xử lý mẫu số = 0
-                    // Nếu mẫu số = 0 → kết quả = 0 (không Divide by zero, NaN, Infinity)
-                    TyLeCheckIn = soDuyet > 0
-                        ? Math.Round((double)soCI / soDuyet * 100, 1) : 0,
-                    TyLeHuy = tongDK > 0
-                        ? Math.Round((double)soHuy / tongDK * 100, 1) : 0,
-                    TyLeLapDay = sucChua > 0
-                        ? Math.Round((double)soDuyet / sucChua * 100, 1) : 0
+                    TyLeCheckIn = TinhTyLe(soCI, soDuyet),    // Attendance Rate
+                    TyLeHuy = TinhTyLe(soHuy, tongDK),        // Cancellation Rate
+                    TyLeLapDay = TinhTyLe(soDuyet, sucChua)   // Fill Rate
                 };
             })
             .OrderByDescending(x => x.TongDangKy)
+            .ThenBy(x => x.TenSuKien)
             .ToList();
 
-        // === TỶ LỆ TRUNG BÌNH ===
-        // Average() — Tính trung bình tỷ lệ check-in và hủy qua tất cả sự kiện
-        if (viewModel.TyLeTheoSuKien.Count > 0)
+        // Trung bình: chỉ tính trên sự kiện có mẫu số > 0
+        var coDuyet = vm.TyLeTheoSuKien.Where(t => t.SoDaDuyet > 0).ToList();
+        vm.TyLeCheckInTrungBinh = coDuyet.Count == 0
+            ? 0
+            : Math.Round(coDuyet.Average(t => t.TyLeCheckIn), 1);
+
+        var coDangKy = vm.TyLeTheoSuKien.Where(t => t.TongDangKy > 0).ToList();
+        vm.TyLeHuyTrungBinh = coDangKy.Count == 0
+            ? 0
+            : Math.Round(coDangKy.Average(t => t.TyLeHuy), 1);
+
+        // =============================================================
+        // 6. THỐNG KÊ NỔI BẬT (null nếu không có dữ liệu)
+        // =============================================================
+
+        // NB1. Sự kiện có nhiều đăng ký nhất
+        var skNhieuDK = vm.DangKyTheoSuKien.FirstOrDefault();
+        vm.SuKienNhieuDangKyNhat = skNhieuDK == null ? null : new NoiBatItem
         {
-            viewModel.TyLeCheckInTrungBinh = Math.Round(
-                viewModel.TyLeTheoSuKien.Average(t => t.TyLeCheckIn), 1);
-            viewModel.TyLeHuyTrungBinh = Math.Round(
-                viewModel.TyLeTheoSuKien.Average(t => t.TyLeHuy), 1);
-        }
+            Ten = skNhieuDK.TenSuKien,
+            GiaTri = skNhieuDK.SoDangKy,
+            ChiTiet = $"{skNhieuDK.SoDangKy} đăng ký"
+        };
 
-        // =====================================================
-        // THỐNG KÊ NỔI BẬT (Bước 4)
-        // =====================================================
-
-        // --- NB1. Sự kiện có nhiều đăng ký nhất ---
-        // OrderByDescending() — Sắp xếp giảm dần theo SoDangKy
-        // FirstOrDefault()   — Lấy phần tử đầu tiên (nhiều nhất)
-        //                       Trả về null nếu danh sách rỗng
-        var skNhieuDK = viewModel.DangKyTheoSuKien
-            .OrderByDescending(x => x.SoDangKy)
+        // NB2. Sự kiện có tỷ lệ tham dự cao nhất: CheckIn / Approved * 100, chỉ xét Approved > 0
+        var skTyLeCao = vm.TyLeTheoSuKien
+            .Where(t => t.SoDaDuyet > 0)
+            .OrderByDescending(t => t.TyLeCheckIn)
+            .ThenByDescending(t => t.SoCheckIn)
             .FirstOrDefault();
+        vm.SuKienTyLeThamDuCaoNhat = skTyLeCao == null ? null : new NoiBatItem
+        {
+            Ten = skTyLeCao.TenSuKien,
+            GiaTri = skTyLeCao.SoCheckIn,
+            TyLe = skTyLeCao.TyLeCheckIn,
+            ChiTiet = $"{skTyLeCao.SoCheckIn}/{skTyLeCao.SoDaDuyet} ({skTyLeCao.TyLeCheckIn}%)"
+        };
 
-        viewModel.SuKienNhieuDangKyNhat = skNhieuDK != null
-            ? new NoiBatItem
-            {
-                Ten = skNhieuDK.TenSuKien,
-                GiaTri = skNhieuDK.SoDangKy,
-                ChiTiet = $"{skNhieuDK.SoDangKy} đăng ký"
-            }
-            : null; // Không có dữ liệu → null → View hiển thị "Chưa có"
-
-        // --- NB2. Sự kiện có tỷ lệ tham dự cao nhất ---
-        // Tỷ lệ tham dự = CheckIn / Approved * 100 (theo đúng đề bài)
-        // Where()              — Chỉ xét sự kiện có người được duyệt (mẫu số > 0)
-        // OrderByDescending()  — Sắp xếp theo TyLeCheckIn giảm dần
-        // FirstOrDefault()     — Lấy sự kiện có tỷ lệ cao nhất
-        var skTyLeCao = viewModel.TyLeTheoSuKien
-            .Where(x => x.SoDaDuyet > 0)
-            .OrderByDescending(x => x.TyLeCheckIn)
-            .FirstOrDefault();
-
-        viewModel.SuKienTyLeThamDuCaoNhat = skTyLeCao != null
-            ? new NoiBatItem
-            {
-                Ten = skTyLeCao.TenSuKien,
-                GiaTri = skTyLeCao.SoCheckIn,
-                TyLe = skTyLeCao.TyLeCheckIn,
-                ChiTiet = $"{skTyLeCao.SoCheckIn}/{skTyLeCao.SoDaDuyet} ({skTyLeCao.TyLeCheckIn}%)"
-            }
-            : null;
-
-        // --- NB3. Loại sự kiện có nhiều lượt tham dự nhất ---
-        // GroupBy()            — Nhóm check-in theo loại sự kiện
-        // Select() + Count()   — Đếm check-in mỗi loại
-        // OrderByDescending()  — Loại nhiều nhất lên đầu
-        // FirstOrDefault()     — Lấy loại đầu tiên
-        var loaiNhieuCI = dsCheckIn
-            .Where(c => c.DangKyThamDu?.SuKien?.LoaiSuKien != null)
-            .GroupBy(c => c.DangKyThamDu!.SuKien!.LoaiSuKien!.TenLoaiSuKien)
-            .Select(g => new { TenLoai = g.Key, SoLuot = g.Count() })
-            .OrderByDescending(x => x.SoLuot)
-            .FirstOrDefault();
-
-        viewModel.LoaiSuKienNhieuThamDuNhat = loaiNhieuCI != null
-            ? new NoiBatItem
-            {
-                Ten = loaiNhieuCI.TenLoai,
-                GiaTri = loaiNhieuCI.SoLuot,
-                ChiTiet = $"{loaiNhieuCI.SoLuot} lượt check-in"
-            }
-            : null;
-
-        // --- NB4. Địa điểm được sử dụng nhiều nhất ---
-        // GroupBy()            — Nhóm sự kiện theo địa điểm
-        // Select() + Count()   — Đếm số sự kiện mỗi địa điểm
-        // OrderByDescending()  — Địa điểm nhiều SK nhất lên đầu
-        // FirstOrDefault()     — Lấy địa điểm đầu tiên
-        var ddNhieuNhat = dsSuKien
-            .Where(s => s.DiaDiem != null)
-            .GroupBy(s => s.DiaDiem!.TenDiaDiem)
-            .Select(g => new { TenDD = g.Key, SoSK = g.Count() })
-            .OrderByDescending(x => x.SoSK)
-            .FirstOrDefault();
-
-        viewModel.DiaDiemSuDungNhieuNhat = ddNhieuNhat != null
-            ? new NoiBatItem
-            {
-                Ten = ddNhieuNhat.TenDD,
-                GiaTri = ddNhieuNhat.SoSK,
-                ChiTiet = $"{ddNhieuNhat.SoSK} sự kiện"
-            }
-            : null;
-
-        // --- NB5. Phiên có nhiều người tham gia nhất ---
-        // OrderByDescending()  — Phiên nhiều đăng ký nhất lên đầu
-        // FirstOrDefault()     — Lấy phiên đầu tiên
-        var phienNhieu = viewModel.ThamGiaTheoPhien
-            .OrderByDescending(x => x.SoDangKy)
-            .FirstOrDefault();
-
-        viewModel.PhienNhieuNguoiNhat = phienNhieu != null
-            ? new NoiBatItem
-            {
-                Ten = phienNhieu.TenPhien,
-                GiaTri = phienNhieu.SoDangKy,
-                ChiTiet = $"{phienNhieu.SoDangKy} người • {phienNhieu.TenSuKien}"
-            }
-            : null;
-
-        // --- NB6. Người tham dự tham gia nhiều sự kiện nhất ---
-        // GroupBy()            — Nhóm đăng ký theo MaNguoiThamDu
-        // Select() + Count()   — Đếm số sự kiện (distinct) mỗi người
-        // OrderByDescending()  — Người nhiều SK nhất lên đầu
-        // FirstOrDefault()     — Lấy người đầu tiên
-        var nguoiNhieu = dsDangKy
-            .Where(d => d.NguoiThamDu != null)
-            .GroupBy(d => new { d.MaNguoiThamDu, d.NguoiThamDu!.HoTen })
+        // NB3. Loại sự kiện có nhiều lượt tham dự nhất (số check-in của đăng ký đã duyệt)
+        var loaiNhieuCI = dangKyDaCheckIn
+            .Where(d => d.SuKien?.LoaiSuKien != null)
+            .GroupBy(d => d.SuKien!.LoaiSuKien!.MaLoaiSuKien)
             .Select(g => new
             {
-                HoTen = g.Key.HoTen,
+                Ten = g.First().SuKien!.LoaiSuKien!.TenLoaiSuKien,
+                SoLuot = g.Count()
+            })
+            .OrderByDescending(x => x.SoLuot)
+            .ThenBy(x => x.Ten)
+            .FirstOrDefault();
+        vm.LoaiSuKienNhieuThamDuNhat = loaiNhieuCI == null ? null : new NoiBatItem
+        {
+            Ten = loaiNhieuCI.Ten,
+            GiaTri = loaiNhieuCI.SoLuot,
+            ChiTiet = $"{loaiNhieuCI.SoLuot} lượt check-in"
+        };
+
+        // NB4. Địa điểm được sử dụng nhiều nhất (theo số sự kiện)
+        var ddNhieuNhat = dsSuKien
+            .Where(s => s.DiaDiem != null)
+            .GroupBy(s => s.MaDiaDiem)
+            .Select(g => new
+            {
+                Ten = g.First().DiaDiem!.TenDiaDiem,
+                SoSuKien = g.Count()
+            })
+            .OrderByDescending(x => x.SoSuKien)
+            .ThenBy(x => x.Ten)
+            .FirstOrDefault();
+        vm.DiaDiemSuDungNhieuNhat = ddNhieuNhat == null ? null : new NoiBatItem
+        {
+            Ten = ddNhieuNhat.Ten,
+            GiaTri = ddNhieuNhat.SoSuKien,
+            ChiTiet = $"{ddNhieuNhat.SoSuKien} sự kiện"
+        };
+
+        // NB5. Phiên có nhiều người tham gia nhất
+        var phienNhieu = vm.ThamGiaTheoPhien.FirstOrDefault();
+        vm.PhienNhieuNguoiNhat = phienNhieu == null ? null : new NoiBatItem
+        {
+            Ten = phienNhieu.TenPhien,
+            GiaTri = phienNhieu.SoNguoiThamGia,
+            ChiTiet = $"{phienNhieu.SoNguoiThamGia} người • {phienNhieu.TenSuKien}"
+        };
+
+        // NB6. Người tham dự tham gia nhiều sự kiện nhất (sự kiện khác nhau, đăng ký đã duyệt)
+        var nguoiNhieu = dangKyDaDuyet
+            .Where(d => d.NguoiThamDu != null)
+            .GroupBy(d => d.MaNguoiThamDu)
+            .Select(g => new
+            {
+                HoTen = g.First().NguoiThamDu!.HoTen,
                 SoSuKien = g.Select(d => d.MaSuKien).Distinct().Count()
             })
             .OrderByDescending(x => x.SoSuKien)
+            .ThenBy(x => x.HoTen)
             .FirstOrDefault();
+        vm.NguoiThamDuNhieuNhat = nguoiNhieu == null ? null : new NoiBatItem
+        {
+            Ten = nguoiNhieu.HoTen,
+            GiaTri = nguoiNhieu.SoSuKien,
+            ChiTiet = $"{nguoiNhieu.SoSuKien} sự kiện"
+        };
 
-        viewModel.NguoiThamDuNhieuNhat = nguoiNhieu != null
-            ? new NoiBatItem
-            {
-                Ten = nguoiNhieu.HoTen,
-                GiaTri = nguoiNhieu.SoSuKien,
-                ChiTiet = $"{nguoiNhieu.SoSuKien} sự kiện"
-            }
-            : null;
+        return View(vm);
+    }
 
-        // -------------------------------------------------------
-        // Bước 5: Đưa ViewModel sang View
-        // -------------------------------------------------------
-        return View(viewModel);
+    /// <summary>
+    /// Tỷ lệ phần trăm làm tròn 1 chữ số.
+    /// Mẫu số <= 0 trả về 0. Kết quả không hữu hạn (NaN, Infinity) cũng trả về 0.
+    /// </summary>
+    private static double TinhTyLe(int tuSo, int mauSo)
+    {
+        if (mauSo <= 0)
+        {
+            return 0;
+        }
+
+        double ketQua = Math.Round((double)tuSo / mauSo * 100, 1);
+        return double.IsFinite(ketQua) ? ketQua : 0;
     }
 }
