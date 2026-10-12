@@ -7,7 +7,8 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
     {
         private readonly DangKyService _dangKyService;
 
-        public DangKyPhienController(DangKyService dangKyService)
+        public DangKyPhienController(
+            DangKyService dangKyService)
         {
             _dangKyService = dangKyService;
         }
@@ -19,18 +20,25 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             return View();
         }
 
-        // POST: xử lý đăng ký phiên
+        // Xử lý đăng ký phiên
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DangKy(string maNguoiThamDu, string maPhien)
         {
-            var (thanhCong, lyDo) = await _dangKyService.DangKyPhienAsync(maNguoiThamDu, maPhien);
+            var (thanhCong, lyDo) =
+                await _dangKyService.DangKyPhienAsync(
+                    maNguoiThamDu,
+                    maPhien);
 
-            TempData[thanhCong ? "ThongBao" : "Loi"] = thanhCong
-                ? "Đăng ký phiên thành công."
-                : lyDo;
+            TempData[thanhCong ? "ThongBao" : "Loi"] =
+                thanhCong
+                    ? "Đăng ký phiên thành công."
+                    : lyDo;
 
-            return RedirectToAction("DanhSachDangKy", "DangKy", new { maNguoiThamDu });
+            return RedirectToAction(
+                "DanhSachDangKy",
+                "DangKy",
+                new { maNguoiThamDu });
         }
     }
 }
