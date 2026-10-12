@@ -45,7 +45,10 @@ public class CheckInController : Controller
             return View(model);
         }
 
-        model.KetQua = await _dichVuModule4.CheckInAsync(model.MaThamDu, model.GhiChu);
+        model.KetQua = await _dichVuModule4.CheckInAsync(
+            model.MaThamDu,
+            HttpContext.Session.GetString("MaTaiKhoan") ?? string.Empty,
+            model.GhiChu);
         return View(model);
     }
 

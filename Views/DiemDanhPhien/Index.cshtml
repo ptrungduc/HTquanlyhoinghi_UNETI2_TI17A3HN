@@ -1,0 +1,89 @@
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module4.DiemDanhPhienViewModel
+
+@{
+    ViewData["Title"] = "Điểm danh theo phiên";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <h1 class="h3 mb-0">Điểm danh theo phiên</h1>
+    <a class="btn btn-outline-secondary" asp-controller="DangKyThamDu" asp-action="Index">Xét duyệt đăng ký</a>
+</div>
+
+@if (Model.KetQua is not null)
+{
+    <div class="alert @(Model.KetQua.ThanhCong ? "alert-success" : "alert-danger")" role="status">
+        @Model.KetQua.ThongBao
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.ThongBao))
+{
+    <div class="alert alert-warning" role="status">@Model.ThongBao</div>
+}
+
+<form asp-action="Index" method="get" class="row g-2 align-items-end mb-4">
+    <div class="col-md-8">
+        <label for="maPhienSuKien" class="form-label">Phiên sự kiện</label>
+        <select id="maPhienSuKien" name="maPhienSuKien" class="form-select" required>
+            <option value="">-- Chọn phiên --</option>
+            @foreach (var phien in Model.DanhSachPhien)
+            {
+                <option value="@phien.MaPhienSuKien" selected="@(phien.MaPhienSuKien == Model.MaPhienSuKien)">
+                    @phien.TenHienThi
+                </option>
+            }
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Xem danh sách</button>
+    </div>
+</form>
+
+@if (!string.IsNullOrWhiteSpace(Model.MaPhienSuKien) && string.IsNullOrWhiteSpace(Model.ThongBao))
+{
+    <h2 class="h5">@Model.TenSuKien / @Model.TenPhien</h2>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Mã người tham dự</th>
+                    <th>Người tham dự</th>
+                    <th>Trạng thái đăng ký phiên</th>
+                    <th>Điểm danh</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.DanhSachNguoiThamDu.Count == 0)
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">Không có người tham dự đủ điều kiện.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var nguoi in Model.DanhSachNguoiThamDu)
+                    {
+                        <tr>
+                            <td>@nguoi.MaNguoiThamDu</td>
+                            <td>@nguoi.HoTen</td>
+                            <td>@nguoi.TrangThaiDangKyPhien</td>
+                            <td>@(nguoi.DaDiemDanh ? "Đã điểm danh" : "Chưa điểm danh")</td>
+                            <td class="text-end">
+                                @if (!nguoi.DaDiemDanh)
+                                {
+                                    <form asp-action="DiemDanh" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="maPhienSuKien" value="@Model.MaPhienSuKien" />
+                                        <input type="hidden" name="maNguoiThamDu" value="@nguoi.MaNguoiThamDu" />
+                                        <button type="submit" class="btn btn-sm btn-success">Điểm danh</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+}

@@ -7,5 +7,13 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module4;
 public class ChiTietDangKyViewModel
 {
     public string? MaDangKy { get; set; }
+    public string TenNguoiThamDu { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string SoDienThoai { get; set; } = string.Empty;
+    public string TenSuKien { get; set; } = string.Empty;
+    public string TrangThai { get; set; } = string.Empty;
+    public DateTime? NgayDangKy { get; set; }
+    public DateTime? NgayDuyet { get; set; }
+    public string? MaThamDu { get; set; }
     public string ThongBao { get; set; } = string.Empty;
 }

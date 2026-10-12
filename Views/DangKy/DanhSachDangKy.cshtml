@@ -83,24 +83,23 @@
         @foreach (var item in Model)
         {
             <tr>
+                <td>@item.TenSuKien</td>
+                <td>@item.NgayDangKy.ToString("dd/MM/yyyy HH:mm")</td>
                 <td>
-                    @item.TenSuKien
+                    @if (item.ThoiGianBatDau == null)
+                    {
+                        <span>-</span>
+                    }
+                    else
+                    {
+                        @item.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm")
+                        @if (item.ThoiGianKetThuc != null)
+                        {
+                            <span> - @item.ThoiGianKetThuc.ToString("HH:mm")</span>
+                        }
+                    }
                 </td>
-
-                <td>
-                    @item.NgayDangKy.ToString("dd/MM/yyyy HH:mm")
-                </td>
-
-                <td>
-                    @item.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm")
-                    -
-                    @item.ThoiGianKetThuc.ToString("HH:mm")
-                </td>
-
-                <td>
-                    @item.TrangThai
-                </td>
-
+                <td>@item.TrangThai</td>
                 <td>
                     @if (item.TrangThai.ToString() != "DaHuy"
                         && item.TrangThai.ToString() != "DaCheckIn"

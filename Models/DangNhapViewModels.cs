@@ -11,5 +11,28 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Models
         [Display(Name = "Mật khẩu")]
         [DataType(DataType.Password)]
         public string MatKhau { get; set; }
+
+        [Required(ErrorMessage = "Email không được để trống")]
+        [Display(Name = "Email")]
+        [EmailAddress(ErrorMessage = "Định dạng email không hợp lệ")]
+        public string Email { get; set; }
+
+        // Hàm kiểm tra định dạng email
+        public static bool IsValidEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            try
+            {
+                // Sử dụng Regex để kiểm tra định dạng email
+                var regex = new System.Text.RegularExpressions.Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+                return regex.IsMatch(email);
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

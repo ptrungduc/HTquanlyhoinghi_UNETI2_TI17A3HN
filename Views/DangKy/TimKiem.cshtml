@@ -7,7 +7,7 @@
 <h2>Tìm kiếm đăng ký</h2>
 
 <form method="get" class="row g-2 mb-3">
-    <div class="col-md-3">
+    <div class="col-md-2">
         <input type="text"
                name="tenNguoiThamDu"
                class="form-control"
@@ -21,7 +21,7 @@
                value="@Context.Request.Query["maSuKien"]"
                placeholder="Mã sự kiện" />
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
         <select name="trangThai" class="form-select">
             <option value="">-- Tất cả trạng thái --</option>
             <option value="ChoDuyet" selected="@(Context.Request.Query["trangThai"] == "ChoDuyet")">Chờ duyệt</option>
@@ -45,6 +45,20 @@
         </select>
     </div>
     <div class="col-md-2">
+        <input type="date"
+               name="tuNgayDangKy"
+               class="form-control"
+               value="@Context.Request.Query["tuNgayDangKy"]"
+               aria-label="Từ ngày đăng ký" />
+    </div>
+    <div class="col-md-1">
+        <input type="date"
+               name="denNgayDangKy"
+               class="form-control"
+               value="@Context.Request.Query["denNgayDangKy"]"
+               aria-label="Đến ngày đăng ký" />
+    </div>
+    <div class="col-md-1">
         <select name="sapXep" class="form-select">
             <option value="ngaydangky" selected="@(Context.Request.Query["sapXep"] == "ngaydangky")">Ngày đăng ký</option>
             <option value="ngaytochuc" selected="@(Context.Request.Query["sapXep"] == "ngaytochuc")">Ngày tổ chức</option>

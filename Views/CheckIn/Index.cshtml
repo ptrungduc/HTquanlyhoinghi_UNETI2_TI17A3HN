@@ -15,11 +15,6 @@
         @Model.KetQua.ThongBao
     </div>
 }
-else
-{
-    <div class="alert alert-info" role="status">Chưa tích hợp Module 3. Check-in chưa được thực hiện.</div>
-}
-
 <form asp-controller="CheckIn" asp-action="Index" method="post" class="mt-3">
     @Html.AntiForgeryToken()
     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
@@ -35,4 +30,5 @@ else
     </div>
     <button type="submit" class="btn btn-primary">Check-in</button>
     <a class="btn btn-outline-secondary" asp-controller="DangKyThamDu" asp-action="Index">Danh sách xét duyệt</a>
+    <a class="btn btn-outline-secondary" asp-controller="DiemDanhPhien" asp-action="Index">Điểm danh phiên</a>
 </form>

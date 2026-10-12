@@ -5,62 +5,38 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Database
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options)
-            : base(options)
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
 
-        // =========================
-        // CÁC BẢNG CÓ SẴN
-        // =========================
-
+        // === DbSet chính (Module 1, 2) ===
         public DbSet<TaiKhoan> TaiKhoans { get; set; }
         public DbSet<LoaiSuKien> LoaiSuKiens { get; set; }
         public DbSet<DiaDiem> DiaDiems { get; set; }
         public DbSet<SuKien> SuKiens { get; set; }
         public DbSet<PhienSuKien> PhienSuKiens { get; set; }
 
-        // =========================
-        // MODULE 3
-        // =========================
-
+        // === DbSet Module 3, 4, 5 ===
         public DbSet<NguoiThamDu> NguoiThamDus { get; set; }
         public DbSet<DangKyThamDu> DangKyThamDus { get; set; }
         public DbSet<DangKyPhien> DangKyPhiens { get; set; }
+        public DbSet<CheckIn> CheckIns { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-
-            // =========================
-            // LOAI SU KIEN
-            // =========================
-
             modelBuilder.Entity<LoaiSuKien>()
                 .HasIndex(l => l.TenLoaiSuKien)
                 .IsUnique();
-
-            // =========================
-            // TAI KHOAN
-            // =========================
-
             modelBuilder.Entity<TaiKhoan>()
                 .HasIndex(t => t.TenDangNhap)
                 .IsUnique();
 
-            // =========================
-            // SU KIEN - LOAI SU KIEN
-            // =========================
-
             modelBuilder.Entity<SuKien>()
                 .HasOne(s => s.LoaiSuKien)
-                .WithMany()
-                .HasForeignKey(s => s.MaLoaiSuKien)
+                .WithOne(l => l.SuKien)
+                .HasForeignKey<SuKien>(s => s.MaLoaiSuKien)
+                .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
-
-            // =========================
-            // SU KIEN - DIA DIEM
-            // =========================
 
             modelBuilder.Entity<SuKien>()
                 .HasOne(s => s.DiaDiem)
@@ -68,59 +44,58 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Database
                 .HasForeignKey(s => s.MaDiaDiem)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // =========================
-            // PHIEN SU KIEN - SU KIEN
-            // =========================
-
             modelBuilder.Entity<PhienSuKien>()
                 .HasOne(p => p.SuKien)
                 .WithMany(s => s.PhienSuKiens)
                 .HasForeignKey(p => p.MaSuKien)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ==================================================
-            // MODULE 3
-            // NGUOI THAM DU - DANG KY THAM DU
-            // ==================================================
+            // === Quan hệ cho NguoiThamDu, DangKyThamDu, CheckIn ===
 
+            // TaiKhoan (1) - (0..1) NguoiThamDu
+            modelBuilder.Entity<NguoiThamDu>()
+                .HasOne(n => n.TaiKhoan)
+                .WithMany()
+                .HasForeignKey(n => n.MaTaiKhoan)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // NguoiThamDu (1) - (n) DangKyThamDu
             modelBuilder.Entity<DangKyThamDu>()
                 .HasOne(d => d.NguoiThamDu)
-                .WithMany(n => n.DanhSachDangKy)
+                .WithMany(n => n.DangKyThamDus)
                 .HasForeignKey(d => d.MaNguoiThamDu)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // ==================================================
-            // MODULE 3
-            // DANG KY THAM DU - SU KIEN
-            // ==================================================
-
+            // SuKien (1) - (n) DangKyThamDu
             modelBuilder.Entity<DangKyThamDu>()
                 .HasOne(d => d.SuKien)
                 .WithMany()
                 .HasForeignKey(d => d.MaSuKien)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // ==================================================
-            // MODULE 3
-            // NGUOI THAM DU - DANG KY PHIEN
-            // ==================================================
+            // DangKyThamDu (1) - (0..1) CheckIn
+            modelBuilder.Entity<CheckIn>()
+                .HasOne(c => c.DangKyThamDu)
+                .WithOne(d => d.CheckIn)
+                .HasForeignKey<CheckIn>(c => c.MaDangKy)
+                .OnDelete(DeleteBehavior.Restrict);
 
+            // === Quan hệ cho DangKyPhien ===
+
+            // NguoiThamDu (1) - (n) DangKyPhien
             modelBuilder.Entity<DangKyPhien>()
-                .HasOne(d => d.NguoiThamDu)
+                .HasOne(dp => dp.NguoiThamDu)
                 .WithMany()
-                .HasForeignKey(d => d.MaNguoiThamDu)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasForeignKey(dp => dp.MaNguoiThamDu)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // ==================================================
-            // MODULE 3
-            // DANG KY PHIEN - PHIEN SU KIEN
-            // ==================================================
-
+            // PhienSuKien (1) - (n) DangKyPhien
             modelBuilder.Entity<DangKyPhien>()
-                .HasOne(d => d.Phien)
+                .HasOne(dp => dp.Phien)
                 .WithMany()
-                .HasForeignKey(d => d.MaPhien)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasForeignKey(dp => dp.MaPhien)
+                .OnDelete(DeleteBehavior.Restrict);
         }
+
     }
 }

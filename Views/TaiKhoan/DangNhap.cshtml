@@ -55,6 +55,20 @@
                 </div>
 
                 <div class="mb-3">
+                    <label asp-for="Email" class="form-label">
+                        Email
+                    </label>
+
+                    <input asp-for="Email"
+                           type="email"
+                           class="form-control"
+                           placeholder="Nhập địa chỉ email" />
+
+                    <span asp-validation-for="Email"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
                     <label asp-for="MatKhau" class="form-label">
                         Mật khẩu
                     </label>
