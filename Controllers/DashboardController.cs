@@ -1,8 +1,9 @@
 // Họ và tên: [TÊN CỦA TÔI]
 // Mã sinh viên: [MSSV CỦA TÔI]
-// Nội dung thực hiện: Module 5 - Lịch sử tham dự, Dashboard, thống kê LINQ, báo cáo.
+// Nội dung thực hiện: Module 5 - Dashboard Organizer/Admin (Bước 2).
 
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Database;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Helper;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module5;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +13,21 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers;
 
 public class DashboardController : Controller
 {
+    // Số sự kiện tối đa hiển thị trong mỗi danh sách
+    private const int SoSuKienHienThi = 5;
+
+    // Số ngày trước khi bắt đầu được coi là "gần hạn đăng ký"
+    private const int SoNgayGanHanDangKy = 7;
+
+    // Đăng ký còn hiệu lực (không tính đã từ chối / đã hủy)
+    private static readonly TrangThaiDangKy[] TrangThaiHieuLuc =
+    {
+        TrangThaiDangKy.ChoDuyet,
+        TrangThaiDangKy.DaDuyet,
+        TrangThaiDangKy.DaCheckIn,
+        TrangThaiDangKy.HoanThanh
+    };
+
     private readonly AppDbContext _context;
 
     public DashboardController(AppDbContext context)
@@ -19,117 +35,177 @@ public class DashboardController : Controller
         _context = context;
     }
 
-    // =================================================================
-    // DASHBOARD ADMIN / ORGANIZER
-    // =================================================================
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        // Bước 1: Kiểm tra quyền Admin
-        var vaiTro = HttpContext.Session.GetString("VaiTro");
-        if (vaiTro != "Admin")
+        // 1. KIỂM TRA QUYỀN Ở SERVER
+        if (!KiemTraQuyenModule4.CoQuyenQuanTri(HttpContext.Session.GetString("VaiTro")))
         {
             return RedirectToAction("DangNhap", "TaiKhoan");
         }
 
         var now = DateTime.Now;
-        var today = now.Date;
+        var homNay = now.Date;
+        var ngayMai = homNay.AddDays(1);
 
-        // Bước 2: Lấy dữ liệu cơ bản từ database
-        var tatCaSuKien = await _context.SuKiens.AsNoTracking().ToListAsync();
-        var tatCaDangKy = await _context.DangKyThamDus.AsNoTracking().ToListAsync();
-        var tatCaCheckIn = await _context.CheckIns.AsNoTracking().ToListAsync();
+        var viewModel = new DashboardViewModel
+        {
+            ThoiDiemTinh = now
+        };
 
-        // Bước 3: LINQ - Tính toán Dashboard
-        var viewModel = new DashboardViewModel();
+        // 2. TỔNG SỐ SỰ KIỆN - CountAsync -> SELECT COUNT(*)
+        viewModel.TongSuKien = await _context.SuKiens
+            .AsNoTracking()
+            .CountAsync();
 
-        // === 1. Tổng số sự kiện — Count() ===
-        viewModel.TongSuKien = tatCaSuKien.Count;
+        // 3. SỐ SỰ KIỆN THEO TRẠNG THÁI - GroupBy(TrangThai) -> GROUP BY trên SQL
+        var suKienNhom = await _context.SuKiens
+            .AsNoTracking()
+            .GroupBy(s => s.TrangThai)
+            .Select(g => new { TrangThai = g.Key, SoLuong = g.Count() })
+            .ToListAsync();
 
-        // === 2. Số sự kiện theo trạng thái — Count() với predicate ===
-        viewModel.SuKienNhap = tatCaSuKien
-            .Count(s => s.TrangThai == "Nhap" || s.TrangThai == "SapDienRa");
-        viewModel.SuKienMoDangKy = tatCaSuKien.Count(s => s.TrangThai == "MoDangKy");
-        viewModel.SuKienDongDangKy = tatCaSuKien.Count(s => s.TrangThai == "DongDangKy");
-        viewModel.SuKienDangDienRa = tatCaSuKien.Count(s => s.TrangThai == "DangDienRa");
-        viewModel.SuKienHoanThanh = tatCaSuKien.Count(s => s.TrangThai == "HoanThanh");
-        viewModel.SuKienDaHuy = tatCaSuKien.Count(s => s.TrangThai == "DaHuy");
+        viewModel.SuKienTheoTrangThai = DanhSachTrangThaiSuKien()
+            .Select(t => new DashboardThongKeItem
+            {
+                MaTrangThai = t.Ma,
+                TenHienThi = t.Ten,
+                CssClass = t.Css,
+                SoLuong = suKienNhom
+                    .Where(x => x.TrangThai == t.Ma)
+                    .Select(x => x.SoLuong)
+                    .FirstOrDefault()
+            })
+            .ToList();
 
-        // === 3. Số đăng ký theo trạng thái — Count() với predicate trên enum ===
-        viewModel.TongDangKy = tatCaDangKy.Count;
-        viewModel.DangKyChoDuyet = tatCaDangKy.Count(d => d.TrangThai == TrangThaiDangKy.ChoDuyet);
-        viewModel.DangKyDaDuyet = tatCaDangKy.Count(d => d.TrangThai == TrangThaiDangKy.DaDuyet);
-        viewModel.DangKyDaCheckIn = tatCaDangKy.Count(d => d.TrangThai == TrangThaiDangKy.DaCheckIn);
-        viewModel.DangKyHoanThanh = tatCaDangKy.Count(d => d.TrangThai == TrangThaiDangKy.HoanThanh);
-        viewModel.DangKyTuChoi = tatCaDangKy.Count(d => d.TrangThai == TrangThaiDangKy.TuChoi);
-        viewModel.DangKyDaHuy = tatCaDangKy.Count(d => d.TrangThai == TrangThaiDangKy.DaHuy);
+        // 4. SỐ ĐĂNG KÝ THEO TRẠNG THÁI - GroupBy trên enum (lưu dạng số trong SQL)
+        var dangKyNhom = await _context.DangKyThamDus
+            .AsNoTracking()
+            .GroupBy(d => d.TrangThai)
+            .Select(g => new { TrangThai = g.Key, SoLuong = g.Count() })
+            .ToListAsync();
 
-        // === 4. Số lượt check-in hôm nay — Count() lọc theo ngày ===
-        viewModel.CheckInHomNay = tatCaCheckIn.Count(c => c.ThoiGianCheckIn.Date == today);
+        viewModel.DangKyTheoTrangThai = DanhSachTrangThaiDangKy()
+            .Select(t => new DashboardThongKeItem
+            {
+                MaTrangThai = t.Ma,
+                TenHienThi = t.Ten,
+                CssClass = t.Css,
+                SoLuong = dangKyNhom
+                    .Where(x => x.TrangThai.ToString() == t.Ma)
+                    .Select(x => x.SoLuong)
+                    .FirstOrDefault()
+            })
+            .ToList();
 
-        // === 5. Sự kiện sắp diễn ra — Where() + OrderBy() + Take() + Select() ===
+        // 5. CHECK-IN HÔM NAY - Where theo khoảng [hôm nay, ngày mai) + CountAsync
+        viewModel.CheckInHomNay = await _context.CheckIns
+            .AsNoTracking()
+            .Where(c => c.ThoiGianCheckIn >= homNay && c.ThoiGianCheckIn < ngayMai)
+            .CountAsync();
+
+        // 6. SỰ KIỆN SẮP DIỄN RA - Where, OrderBy, Take, Select
+        // Chưa bắt đầu, không bị hủy, không hoàn thành. Gần nhất lên đầu.
+        var daHuy = nameof(TrangThaiSuKien.DaHuy);
+        var hoanThanh = nameof(TrangThaiSuKien.HoanThanh);
+
         viewModel.SuKienSapDienRa = await _context.SuKiens
             .AsNoTracking()
-            .Where(s => s.ThoiGianBatDau > now)
+            .Where(s => s.ThoiGianBatDau > now
+                     && s.TrangThai != daHuy
+                     && s.TrangThai != hoanThanh)
             .OrderBy(s => s.ThoiGianBatDau)
-            .Take(5)
-            .Select(s => new SuKienSapDienRaItem
+            .Take(SoSuKienHienThi)
+            .Select(s => new DashboardSuKienItem
             {
                 MaSuKien = s.MaSuKien,
                 TenSuKien = s.TenSuKien,
-                ThoiGianBatDau = s.ThoiGianBatDau,
                 TenDiaDiem = s.DiaDiem != null ? s.DiaDiem.TenDiaDiem : "",
+                ThoiGianBatDau = s.ThoiGianBatDau,
                 TrangThai = s.TrangThai,
-                SoDangKy = _context.DangKyThamDus.Count(d => d.MaSuKien == s.MaSuKien)
+                // Đếm đăng ký còn hiệu lực qua DbSet, vì SuKien không có navigation DangKyThamDus
+                SoDangKyHieuLuc = _context.DangKyThamDus.Count(d =>
+                    d.MaSuKien == s.MaSuKien && TrangThaiHieuLuc.Contains(d.TrangThai)),
+                SucChua = s.DiaDiem != null ? s.DiaDiem.SucChuaToiDa : 0
             })
             .ToListAsync();
 
-        // === 6. Tham dự thực tế theo tháng (12 tháng) — Where() + GroupBy() + Select() + OrderBy() ===
-        var dauKy = now.AddMonths(-11);
-        var ngayBatDauKy = new DateTime(dauKy.Year, dauKy.Month, 1);
+        // 7. NGƯỜI THAM DỰ THỰC TẾ THEO THÁNG - 12 tháng gần nhất, tính theo check-in
+        var thangHienTai = new DateTime(now.Year, now.Month, 1);
+        var tuThang = thangHienTai.AddMonths(-11);
+        var denThang = thangHienTai.AddMonths(1);
 
-        viewModel.ThamDuTheoThang = tatCaCheckIn
-            .Where(c => c.ThoiGianCheckIn >= ngayBatDauKy)
+        var checkInTheoThang = await _context.CheckIns
+            .AsNoTracking()
+            .Where(c => c.ThoiGianCheckIn >= tuThang && c.ThoiGianCheckIn < denThang)
             .GroupBy(c => new { c.ThoiGianCheckIn.Year, c.ThoiGianCheckIn.Month })
-            .Select(g => new ThongKeThamDuTheoThang
+            .Select(g => new { g.Key.Year, g.Key.Month, SoNguoi = g.Count() })
+            .ToListAsync();
+
+        // Tạo đủ 12 tháng, tháng không có dữ liệu = 0
+        viewModel.NguoiThamDuTheoThang = Enumerable.Range(0, 12)
+            .Select(i => tuThang.AddMonths(i))
+            .Select(ngay => new DashboardThangItem
             {
-                Nam = g.Key.Year,
-                Thang = g.Key.Month,
-                SoLuotCheckIn = g.Count()
+                Nam = ngay.Year,
+                Thang = ngay.Month,
+                SoNguoi = checkInTheoThang
+                    .Where(x => x.Year == ngay.Year && x.Month == ngay.Month)
+                    .Select(x => x.SoNguoi)
+                    .FirstOrDefault()
             })
-            .OrderBy(t => t.Nam)
-            .ThenBy(t => t.Thang)
             .ToList();
 
-        // === 7. Sự kiện gần hạn (bắt đầu trong 7 ngày tới) — Where() + OrderBy() + Select() ===
-        var hanCuoi = now.AddDays(7);
-        var dsGanHan = await _context.SuKiens
-            .AsNoTracking()
-            .Where(s => s.ThoiGianBatDau > now && s.ThoiGianBatDau <= hanCuoi)
-            .OrderBy(s => s.ThoiGianBatDau)
-            .Select(s => new
-            {
-                s.MaSuKien,
-                s.TenSuKien,
-                s.ThoiGianBatDau,
-                SoDangKy = _context.DangKyThamDus.Count(d => d.MaSuKien == s.MaSuKien)
-            })
-            .ToListAsync();
+        // 8. SỰ KIỆN GẦN HẠN ĐĂNG KÝ
+        // Hệ thống không có trường hạn đăng ký. Quy ước tạm:
+        // đang MoDangKy và bắt đầu trong vòng 7 ngày tới.
+        var mocGanHan = now.AddDays(SoNgayGanHanDangKy);
+        var moDangKy = nameof(TrangThaiSuKien.MoDangKy);
 
-        // Tính số ngày còn lại trên C# (phép trừ DateTime)
-        viewModel.SuKienGanHan = dsGanHan
-            .Select(s => new SuKienGanHanItem
+        viewModel.SuKienGanHanDangKy = await _context.SuKiens
+            .AsNoTracking()
+            .Where(s => s.TrangThai == moDangKy
+                     && s.ThoiGianBatDau > now
+                     && s.ThoiGianBatDau <= mocGanHan)
+            .OrderBy(s => s.ThoiGianBatDau)
+            .Take(SoSuKienHienThi)
+            .Select(s => new DashboardSuKienItem
             {
                 MaSuKien = s.MaSuKien,
                 TenSuKien = s.TenSuKien,
+                TenDiaDiem = s.DiaDiem != null ? s.DiaDiem.TenDiaDiem : "",
                 ThoiGianBatDau = s.ThoiGianBatDau,
-                SoNgayConLai = (s.ThoiGianBatDau - now).Days,
-                SoDangKy = s.SoDangKy
+                TrangThai = s.TrangThai,
+                SoDangKyHieuLuc = _context.DangKyThamDus.Count(d =>
+                    d.MaSuKien == s.MaSuKien && TrangThaiHieuLuc.Contains(d.TrangThai)),
+                SucChua = s.DiaDiem != null ? s.DiaDiem.SucChuaToiDa : 0
             })
-            .ToList();
+            .ToListAsync();
 
-        // Bước 4: Đưa ViewModel sang View
         return View(viewModel);
     }
-}
 
+    // =================================================================
+    // HÀM HỖ TRỢ - Danh sách trạng thái hiển thị (thứ tự cố định)
+    // =================================================================
+
+    private static List<(string Ma, string Ten, string Css)> DanhSachTrangThaiSuKien() =>
+    [
+        (nameof(TrangThaiSuKien.Nhap), "Nháp", "bg-secondary"),
+        (nameof(TrangThaiSuKien.MoDangKy), "Mở đăng ký", "bg-primary"),
+        (nameof(TrangThaiSuKien.DongDangKy), "Đóng đăng ký", "bg-warning text-dark"),
+        (nameof(TrangThaiSuKien.DangDienRa), "Đang diễn ra", "bg-info"),
+        (nameof(TrangThaiSuKien.HoanThanh), "Hoàn thành", "bg-success"),
+        (nameof(TrangThaiSuKien.DaHuy), "Đã hủy", "bg-dark")
+    ];
+
+    private static List<(string Ma, string Ten, string Css)> DanhSachTrangThaiDangKy() =>
+    [
+        (nameof(TrangThaiDangKy.ChoDuyet), "Chờ duyệt", "bg-warning text-dark"),
+        (nameof(TrangThaiDangKy.DaDuyet), "Đã duyệt", "bg-primary"),
+        (nameof(TrangThaiDangKy.DaCheckIn), "Đã check-in", "bg-info"),
+        (nameof(TrangThaiDangKy.HoanThanh), "Hoàn thành", "bg-success"),
+        (nameof(TrangThaiDangKy.TuChoi), "Từ chối", "bg-danger"),
+        (nameof(TrangThaiDangKy.DaHuy), "Đã hủy", "bg-dark")
+    ];
+}
