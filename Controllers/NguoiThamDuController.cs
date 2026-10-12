@@ -60,8 +60,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             // Kiểm tra tài khoản có tồn tại không
             // -----------------------------------------------------
        var taiKhoanTonTai = await _context.TaiKhoans
-    .AnyAsync(t =>
-        t.MaTaiKhoan == nguoiThamDu.MaTaiKhoan.ToString());
+                .AnyAsync(t => t.MaTaiKhoan == nguoiThamDu.MaTaiKhoan);
 
             if (!taiKhoanTonTai)
             {
@@ -83,6 +82,12 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
                     "Email",
                     "Email này đã được đăng ký cho người tham dự khác.");
             }
+
+            if (string.IsNullOrWhiteSpace(nguoiThamDu.MaNguoiThamDu))
+            {
+                nguoiThamDu.MaNguoiThamDu = Guid.NewGuid().ToString("N");
+            }
+            ModelState.Remove(nameof(nguoiThamDu.MaNguoiThamDu));
 
             // -----------------------------------------------------
             // Kiểm tra dữ liệu Model
@@ -109,8 +114,13 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         // 4. HIỂN THỊ FORM SỬA
         // =========================================================
         [HttpGet]
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(string id)
         {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return NotFound();
+            }
+
             var nguoiThamDu =
                 await _context.NguoiThamDus
                     .FindAsync(id);
@@ -129,7 +139,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
-            int id,
+            string id,
             NguoiThamDu nguoiThamDu)
         {
             // Kiểm tra ID trên URL và ID trong Model
@@ -206,8 +216,13 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> KhoaMoKhoa(int id)
+        public async Task<IActionResult> KhoaMoKhoa(string id)
         {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return NotFound();
+            }
+
             var nguoiThamDu =
                 await _context.NguoiThamDus
                     .FindAsync(id);
@@ -242,8 +257,13 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         // =========================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(string id)
         {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return NotFound();
+            }
+
             var nguoiThamDu =
                 await _context.NguoiThamDus
                     .FindAsync(id);
