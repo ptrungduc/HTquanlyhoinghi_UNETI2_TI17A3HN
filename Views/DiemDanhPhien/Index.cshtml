@@ -64,10 +64,21 @@
                 {
                     @foreach (var nguoi in Model.DanhSachNguoiThamDu)
                     {
+                        var trangThaiHienThi = nguoi.TrangThaiDangKyPhien switch
+                        {
+                            HTquanlyhoinghi_UNETI2_TI17A3HN.Models.TrangThaiDangKy.ChoDuyet => "Chờ duyệt",
+                            HTquanlyhoinghi_UNETI2_TI17A3HN.Models.TrangThaiDangKy.DaDuyet => "Đã duyệt",
+                            HTquanlyhoinghi_UNETI2_TI17A3HN.Models.TrangThaiDangKy.DaCheckIn => "Đã điểm danh",
+                            HTquanlyhoinghi_UNETI2_TI17A3HN.Models.TrangThaiDangKy.HoanThanh => "Hoàn thành",
+                            HTquanlyhoinghi_UNETI2_TI17A3HN.Models.TrangThaiDangKy.TuChoi => "Từ chối",
+                            HTquanlyhoinghi_UNETI2_TI17A3HN.Models.TrangThaiDangKy.DaHuy => "Đã hủy",
+                            _ => nguoi.TrangThaiDangKyPhien.ToString()
+                        };
+
                         <tr>
                             <td>@nguoi.MaNguoiThamDu</td>
                             <td>@nguoi.HoTen</td>
-                            <td>@nguoi.TrangThaiDangKyPhien</td>
+                            <td>@trangThaiHienThi</td>
                             <td>@(nguoi.DaDiemDanh ? "Đã điểm danh" : "Chưa điểm danh")</td>
                             <td class="text-end">
                                 @if (!nguoi.DaDiemDanh)

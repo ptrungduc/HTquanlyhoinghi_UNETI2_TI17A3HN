@@ -15,5 +15,6 @@ public class ChiTietDangKyViewModel
     public DateTime? NgayDangKy { get; set; }
     public DateTime? NgayDuyet { get; set; }
     public string? MaThamDu { get; set; }
+    public string? GhiChu { get; set; }
     public string ThongBao { get; set; } = string.Empty;
 }
