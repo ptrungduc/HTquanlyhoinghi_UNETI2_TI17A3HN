@@ -19,4 +19,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="HTquanlyhoinghi_UNETI2_TI17A3HN/**/*.cs" />
+  </ItemGroup>
+
 </Project>

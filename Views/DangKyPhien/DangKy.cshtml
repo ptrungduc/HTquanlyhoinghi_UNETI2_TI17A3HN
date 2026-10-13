@@ -1,36 +1,24 @@
 @{
     ViewData["Title"] = "Đăng ký phiên sự kiện";
-    string maPhien = ViewBag.MaPhien?.ToString() ?? "";
+    string maPhien = (string)ViewBag.MaPhien;
 }
 
 <h2>Đăng ký phiên sự kiện</h2>
 
+<p><strong>Phiên:</strong> @ViewBag.TenPhien</p>
+<p><strong>Thời gian:</strong> @(((DateTime)ViewBag.ThoiGianBatDau).ToString("dd/MM/yyyy HH:mm")) - @(((DateTime)ViewBag.ThoiGianKetThuc).ToString("dd/MM/yyyy HH:mm"))</p>
+
 @if (TempData["Loi"] != null)
 {
-    <div class="alert alert-danger">
-        @TempData["Loi"]
-    </div>
+    <div class="alert alert-danger">@TempData["Loi"]</div>
 }
-
 @if (TempData["ThongBao"] != null)
 {
-    <div class="alert alert-success">
-        @TempData["ThongBao"]
-    </div>
+    <div class="alert alert-success">@TempData["ThongBao"]</div>
 }
 
 <form asp-action="DangKy" method="post">
-    @Html.AntiForgeryToken()
+    <input type="hidden" name="maPhien" value="@maPhien" />
 
-    <input type="hidden"
-           name="maPhien"
-           value="@maPhien" />
-
-    <div class="mb-3">
-    </div>
-
-    <button type="submit"
-            class="btn btn-primary">
-        Đăng ký phiên này
-    </button>
+    <button type="submit" class="btn btn-primary">Đăng ký phiên này</button>
 </form>
