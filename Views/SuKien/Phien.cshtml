@@ -11,8 +11,18 @@
 }
 
 <div class="container mt-4">
-    <h1>Phiên sự kiện - @suKien.TenSuKien</h1>
-    <p class="text-muted">Tìm, lọc và sắp xếp các phiên của sự kiện này.</p>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1>Phiên sự kiện - @suKien.TenSuKien</h1>
+            <p class="text-muted mb-0">Tìm, lọc và sắp xếp các phiên của sự kiện này.</p>
+        </div>
+        <a asp-action="CreatePhien" asp-route-maSuKien="@suKien.MaSuKien" class="btn btn-success">+ Thêm phiên</a>
+    </div>
+
+    @if (TempData["ThongBao"] is string thongBao)
+    {
+        <div class="alert alert-warning" role="alert">@thongBao</div>
+    }
 
     <form method="get" class="row g-3 mb-3">
         <input type="hidden" name="maSuKien" value="@suKien.MaSuKien" />
@@ -54,6 +64,7 @@
                         <th>Diễn giả</th>
                         <th>Nơi dung</th>
                         <th>Trạng thái</th>
+                        <th class="text-center">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -68,13 +79,19 @@
                                     <td>@item.DienGia</td>
                                     <td>@item.NoiDung</td>
                                     <td>@item.TrangThai</td>
+                                    <td class="text-center text-nowrap">
+                                        <a asp-action="EditPhien" asp-route-maSuKien="@suKien.MaSuKien"
+                                           asp-route-id="@item.MaPhienSuKien" class="btn btn-sm btn-outline-secondary">Sửa</a>
+                                        <a asp-action="DeletePhien" asp-route-maSuKien="@suKien.MaSuKien"
+                                           asp-route-id="@item.MaPhienSuKien" class="btn btn-sm btn-outline-danger">Xóa</a>
+                                    </td>
                                 </tr>
                             }
                         }
                     else
                         {
                             <tr>
-                                <td colspan="5" class="text-center text-muted py-4">Không có phiên nào khớp.</td>
+                                <td colspan="6" class="text-center text-muted py-4">Không có phiên nào khớp.</td>
                             </tr>
                         }
                     </tbody>
