@@ -1,13 +1,12 @@
 @* Họ và tên: [TÊN CỦA TÔI] *@
 @* Mã sinh viên: [MSSV CỦA TÔI] *@
-@* Nội dung thực hiện: Module 5 - Lịch sử tham dự, Dashboard, thống kê LINQ, báo cáo. *@
+@* Nội dung thực hiện: Module 5 - Lịch sử tham dự (Bước 1). *@
 
 @model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module5.ChiTietSuKienLichSuViewModel
 
 @{
     ViewData["Title"] = "Chi tiết lịch sử - " + Model.TenSuKien;
 
-    // Hiển thị tên trạng thái thân thiện
     string TenTrangThai(string trangThai) => trangThai switch
     {
         "ChoDuyet"  => "Chờ duyệt",
@@ -19,7 +18,6 @@
         _           => trangThai
     };
 
-    // Badge CSS cho trạng thái đăng ký
     string BadgeDangKy(string trangThai) => trangThai switch
     {
         "ChoDuyet"  => "bg-warning text-dark",
@@ -31,16 +29,15 @@
         _           => "bg-secondary"
     };
 
-    // Badge CSS cho kết quả tham gia
     string BadgeKetQua(string ketQua) => ketQua switch
     {
-        "Đã tham dự"      => "bg-success",
-        "Đã check-in"     => "bg-info",
-        "Chưa check-in"   => "bg-warning text-dark",
-        "Đang chờ duyệt"  => "bg-secondary",
-        "Bị từ chối"      => "bg-danger",
-        "Đã hủy"          => "bg-dark",
-        _                  => "bg-secondary"
+        "Đã tham dự"     => "bg-success",
+        "Đã check-in"    => "bg-info",
+        "Chưa check-in"  => "bg-warning text-dark",
+        "Đang chờ duyệt" => "bg-secondary",
+        "Bị từ chối"     => "bg-danger",
+        "Đã hủy"         => "bg-dark",
+        _                => "bg-secondary"
     };
 }
 
@@ -61,16 +58,13 @@
 
 <div class="container mt-4">
 
-    <!-- Nút quay lại -->
     <div class="mb-3">
         <a asp-controller="SuKien" asp-action="Index" class="btn btn-outline-secondary btn-sm">
             ← Quay lại danh sách sự kiện
         </a>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- THÔNG TIN SỰ KIỆN                                           -->
-    <!-- ============================================================ -->
+    <!-- THÔNG TIN SỰ KIỆN -->
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
             <h4 class="fw-bold mb-3">📅 @Model.TenSuKien</h4>
@@ -92,9 +86,7 @@
         </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- THỐNG KÊ TỔNG HỢP (đã tính bằng LINQ trong Controller)     -->
-    <!-- ============================================================ -->
+    <!-- THỐNG KÊ TỔNG HỢP (tính bằng LINQ trong Controller) -->
     <div class="row mb-4">
         <div class="col">
             <div class="card text-center border-0 shadow-sm">
@@ -138,9 +130,7 @@
         </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- DANH SÁCH PHIÊN SỰ KIỆN (nếu có)                            -->
-    <!-- ============================================================ -->
+    <!-- DANH SÁCH PHIÊN SỰ KIỆN (nếu có) -->
     @if (Model.DanhSachPhien.Any())
     {
         <div class="card shadow-sm border-0 mb-4">
@@ -178,9 +168,7 @@
         </div>
     }
 
-    <!-- ============================================================ -->
-    <!-- DANH SÁCH ĐĂNG KÝ THAM DỰ                                   -->
-    <!-- ============================================================ -->
+    <!-- DANH SÁCH ĐĂNG KÝ THAM DỰ -->
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-header bg-white">
             <h5 class="mb-0">👥 Danh sách đăng ký (@Model.TongDangKy người)</h5>
@@ -199,6 +187,7 @@
                             <th>Check-in</th>
                             <th>Mã tham dự</th>
                             <th>Kết quả</th>
+                            <th>Phiên đã đăng ký</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -263,13 +252,35 @@
                                             @dk.KetQuaThamGia
                                         </span>
                                     </td>
+
+                                    <td>
+                                        @if (dk.DanhSachPhien.Any())
+                                        {
+                                            <ul class="list-unstyled mb-0 small">
+                                                @foreach (var p in dk.DanhSachPhien)
+                                                {
+                                                    <li>
+                                                        <strong>@p.TenPhien</strong><br />
+                                                        <span class="text-muted">
+                                                            @p.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm") — @p.ThoiGianKetThuc.ToString("HH:mm")
+                                                        </span>
+                                                        <span class="badge @BadgeDangKy(p.TrangThai)">@TenTrangThai(p.TrangThai)</span>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
                                 </tr>
                             }
                         }
                         else
                         {
                             <tr>
-                                <td colspan="9" class="text-center text-muted py-4">
+                                <td colspan="10" class="text-center text-muted py-4">
                                     Chưa có đăng ký nào cho sự kiện này.
                                 </td>
                             </tr>

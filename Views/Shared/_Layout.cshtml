@@ -120,6 +120,33 @@
                 </a>
 
 
+                <!-- DASHBOARD (MODULE 5) -->
+                <a asp-controller="Dashboard"
+                   asp-action="Index"
+                   class="@(currentController == "Dashboard" ? "active" : "")">
+                    📈
+                    <span>Dashboard</span>
+                </a>
+
+
+                <!-- THỐNG KÊ (MODULE 5) -->
+                <a asp-controller="ThongKe"
+                   asp-action="Index"
+                   class="@(currentController == "ThongKe" ? "active" : "")">
+                    🏆
+                    <span>Thống kê &amp; Tỷ lệ</span>
+                </a>
+
+
+                <!-- LỊCH SỬ (MODULE 5) -->
+                <a asp-controller="LichSu"
+                   asp-action="CaNhan"
+                   class="@(currentController == "LichSu" ? "active" : "")">
+                    ⏳
+                    <span>Lịch sử tham dự</span>
+                </a>
+
+
                 <!-- CÀI ĐẶT -->
                 <a asp-controller="CaiDat"
                    asp-action="Index"
