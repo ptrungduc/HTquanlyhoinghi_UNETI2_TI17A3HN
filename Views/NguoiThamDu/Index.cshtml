@@ -8,32 +8,13 @@
 
 @if (TempData["ThongBao"] != null)
 {
-    <div class="alert alert-success">
-        @TempData["ThongBao"]
-    </div>
-}
-
-@if (TempData["Loi"] != null)
-{
-    <div class="alert alert-danger">
-        @TempData["Loi"]
-    </div>
+    <div class="alert alert-success">@TempData["ThongBao"]</div>
 }
 
 <form method="get" class="mb-3 d-flex gap-2">
-    <input type="text"
-           name="timKiem"
-           class="form-control"
-           placeholder="Tìm theo tên, email, SĐT..." />
-
-    <button type="submit" class="btn btn-secondary">
-        Tìm
-    </button>
-
-    <a asp-action="Create"
-       class="btn btn-primary ms-auto">
-        + Thêm người tham dự
-    </a>
+    <input type="text" name="timKiem" value="@ViewBag.TimKiem" class="form-control" placeholder="Tìm theo tên, email, SĐT..." />
+    <button type="submit" class="btn btn-secondary">Tìm</button>
+    <a asp-action="Create" class="btn btn-primary ms-auto">+ Thêm người tham dự</a>
 </form>
 
 <table class="table table-bordered table-striped">
@@ -44,71 +25,33 @@
             <th>Email</th>
             <th>Đơn vị công tác</th>
             <th>Trạng thái</th>
-            <th>Thao tác</th>
+            <th></th>
         </tr>
     </thead>
-
     <tbody>
         @foreach (var item in Model)
         {
             <tr>
                 <td>@item.HoTen</td>
-
                 <td>@item.SoDienThoai</td>
-
                 <td>@item.Email</td>
-
                 <td>@item.DonViCongTac</td>
-
                 <td>
                     @if (item.TrangThai)
                     {
-                        <span class="badge bg-success">
-                            Hoạt động
-                        </span>
+                        <span class="badge bg-success">Hoạt động</span>
                     }
                     else
                     {
-                        <span class="badge bg-secondary">
-                            Đã khóa
-                        </span>
+                        <span class="badge bg-secondary">Đã khóa</span>
                     }
                 </td>
-
                 <td>
-                    <!-- Sửa -->
-                    <a asp-action="Edit"
-                       asp-route-id="@item.MaNguoiThamDu"
-                       class="btn btn-sm btn-outline-primary">
-                        Sửa
-                    </a>
-
-                    <!-- Khóa / Mở khóa -->
-                    <form asp-action="KhoaMoKhoa"
-                          asp-route-id="@item.MaNguoiThamDu"
-                          method="post"
-                          class="d-inline">
-
+                    <a asp-action="Edit" asp-route-id="@item.MaNguoiThamDu" class="btn btn-sm btn-outline-primary">Sửa</a>
+                    <form asp-action="KhoaMoKhoa" asp-route-id="@item.MaNguoiThamDu" method="post" class="d-inline">
                         @Html.AntiForgeryToken()
-
-                        <button type="submit"
-                                class="btn btn-sm btn-outline-warning">
+                        <button type="submit" class="btn btn-sm btn-outline-warning">
                             @(item.TrangThai ? "Khóa" : "Mở khóa")
-                        </button>
-                    </form>
-
-                    <!-- Xóa -->
-                    <form asp-action="Delete"
-                          asp-route-id="@item.MaNguoiThamDu"
-                          method="post"
-                          class="d-inline"
-                          onsubmit="return confirm('Bạn có chắc muốn xóa người tham dự này không?');">
-
-                        @Html.AntiForgeryToken()
-
-                        <button type="submit"
-                                class="btn btn-sm btn-outline-danger">
-                            Xóa
                         </button>
                     </form>
                 </td>
