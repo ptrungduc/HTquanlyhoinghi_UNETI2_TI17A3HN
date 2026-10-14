@@ -99,6 +99,21 @@ public class NguoiThamDuController : Controller
 
         var nguoiThamDu = await _context.NguoiThamDus
             .FirstOrDefaultAsync(n => n.MaTaiKhoan == maTaiKhoan);
+        var email = model.Email.Trim();
+        var emailNguoiKhac = _context.NguoiThamDus
+            .Where(n => n.Email == email);
+        if (nguoiThamDu != null)
+        {
+            emailNguoiKhac = emailNguoiKhac
+                .Where(n => n.MaNguoiThamDu != nguoiThamDu.MaNguoiThamDu);
+        }
+
+        if (await emailNguoiKhac.AnyAsync())
+        {
+            ModelState.AddModelError(nameof(model.Email), "Email này đã được dùng bởi người tham dự khác.");
+            return View(model);
+        }
+
         if (nguoiThamDu == null)
         {
             nguoiThamDu = new NguoiThamDu
@@ -112,7 +127,7 @@ public class NguoiThamDuController : Controller
 
         nguoiThamDu.HoTen = model.HoTen.Trim();
         nguoiThamDu.SoDienThoai = model.SoDienThoai.Trim();
-        nguoiThamDu.Email = model.Email.Trim();
+        nguoiThamDu.Email = email;
         nguoiThamDu.DonViCongTac = model.DonViCongTac.Trim();
 
         await _context.SaveChangesAsync();
@@ -160,6 +175,14 @@ public class NguoiThamDuController : Controller
             return View(model);
         }
 
+        var email = model.Email.Trim();
+        if (await _context.NguoiThamDus.AnyAsync(n => n.Email == email))
+        {
+            ModelState.AddModelError(nameof(model.Email), "Email này đã được dùng bởi người tham dự khác.");
+            await NapTaiKhoanChuaCoNguoiThamDu(model.MaTaiKhoan);
+            return View(model);
+        }
+
         var maNguoiThamDu = Guid.NewGuid().ToString("N");
         _context.NguoiThamDus.Add(new NguoiThamDu
         {
@@ -167,7 +190,7 @@ public class NguoiThamDuController : Controller
             MaTaiKhoan = model.MaTaiKhoan,
             HoTen = model.HoTen.Trim(),
             SoDienThoai = model.SoDienThoai.Trim(),
-            Email = model.Email.Trim(),
+            Email = email,
             DonViCongTac = model.DonViCongTac.Trim(),
             TrangThai = true
         });
@@ -235,9 +258,18 @@ public class NguoiThamDuController : Controller
             return View(model);
         }
 
+        var email = model.Email.Trim();
+        if (await _context.NguoiThamDus.AnyAsync(n =>
+            n.Email == email && n.MaNguoiThamDu != id))
+        {
+            ModelState.AddModelError(nameof(model.Email), "Email này đã được dùng bởi người tham dự khác.");
+            model.MaTaiKhoan = nguoiThamDu.MaTaiKhoan;
+            return View(model);
+        }
+
         nguoiThamDu.HoTen = model.HoTen.Trim();
         nguoiThamDu.SoDienThoai = model.SoDienThoai.Trim();
-        nguoiThamDu.Email = model.Email.Trim();
+        nguoiThamDu.Email = email;
         nguoiThamDu.DonViCongTac = model.DonViCongTac.Trim();
         await _context.SaveChangesAsync();
         TempData["ThongBao"] = "Đã cập nhật người tham dự.";
@@ -265,6 +297,43 @@ public class NguoiThamDuController : Controller
         TempData["ThongBao"] = nguoiThamDu.TrangThai
             ? "Đã mở khóa người tham dự."
             : "Đã khóa người tham dự.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(string id)
+    {
+        if (!LaQuanTri())
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được quản lý danh sách người tham dự.");
+        }
+
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            return BadRequest();
+        }
+
+        var nguoiThamDu = await _context.NguoiThamDus
+            .FirstOrDefaultAsync(n => n.MaNguoiThamDu == id);
+        if (nguoiThamDu == null)
+        {
+            return NotFound();
+        }
+
+        var daCoDangKySuKien = await _context.DangKyThamDus
+            .AnyAsync(d => d.MaNguoiThamDu == id);
+        var daCoDangKyPhien = await _context.DangKyPhiens
+            .AnyAsync(d => d.MaNguoiThamDu == id);
+        if (daCoDangKySuKien || daCoDangKyPhien)
+        {
+            TempData["Loi"] = "Không thể xóa người tham dự đã có lịch sử đăng ký. Bạn có thể khóa người tham dự thay vì xóa.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        _context.NguoiThamDus.Remove(nguoiThamDu);
+        await _context.SaveChangesAsync();
+        TempData["ThongBao"] = "Đã xóa người tham dự.";
         return RedirectToAction(nameof(Index));
     }
 
