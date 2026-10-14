@@ -30,6 +30,12 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
                 return View(model);
             }
 
+            if (!DangNhapViewModels.IsValidEmail(model.Email))
+            {
+                ModelState.AddModelError("Email", "Định dạng email không hợp lệ");
+                return View(model);
+            }
+
             var matKhauMaHoa = MatKhauHelper.MaHoa(model.MatKhau);
             var tenDangNhap = model.TenDangNhap.Trim();
             var email = model.Email.Trim().ToLower();

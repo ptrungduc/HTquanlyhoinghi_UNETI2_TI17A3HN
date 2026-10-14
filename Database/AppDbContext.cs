@@ -22,14 +22,6 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Database
         public DbSet<DangKyPhien> DangKyPhiens { get; set; }
         public DbSet<CheckIn> CheckIns { get; set; }
 
-        // === Alias không "s" - Module 3 sử dụng tên này ===
-        public DbSet<NguoiThamDu> NguoiThamDu => NguoiThamDus;
-        public DbSet<DangKyThamDu> DangKyThamDu => DangKyThamDus;
-        public DbSet<DangKyPhien> DangKyPhien => DangKyPhiens;
-        public DbSet<DiaDiem> DiaDiem => DiaDiems;
-        public DbSet<SuKien> SuKien => SuKiens;
-        public DbSet<PhienSuKien> PhienSuKien => PhienSuKiens;
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Cố định tên bảng. Các DbSet alias không "s" ở trên (DiaDiem, SuKien, ...)
@@ -53,8 +45,9 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Database
 
             modelBuilder.Entity<SuKien>()
                 .HasOne(s => s.LoaiSuKien)
-                .WithMany()
-                .HasForeignKey(s => s.MaLoaiSuKien)
+                .WithOne(l => l.SuKien)
+                .HasForeignKey<SuKien>(s => s.MaLoaiSuKien)
+                .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<SuKien>()

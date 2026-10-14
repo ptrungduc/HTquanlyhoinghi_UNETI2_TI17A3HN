@@ -38,6 +38,7 @@
             </div>
 
             <form asp-action="DangNhap" method="post">
+                @Html.AntiForgeryToken()
 
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -62,7 +63,7 @@
                     <input asp-for="Email"
                            type="email"
                            class="form-control"
-                           placeholder="Ví dụ: ten@gmail.com" />
+                           placeholder="Nhập địa chỉ email" />
 
                     <span asp-validation-for="Email"
                           class="text-danger"></span>

@@ -142,7 +142,13 @@ body {
 
 .admin-sidebar {
   width: 250px;
-  min-height: 100vh;
+  height: 100vh;
+
+  /* Giữ cố định bên trái khi cuộn nội dung */
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  overflow-y: auto;
 
   background: #10294a;
   color: white;
@@ -212,10 +218,12 @@ body {
 
 .admin-content {
   flex: 1;
+  min-width: 0;
 
   padding: 25px 30px;
 
-  overflow: hidden;
+  /* Không cắt nội dung, để trang cuộn bình thường */
+  overflow: visible;
 }
 
 
@@ -1332,59 +1340,101 @@ body {
 
   }
 
-/* =========================================================
-   FORM STYLES (DÙNG CHUNG CHO CREATE / EDIT)
-   ========================================================= */
+/* ==========================================================================
+   CSS CHO TRANG CREATE / EDIT (FORM)
+   ========================================================================== */
 
 .form-page {
-    width: 100%;
+    padding: 20px;
+    background-color: #f4f6f9;
+    min-height: calc(100vh - 60px);
+}
+
+.form-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.form-page-header h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 8px 0;
+}
+
+.form-page-header p {
+    color: #666;
+    margin: 0;
+}
+
+.admin-account {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.admin-avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.admin-account strong {
+    display: block;
+    color: #333;
+}
+
+.admin-account small {
+    color: #888;
 }
 
 .form-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
-    padding: 30px;
-    margin-top: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    padding: 24px;
 }
 
 .form-card-header {
     display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 25px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #edf0f4;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 16px;
 }
 
 .form-icon {
-    width: 45px;
-    height: 45px;
-    background: #eef5ff;
-    color: #1677ff;
-    border-radius: 10px;
+    font-size: 24px;
+    background-color: #e9ecef;
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
 }
 
 .form-card-header h3 {
-    margin: 0;
-    font-size: 20px;
-    color: #172b4d;
-    font-weight: 600;
+    margin: 0 0 4px 0;
+    font-size: 18px;
+    color: #333;
 }
 
 .form-card-header p {
-    margin: 5px 0 0;
-    color: #7b8794;
+    margin: 0;
+    color: #666;
     font-size: 14px;
 }
-
-/* =========================
-   FORM GRID & FIELDS
-   ========================= */
 
 .form-grid {
     display: grid;
@@ -1398,170 +1448,143 @@ body {
 }
 
 .form-field.full-width {
-    grid-column: span 2;
+    grid-column: 1 / -1;
 }
 
 .form-field label {
     font-weight: 500;
-    color: #333;
     margin-bottom: 8px;
-    font-size: 14px;
+    color: #444;
 }
 
 .required {
-    color: #e74c3c;
-    margin-left: 3px;
+    color: #dc3545;
+    margin-left: 4px;
 }
 
 .input-control {
-    width: 100%;
-    height: 42px;
-    padding: 0 14px;
-    border: 1px solid #d7dce2;
-    border-radius: 7px;
+    padding: 10px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
     font-size: 14px;
-    color: #333;
-    transition: 0.2s;
-    background: #fff;
+    transition: border-color 0.15s ease-in-out;
 }
 
 .input-control:focus {
-    border-color: #1677ff;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1);
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
 }
 
 .textarea-control {
-    height: auto;
-    padding: 10px 14px;
     resize: vertical;
 }
 
-.field-error {
-    color: #e74c3c;
-    font-size: 12px;
-    margin-top: 5px;
-}
-
-.field-note {
-    color: #8995a5;
-    font-size: 12px;
-    margin-top: 6px;
-}
-
-/* =========================
-   ĐẶC BIỆT (UNIT, STATUS)
-   ========================= */
-
 .input-with-unit {
     display: flex;
-    align-items: center;
+    align-items: stretch;
 }
 
 .input-with-unit .input-control {
+    flex: 1;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
 }
 
 .input-unit {
-    height: 42px;
-    padding: 0 15px;
-    background: #f7f9fc;
-    border: 1px solid #d7dce2;
-    border-left: none;
-    border-top-right-radius: 7px;
-    border-bottom-right-radius: 7px;
     display: flex;
     align-items: center;
-    color: #68778d;
+    padding: 0 12px;
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    border-left: none;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    color: #495057;
     font-size: 14px;
-    font-weight: 500;
+}
+
+.field-error {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.field-note {
+    color: #6c757d;
+    font-size: 12px;
+    margin-top: 4px;
 }
 
 .status-create {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 7px;
-    padding: 10px 15px;
-    background: #e7f7ee;
-    color: #1c9b5d;
-    border-radius: 7px;
-    font-size: 14px;
+    gap: 8px;
+    padding: 10px 12px;
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    color: #28a745;
     font-weight: 500;
-    width: fit-content;
 }
 
 .status-create-dot {
     width: 8px;
     height: 8px;
-    background: #1c9b5d;
+    background-color: #28a745;
     border-radius: 50%;
 }
-
-/* =========================
-   ACTIONS (BUTTONS)
-   ========================= */
 
 .form-actions {
     display: flex;
     justify-content: flex-end;
-    align-items: center;
     gap: 12px;
-    margin-top: 30px;
-    padding-top: 25px;
-    border-top: 1px solid #edf0f4;
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
 }
 
 .btn-cancel {
-    height: 42px;
-    padding: 0 20px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #d7dce2;
-    background: white;
-    color: #4a5568;
-    border-radius: 7px;
+    padding: 10px 20px;
+    background-color: #fff;
+    color: #6c757d;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
     text-decoration: none;
-    font-size: 14px;
     font-weight: 500;
-    transition: 0.2s;
+    transition: background-color 0.2s;
 }
 
 .btn-cancel:hover {
-    background: #f7f9fc;
-    color: #172b4d;
+    background-color: #f8f9fa;
+    color: #5a6268;
 }
 
 .btn-save {
-    height: 42px;
-    padding: 0 22px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
     border: none;
-    background: #1677ff;
-    color: white;
-    border-radius: 7px;
-    font-size: 14px;
+    border-radius: 4px;
     font-weight: 500;
     cursor: pointer;
-    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s;
 }
 
 .btn-save:hover {
-    background: #0d65d9;
-    transform: translateY(-1px);
+    background-color: #0056b3;
 }
 
 .validation-summary {
-    background: #fdeaea;
+    color: #dc3545;
+    background-color: #f8d7da;
     border: 1px solid #f5c6cb;
-    border-radius: 7px;
-    padding: 12px 15px;
+    padding: 12px;
+    border-radius: 4px;
     margin-bottom: 20px;
-    color: #c0392b;
 }
 
 .validation-summary ul {
@@ -1569,9 +1592,6 @@ body {
     padding-left: 20px;
 }
 
-/* =========================
-   RESPONSIVE FORM
-   ========================= */
 @media (max-width: 768px) {
     .form-grid {
         grid-template-columns: 1fr;
@@ -1589,22 +1609,22 @@ body {
     }
 }
 
-.status-inactive {
-    background: #fdeaea;
-    color: #c0392b;
-}
-
-.status-inactive .status-create-dot {
-    background: #c0392b;
-}
-
 .input-readonly {
-    background-color: #f7f9fc;
-    color: #8995a5;
+    background-color: #e9ecef;
+    opacity: 1;
     cursor: not-allowed;
 }
 
-.input-readonly:focus {
-    border-color: #d7dce2;
-    box-shadow: none;
+.status-active {
+    color: #28a745;
+}
+.status-active .status-create-dot {
+    background-color: #28a745;
+}
+
+.status-inactive {
+    color: #dc3545;
+}
+.status-inactive .status-create-dot {
+    background-color: #dc3545;
 }

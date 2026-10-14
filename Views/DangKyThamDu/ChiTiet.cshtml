@@ -8,10 +8,25 @@
 }
 
 <h1 class="h3 mb-4">Chi tiết đăng ký</h1>
-<div class="alert alert-info" role="status">@Model.ThongBao</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.ThongBao))
+{
+    <div class="alert alert-info" role="status">@Model.ThongBao</div>
+}
 
 @if (!string.IsNullOrWhiteSpace(Model.MaDangKy))
 {
+    var trangThaiHienThi = Model.TrangThai switch
+    {
+        "ChoDuyet" => "Chờ duyệt",
+        "DaDuyet" => "Đã duyệt",
+        "DaCheckIn" => "Đã check-in",
+        "HoanThanh" => "Hoàn thành",
+        "TuChoi" => "Từ chối",
+        "DaHuy" => "Đã hủy",
+        _ => Model.TrangThai
+    };
+
     <dl class="row">
         <dt class="col-sm-3">Mã đăng ký</dt>
         <dd class="col-sm-9"><code>@Model.MaDangKy</code></dd>
@@ -24,13 +39,17 @@
         <dt class="col-sm-3">Sự kiện</dt>
         <dd class="col-sm-9">@Model.TenSuKien</dd>
         <dt class="col-sm-3">Trạng thái</dt>
-        <dd class="col-sm-9">@Model.TrangThai</dd>
+        <dd class="col-sm-9">@trangThaiHienThi</dd>
         <dt class="col-sm-3">Ngày đăng ký</dt>
         <dd class="col-sm-9">@Model.NgayDangKy?.ToString("dd/MM/yyyy HH:mm")</dd>
         <dt class="col-sm-3">Ngày duyệt</dt>
         <dd class="col-sm-9">@(Model.NgayDuyet?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
         <dt class="col-sm-3">Mã tham dự</dt>
         <dd class="col-sm-9">@(Model.MaThamDu ?? "-")</dd>
+        <dt class="col-sm-3">@(Model.TrangThai == "TuChoi" ? "Ghi chú / lý do từ chối" : "Ghi chú")</dt>
+        <dd class="col-sm-9">
+            <span style="white-space: pre-line">@(string.IsNullOrWhiteSpace(Model.GhiChu) ? "-" : Model.GhiChu)</span>
+        </dd>
     </dl>
 }
 
