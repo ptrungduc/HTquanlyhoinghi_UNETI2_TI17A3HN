@@ -233,7 +233,11 @@ public class DangKyController : Controller
             TrangThaiSuKien = suKien.TrangThai,
             SoLuongDangKyHieuLuc = await _dangKyService.DemSoDangKyHieuLucAsync(maSuKien),
             CoTheDangKy = coTheDangKy,
-            LyDoKhongTheDangKy = lyDoKhongTheDangKy
+            LyDoKhongTheDangKy = lyDoKhongTheDangKy,
+            HoTenNguoiThamDu = nguoiThamDu.HoTen,
+            SoDienThoaiNguoiThamDu = nguoiThamDu.SoDienThoai,
+            EmailNguoiThamDu = nguoiThamDu.Email,
+            DonViCongTacNguoiThamDu = nguoiThamDu.DonViCongTac
         };
         return View(model);
     }
@@ -241,7 +245,7 @@ public class DangKyController : Controller
     [HttpPost]
     [ActionName("DangKy")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> XacNhanDangKy(string maSuKien)
+    public async Task<IActionResult> XacNhanDangKy(string maSuKien, string? ghiChu)
     {
         var taiKhoan = await LayTaiKhoanHienTai();
         if (taiKhoan == null)
@@ -259,7 +263,8 @@ public class DangKyController : Controller
 
         var (thanhCong, lyDo) = await _dangKyService.DangKySuKienAsync(
             nguoiThamDu.MaNguoiThamDu,
-            maSuKien);
+            maSuKien,
+            ghiChu);
         if (!thanhCong)
         {
             TempData["Loi"] = lyDo;
@@ -412,6 +417,7 @@ public class DangKyController : Controller
         {
             MaDangKy = d.MaDangKy,
             MaNguoiThamDu = d.MaNguoiThamDu,
+            MaSuKien = d.MaSuKien,
             TenNguoiThamDu = d.NguoiThamDu == null ? string.Empty : d.NguoiThamDu.HoTen,
             TenSuKien = d.SuKien == null ? string.Empty : d.SuKien.TenSuKien,
             MaLoaiSuKien = d.SuKien == null ? string.Empty : d.SuKien.MaLoaiSuKien,

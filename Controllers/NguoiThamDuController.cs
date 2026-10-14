@@ -300,6 +300,35 @@ public class NguoiThamDuController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    // Trang xác nhận xóa, chỉ hiển thị thông tin và không xóa dữ liệu.
+    [HttpGet]
+    public async Task<IActionResult> XacNhanXoa(string id)
+    {
+        if (!LaQuanTri())
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được xóa người tham dự.");
+        }
+
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            return BadRequest();
+        }
+
+        var nguoiThamDu = await _context.NguoiThamDus
+            .AsNoTracking()
+            .FirstOrDefaultAsync(n => n.MaNguoiThamDu == id);
+
+        if (nguoiThamDu == null)
+        {
+            return NotFound();
+        }
+
+        ViewBag.DaCoLichSu = await _context.DangKyThamDus
+            .AnyAsync(d => d.MaNguoiThamDu == id);
+
+        return View(nguoiThamDu);
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(string id)
@@ -321,14 +350,18 @@ public class NguoiThamDuController : Controller
             return NotFound();
         }
 
-        var daCoDangKySuKien = await _context.DangKyThamDus
-            .AnyAsync(d => d.MaNguoiThamDu == id);
-        var daCoDangKyPhien = await _context.DangKyPhiens
-            .AnyAsync(d => d.MaNguoiThamDu == id);
-        if (daCoDangKySuKien || daCoDangKyPhien)
+        var dangKys = await _context.DangKyThamDus
+            .Where(d => d.MaNguoiThamDu == id)
+            .ToListAsync();
+        var maDangKys = dangKys.Select(d => d.MaDangKy).ToList();
+
+        if (maDangKys.Count > 0)
         {
-            TempData["Loi"] = "Không thể xóa người tham dự đã có lịch sử đăng ký. Bạn có thể khóa người tham dự thay vì xóa.";
-            return RedirectToAction(nameof(Index));
+            var checkIns = await _context.CheckIns
+                .Where(c => maDangKys.Contains(c.MaDangKy))
+                .ToListAsync();
+            _context.CheckIns.RemoveRange(checkIns);
+            _context.DangKyThamDus.RemoveRange(dangKys);
         }
 
         _context.NguoiThamDus.Remove(nguoiThamDu);

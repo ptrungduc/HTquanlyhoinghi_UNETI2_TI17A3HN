@@ -39,7 +39,8 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Services
 
         public async Task<(bool ThanhCong, string? LyDo)> DangKySuKienAsync(
             string maNguoiThamDu,
-            string maSuKien)
+            string maSuKien,
+            string? ghiChu = null)
         {
             if (string.IsNullOrWhiteSpace(maNguoiThamDu) || string.IsNullOrWhiteSpace(maSuKien))
                 return (false, "Thông tin người tham dự hoặc sự kiện không hợp lệ.");
@@ -68,7 +69,8 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Services
                 MaNguoiThamDu = maNguoiThamDu,
                 MaSuKien = maSuKien,
                 NgayDangKy = DateTime.Now,
-                TrangThai = TrangThaiDangKy.ChoDuyet
+                TrangThai = TrangThaiDangKy.ChoDuyet,
+                GhiChu = ghiChu?.Trim() ?? string.Empty
             });
 
             await _context.SaveChangesAsync();

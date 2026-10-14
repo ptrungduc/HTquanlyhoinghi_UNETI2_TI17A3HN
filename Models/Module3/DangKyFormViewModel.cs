@@ -15,4 +15,9 @@ public class DangKyFormViewModel
     public int SoLuongDangKyHieuLuc { get; set; }
     public bool CoTheDangKy { get; set; }
     public string? LyDoKhongTheDangKy { get; set; }
+    public string HoTenNguoiThamDu { get; set; } = string.Empty;
+    public string SoDienThoaiNguoiThamDu { get; set; } = string.Empty;
+    public string EmailNguoiThamDu { get; set; } = string.Empty;
+    public string DonViCongTacNguoiThamDu { get; set; } = string.Empty;
+    public string? GhiChu { get; set; }
 }
