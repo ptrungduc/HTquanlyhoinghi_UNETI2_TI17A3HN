@@ -10,11 +10,7 @@
     @Html.AntiForgeryToken()
 
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-<div class="mb-3">
-    <label asp-for="MaTaiKhoan" class="form-label">Mã tài khoản</label>
-    <input asp-for="MaTaiKhoan" class="form-control" />
-    <span asp-validation-for="MaTaiKhoan" class="text-danger"></span>
-</div>
+
     <div class="mb-3">
         <label asp-for="MaTaiKhoan" class="form-label">Tài khoản</label>
         <select asp-for="MaTaiKhoan" asp-items="ViewBag.TaiKhoans" class="form-select">

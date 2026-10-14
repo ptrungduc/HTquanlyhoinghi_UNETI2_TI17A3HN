@@ -1586,9 +1586,27 @@ body {
     border-radius: 4px;
     margin-bottom: 20px;
 }
+
 .validation-summary ul {
     margin: 0;
     padding-left: 20px;
+}
+
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    .form-field.full-width {
+        grid-column: span 1;
+    }
+    .form-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+    .btn-cancel, .btn-save {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 .input-readonly {

@@ -39,6 +39,69 @@ public class NguoiThamDuController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> Create()
+    {
+        if (!LaQuanTri())
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được thêm người tham dự.");
+        }
+
+        await NapTaiKhoanChuaCoNguoiThamDu();
+        return View(new NguoiThamDuQuanTriViewModel());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(NguoiThamDuQuanTriViewModel model)
+    {
+        if (!LaQuanTri())
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được thêm người tham dự.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            await NapTaiKhoanChuaCoNguoiThamDu(model.MaTaiKhoan);
+            return View(model);
+        }
+
+        var daCoNguoiThamDu = await _context.NguoiThamDus
+            .AnyAsync(n => n.MaTaiKhoan == model.MaTaiKhoan);
+        if (daCoNguoiThamDu)
+        {
+            ModelState.AddModelError(nameof(model.MaTaiKhoan), "Tài khoản này đã có hồ sơ người tham dự.");
+            await NapTaiKhoanChuaCoNguoiThamDu(model.MaTaiKhoan);
+            return View(model);
+        }
+
+        var email = model.Email.Trim();
+        var trungEmail = await _context.NguoiThamDus.AnyAsync(n => n.Email == email);
+        if (trungEmail)
+        {
+            ModelState.AddModelError(nameof(model.Email), "Email này đã được dùng bởi người tham dự khác.");
+            await NapTaiKhoanChuaCoNguoiThamDu(model.MaTaiKhoan);
+            return View(model);
+        }
+
+        var nguoiThamDu = new NguoiThamDu
+        {
+            MaNguoiThamDu = Guid.NewGuid().ToString("N"),
+            MaTaiKhoan = model.MaTaiKhoan,
+            HoTen = model.HoTen.Trim(),
+            SoDienThoai = model.SoDienThoai.Trim(),
+            Email = email,
+            DonViCongTac = model.DonViCongTac?.Trim() ?? string.Empty,
+            TrangThai = true
+        };
+
+        _context.NguoiThamDus.Add(nguoiThamDu);
+        await _context.SaveChangesAsync();
+
+        TempData["ThongBao"] = "Thêm người tham dự thành công.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpGet]
     public async Task<IActionResult> HoSo()
     {
         var maTaiKhoan = HttpContext.Session.GetString("MaTaiKhoan");
