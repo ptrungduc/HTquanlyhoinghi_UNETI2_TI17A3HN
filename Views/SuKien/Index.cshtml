@@ -18,6 +18,11 @@
         <a asp-action="Create" class="btn btn-success">+ Thêm sự kiện</a>
     </div>
 
+        @if (TempData["ThongBao"] is string thongBao)
+        {
+            <div class="alert alert-info" role="alert">@thongBao</div>
+        }
+
     <form method="get" class="row g-3 mb-3">
         <div class="col-md-5">
             <input name="search" value="@ViewBag.Search" class="form-control"

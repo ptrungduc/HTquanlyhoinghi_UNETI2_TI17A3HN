@@ -156,6 +156,144 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             return View("Phien", await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync());
         }
 
+        [HttpGet]
+        public async Task<IActionResult> CreatePhien(string maSuKien)
+        {
+            var suKien = await _context.SuKiens
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.MaSuKien == maSuKien);
+
+            if (suKien == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.SuKien = suKien;
+            return View(new PhienSuKien
+            {
+                MaSuKien = suKien.MaSuKien,
+                ThoiGianBatDau = suKien.ThoiGianBatDau,
+                ThoiGianKetThuc = suKien.ThoiGianKetThuc
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreatePhien(string maSuKien, PhienSuKien phien)
+        {
+            var suKien = await _context.SuKiens
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.MaSuKien == maSuKien);
+
+            if (suKien == null || phien.MaSuKien != maSuKien)
+            {
+                return NotFound();
+            }
+
+            ValidatePhienTimeRange(phien, suKien);
+            ModelState.Remove(nameof(PhienSuKien.MaPhienSuKien));
+            phien.MaPhienSuKien = CreateCode("PSK");
+            if (!ModelState.IsValid)
+            {
+                ViewBag.SuKien = suKien;
+                return View(phien);
+            }
+
+            _context.PhienSuKiens.Add(phien);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Phien), new { maSuKien });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditPhien(string maSuKien, string id)
+        {
+            var phien = await _context.PhienSuKiens
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.MaPhienSuKien == id && p.MaSuKien == maSuKien);
+            var suKien = await _context.SuKiens
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.MaSuKien == maSuKien);
+
+            if (phien == null || suKien == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.SuKien = suKien;
+            return View(phien);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditPhien(string maSuKien, string id, PhienSuKien phien)
+        {
+            if (id != phien.MaPhienSuKien || phien.MaSuKien != maSuKien)
+            {
+                return NotFound();
+            }
+
+            var existingPhien = await _context.PhienSuKiens
+                .FirstOrDefaultAsync(p => p.MaPhienSuKien == id && p.MaSuKien == maSuKien);
+            var suKien = await _context.SuKiens
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.MaSuKien == maSuKien);
+
+            if (existingPhien == null || suKien == null)
+            {
+                return NotFound();
+            }
+
+            ValidatePhienTimeRange(phien, suKien);
+            if (!ModelState.IsValid)
+            {
+                ViewBag.SuKien = suKien;
+                return View(phien);
+            }
+
+            existingPhien.TenPhien = phien.TenPhien;
+            existingPhien.ThoiGianBatDau = phien.ThoiGianBatDau;
+            existingPhien.ThoiGianKetThuc = phien.ThoiGianKetThuc;
+            existingPhien.DienGia = phien.DienGia;
+            existingPhien.NoiDung = phien.NoiDung;
+            existingPhien.TrangThai = phien.TrangThai;
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Phien), new { maSuKien });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DeletePhien(string maSuKien, string id)
+        {
+            var phien = await _context.PhienSuKiens
+                .Include(p => p.SuKien)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.MaPhienSuKien == id && p.MaSuKien == maSuKien);
+
+            return phien == null ? NotFound() : View(phien);
+        }
+
+        [HttpPost, ActionName("DeletePhien")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePhienConfirmed(string maSuKien, string id)
+        {
+            var phien = await _context.PhienSuKiens
+                .FirstOrDefaultAsync(p => p.MaPhienSuKien == id && p.MaSuKien == maSuKien);
+
+            if (phien == null)
+            {
+                return NotFound();
+            }
+
+            if (await _context.DangKyPhiens.AnyAsync(d => d.MaPhien == id))
+            {
+                TempData["ThongBao"] = "Không thể xóa phiên đã có người đăng ký.";
+                return RedirectToAction(nameof(Phien), new { maSuKien });
+            }
+
+            _context.PhienSuKiens.Remove(phien);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Phien), new { maSuKien });
+        }
+
         public async Task<IActionResult> Details(string id)
         {
             var suKien = await _context.SuKiens
@@ -285,9 +423,10 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
                 return NotFound();
             }
 
-            if (await _context.PhienSuKiens.AnyAsync(p => p.MaSuKien == id))
+            if (await _context.PhienSuKiens.AnyAsync(p => p.MaSuKien == id)
+                || await _context.DangKyThamDus.AnyAsync(d => d.MaSuKien == id))
             {
-                TempData["ThongBao"] = "Không thể xóa sự kiện đã có phiên chương trình.";
+                TempData["ThongBao"] = "Không thể xóa sự kiện đã có phiên chương trình hoặc đăng ký tham dự.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -352,6 +491,24 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             if (suKien.ThoiGianKetThuc < suKien.ThoiGianBatDau)
             {
                 ModelState.AddModelError(nameof(SuKien.ThoiGianKetThuc), "Ngày kết thúc phải bằng hoặc sau ngày bắt đầu.");
+            }
+        }
+
+        private void ValidatePhienTimeRange(PhienSuKien phien, SuKien suKien)
+        {
+            if (phien.ThoiGianKetThuc < phien.ThoiGianBatDau)
+            {
+                ModelState.AddModelError(
+                    nameof(PhienSuKien.ThoiGianKetThuc),
+                    "Thời gian kết thúc phải bằng hoặc sau thời gian bắt đầu.");
+            }
+
+            if (phien.ThoiGianBatDau < suKien.ThoiGianBatDau
+                || phien.ThoiGianKetThuc > suKien.ThoiGianKetThuc)
+            {
+                ModelState.AddModelError(
+                    nameof(PhienSuKien.ThoiGianBatDau),
+                    "Thời gian phiên phải nằm trong khoảng thời gian của sự kiện.");
             }
         }
 
