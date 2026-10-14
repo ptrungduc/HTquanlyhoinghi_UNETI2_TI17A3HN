@@ -92,6 +92,13 @@
                     <span>Người tham dự</span>
                 </a>
 
+                <a asp-controller="DangKy"
+                   asp-action="Index"
+                   class="@(currentController == "DangKy" ? "active" : "")">
+                    📝
+                   <span>Quản lý đăng ký</span>
+                </a>
+
 
                 <!-- LỊCH TRÌNH -->
                 <a asp-controller="LichTrinh"
