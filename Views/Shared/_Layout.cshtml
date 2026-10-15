@@ -68,9 +68,15 @@
 
                 <!-- QUẢN LÝ SỰ KIỆN -->
                 <a asp-controller="LoaiSuKien"
-                   asp-action="Index"
-                   class="@(currentController == "LoaiSuKien" ? "active" : "")">
+                   asp-action="Index">
                     📅
+                    <span>Loại sự kiện</span>
+                </a>
+
+                <a asp-controller="SuKien"
+                   asp-action="Index"
+                   class="@(currentController == "SuKien" ? "active" : "")">
+                    🗓️
                     <span>Quản lý sự kiện</span>
                 </a>
 

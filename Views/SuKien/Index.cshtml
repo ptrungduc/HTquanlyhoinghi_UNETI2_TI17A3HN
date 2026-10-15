@@ -7,6 +7,16 @@
     var pageSize = (int)(ViewBag.PageSize ?? 10);
     var totalPages = (int)(ViewBag.TotalPages ?? 1);
     var totalCount = (int)(ViewBag.TotalCount ?? Model.Count());
+    string TenTrangThai(string trangThai) => trangThai switch
+    {
+        "Nhap" => "Nháp",
+        "MoDangKy" => "Mở đăng ký",
+        "DongDangKy" => "Đóng đăng ký",
+        "DangDienRa" => "Đang diễn ra",
+        "HoanThanh" => "Hoàn thành",
+        "DaHuy" => "Đã hủy",
+        _ => trangThai
+    };
 }
 
 <div class="container mt-4">
@@ -18,10 +28,10 @@
         <a asp-action="Create" class="btn btn-success">+ Thêm sự kiện</a>
     </div>
 
-        @if (TempData["ThongBao"] is string thongBao)
-        {
-            <div class="alert alert-info" role="alert">@thongBao</div>
-        }
+    @if (TempData["ThongBao"] is string thongBao)
+    {
+        <div class="alert alert-info" role="alert">@thongBao</div>
+    }
 
     <form method="get" class="row g-3 mb-3">
         <div class="col-md-5">
@@ -31,9 +41,11 @@
         <div class="col-md-3">
             <select name="trangThai" class="form-select">
                 <option value="">Tất cả trạng thái</option>
-                <option value="SapDienRa" selected="@(ViewBag.TrangThai == "SapDienRa")">Sắp diễn ra</option>
+                <option value="Nhap" selected="@(ViewBag.TrangThai == "Nhap")">Nháp</option>
+                <option value="MoDangKy" selected="@(ViewBag.TrangThai == "MoDangKy")">Mở đăng ký</option>
+                <option value="DongDangKy" selected="@(ViewBag.TrangThai == "DongDangKy")">Đóng đăng ký</option>
                 <option value="DangDienRa" selected="@(ViewBag.TrangThai == "DangDienRa")">Đang diễn ra</option>
-                <option value="DaKetThuc" selected="@(ViewBag.TrangThai == "DaKetThuc")">Đã kết thúc</option>
+                <option value="HoanThanh" selected="@(ViewBag.TrangThai == "HoanThanh")">Hoàn thành</option>
                 <option value="DaHuy" selected="@(ViewBag.TrangThai == "DaHuy")">Đã hủy</option>
             </select>
         </div>
@@ -57,11 +69,30 @@
             <input id="ngayBatDauDen" name="ngayBatDauDen" type="date"
                    value="@ViewBag.NgayBatDauDen" class="form-control" />
         </div>
+        <div class="col-md-3">
+            <label for="tinhTrangDangKy" class="form-label">Hạn đăng ký</label>
+            <select id="tinhTrangDangKy" name="tinhTrangDangKy" class="form-select">
+                <option value="">Tất cả</option>
+                <option value="ConHan" selected="@(ViewBag.TinhTrangDangKy == "ConHan")">Còn hạn</option>
+                <option value="HetHan" selected="@(ViewBag.TinhTrangDangKy == "HetHan")">Đã hết hạn</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label for="soLuongTu" class="form-label">Số lượng từ</label>
+            <input id="soLuongTu" name="soLuongTu" type="number" min="1"
+                   value="@ViewBag.SoLuongTu" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <label for="soLuongDen" class="form-label">Số lượng đến</label>
+            <input id="soLuongDen" name="soLuongDen" type="number" min="1"
+                   value="@ViewBag.SoLuongDen" class="form-control" />
+        </div>
         <div class="col-md-2">
             <select name="sortBy" class="form-select">
                 <option value="ThoiGianBatDau" selected="@(sortBy == "ThoiGianBatDau")">Bắt đầu</option>
                 <option value="TenSuKien" selected="@(sortBy == "TenSuKien")">Tên sự kiện</option>
-                <option value="ThoiGianKetThuc" selected="@(sortBy == "ThoiGianKetThuc")">Kết thúc</option>
+                <option value="HanDangKy" selected="@(sortBy == "HanDangKy")">Hạn đăng ký</option>
+                <option value="SoLuongToiDa" selected="@(sortBy == "SoLuongToiDa")">Số lượng</option>
             </select>
         </div>
         <div class="col-md-2 d-flex gap-2">
@@ -82,6 +113,8 @@
                         <th>Loại sự kiện</th>
                         <th>Địa điểm</th>
                         <th>Thời gian</th>
+                        <th>Hạn đăng ký</th>
+                        <th>Số lượng tối đa</th>
                         <th>Trạng thái</th>
                         <th class="text-center">Thao tác</th>
                     </tr>
@@ -97,7 +130,9 @@
                                 <td>@item.DiaDiem?.TenDiaDiem</td>
                                 <td>@item.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm") -
                                     @item.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td>@item.TrangThai</td>
+                                <td>@item.HanDangKy.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@item.SoLuongToiDa</td>
+                                <td>@TenTrangThai(item.TrangThai)</td>
                                     <td class="text-center text-nowrap">
                                         <a asp-action="Phien" asp-route-maSuKien="@item.MaSuKien"
                                            class="btn btn-sm btn-outline-info">Phiên</a>
@@ -114,7 +149,7 @@
                     else
                         {
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-4">Không có sự kiện nào khớp.</td>
+                                <td colspan="8" class="text-center text-muted py-4">Không có sự kiện nào khớp.</td>
                             </tr>
                         }
                     </tbody>
@@ -131,7 +166,9 @@
                            asp-route-trangThai="@ViewBag.TrangThai" asp-route-sortBy="@sortBy"
                            asp-route-sortDescending="@sortDescending" asp-route-maLoaiSuKien="@ViewBag.MaLoaiSuKien"
                            asp-route-maDiaDiem="@ViewBag.MaDiaDiem" asp-route-ngayBatDauTu="@ViewBag.NgayBatDauTu"
-                           asp-route-ngayBatDauDen="@ViewBag.NgayBatDauDen" asp-route-pageSize="@pageSize">Trước</a>
+                           asp-route-ngayBatDauDen="@ViewBag.NgayBatDauDen" asp-route-tinhTrangDangKy="@ViewBag.TinhTrangDangKy"
+                           asp-route-soLuongTu="@ViewBag.SoLuongTu" asp-route-soLuongDen="@ViewBag.SoLuongDen"
+                           asp-route-pageSize="@pageSize">Trước</a>
                     </li>
                     <li class="page-item active"><span class="page-link">Trang @pageNumber / @totalPages</span></li>
                     <li class="page-item @(pageNumber >= totalPages ? "disabled" : "")">
@@ -139,7 +176,9 @@
                            asp-route-trangThai="@ViewBag.TrangThai" asp-route-sortBy="@sortBy"
                            asp-route-sortDescending="@sortDescending" asp-route-maLoaiSuKien="@ViewBag.MaLoaiSuKien"
                            asp-route-maDiaDiem="@ViewBag.MaDiaDiem" asp-route-ngayBatDauTu="@ViewBag.NgayBatDauTu"
-                           asp-route-ngayBatDauDen="@ViewBag.NgayBatDauDen" asp-route-pageSize="@pageSize">Sau</a>
+                           asp-route-ngayBatDauDen="@ViewBag.NgayBatDauDen" asp-route-tinhTrangDangKy="@ViewBag.TinhTrangDangKy"
+                           asp-route-soLuongTu="@ViewBag.SoLuongTu" asp-route-soLuongDen="@ViewBag.SoLuongDen"
+                           asp-route-pageSize="@pageSize">Sau</a>
                     </li>
                 </ul>
             </nav>

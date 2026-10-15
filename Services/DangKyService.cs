@@ -49,6 +49,9 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Services
             if (DateTime.Now >= suKien.ThoiGianBatDau)
                 return (false, "Sự kiện đã bắt đầu, không thể đăng ký.");
 
+            if (DateTime.Now >= suKien.HanDangKy)
+                return (false, "Đã hết hạn đăng ký sự kiện.");
+
             bool daDangKyHieuLuc = await _context.DangKyThamDu
                 .AnyAsync(d =>
                     d.MaNguoiThamDu == maNguoiThamDu &&
@@ -64,7 +67,8 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Services
             if (suKien.DiaDiem == null)
                 return (false, "Địa điểm của sự kiện không tồn tại.");
 
-            if (soLuongHieuLuc >= suKien.DiaDiem.SucChuaToiDa)
+            var sucChuaDangKy = Math.Min(suKien.SoLuongToiDa, suKien.DiaDiem.SucChuaToiDa);
+            if (soLuongHieuLuc >= sucChuaDangKy)
                 return (false, "Sự kiện đã đủ số lượng đăng ký, không thể đăng ký thêm.");
 
             return (true, null);
@@ -191,10 +195,32 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Services
                 string maPhien)
         {
             var phien = await _context.PhienSuKien
+                .Include(p => p.SuKien)
                 .FirstOrDefaultAsync(p => p.MaPhienSuKien == maPhien);
 
             if (phien == null)
                 return (false, "Phiên sự kiện không tồn tại.");
+
+            if (phien.TrangThai is "Ngung" or "DaHuy" or "DaKetThuc")
+                return (false, "Phiên đã ngừng, bị hủy hoặc kết thúc nên không nhận đăng ký mới.");
+
+            if (phien.SuKien == null
+                || phien.SuKien.TrangThai is nameof(TrangThaiSuKien.DaHuy) or nameof(TrangThaiSuKien.HoanThanh))
+            {
+                return (false, "Sự kiện không còn nhận đăng ký phiên.");
+            }
+
+            if (phien.SuKien.TrangThai != nameof(TrangThaiSuKien.MoDangKy))
+                return (false, "Sự kiện hiện không ở trạng thái mở đăng ký.");
+
+            if (DateTime.Now >= phien.SuKien.HanDangKy)
+                return (false, "Đã hết hạn đăng ký sự kiện.");
+
+            if (DateTime.Now >= phien.SuKien.ThoiGianBatDau)
+                return (false, "Sự kiện đã bắt đầu, không thể đăng ký phiên.");
+
+            if (DateTime.Now >= phien.ThoiGianBatDau)
+                return (false, "Phiên đã bắt đầu, không thể đăng ký mới.");
 
             bool coDangKySuKienHieuLuc = await _context.DangKyThamDu
                 .AnyAsync(d =>
@@ -214,6 +240,14 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Services
 
             if (daDangKy)
                 return (false, "Bạn đã đăng ký phiên này rồi.");
+
+            var soDangKyPhienHieuLuc = await _context.DangKyPhien
+                .CountAsync(dp =>
+                    dp.MaPhien == maPhien
+                    && dp.TrangThai != TrangThaiDangKy.DaHuy
+                    && dp.TrangThai != TrangThaiDangKy.TuChoi);
+            if (soDangKyPhienHieuLuc >= phien.SoLuongToiDa)
+                return (false, "Phiên đã đủ số lượng đăng ký.");
 
             var (hopLe, lyDo) =
                 await KiemTraTrungLichPhienAsync(
