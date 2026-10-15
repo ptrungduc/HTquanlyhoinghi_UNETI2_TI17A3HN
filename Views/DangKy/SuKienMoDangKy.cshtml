@@ -1,0 +1,49 @@
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module3.SuKienMoDangKyViewModel
+
+@{
+    ViewData["Title"] = "Sự kiện đang mở đăng ký";
+}
+
+<h2>Sự kiện đang mở đăng ký</h2>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-5">
+        <input type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control" placeholder="Tìm tên sự kiện" />
+    </div>
+    <div class="col-md-4">
+        <select name="maLoaiSuKien" class="form-select">
+            <option value="">Tất cả loại sự kiện</option>
+            @foreach (var category in Model.LoaiSuKiens)
+            {
+                <option value="@category.MaLoaiSuKien" selected="@(Model.MaLoaiSuKien == category.MaLoaiSuKien)">@category.TenLoaiSuKien</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3"><button type="submit" class="btn btn-primary">Tìm sự kiện</button></div>
+</form>
+
+@if (Model.SuKiens.Count == 0)
+{
+    <div class="alert alert-info">Hiện không có sự kiện phù hợp đang mở đăng ký.</div>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr><th>Sự kiện</th><th>Loại</th><th>Địa điểm</th><th>Bắt đầu</th><th>Sức chứa</th><th></th></tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model.SuKiens)
+        {
+            <tr>
+                <td>@item.TenSuKien</td>
+                <td>@item.TenLoaiSuKien</td>
+                <td>@item.TenDiaDiem</td>
+                <td>@item.BatDau.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@item.SoLuongHieuLuc / @item.SucChua chỗ đã được giữ</td>
+                <td><a asp-action="DangKy" asp-route-maSuKien="@item.MaSuKien" class="btn btn-sm btn-primary">Đăng ký</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

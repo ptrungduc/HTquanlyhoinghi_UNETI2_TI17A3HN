@@ -3,6 +3,7 @@
 // Nội dung thực hiện: Module 4 - Xét duyệt đăng ký, mã tham dự, check-in, điểm danh.
 
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module4;
 
@@ -17,5 +18,6 @@ public class CheckInViewModel
     [Display(Name = "Ghi chú")]
     public string? GhiChu { get; set; }
 
+    [BindNever]
     public KetQuaThaoTacViewModel? KetQua { get; set; }
 }

@@ -15,9 +15,23 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(string? search, string? trangThai)
+        public async Task<IActionResult> Index(
+            string? search,
+            string? trangThai,
+            string? maLoaiSuKien,
+            string? maDiaDiem,
+            DateTime? ngayBatDauTu,
+            DateTime? ngayBatDauDen,
+            string sortBy = "ThoiGianBatDau",
+
+            bool sortDescending = true,
+            int pageNumber = 1,
+            int pageSize = 10)
         {
-            var query = _context.SuKiens
+            pageNumber = Math.Max(1, pageNumber);
+            pageSize = Math.Clamp(pageSize, 5, 50);
+
+            IQueryable<SuKien> query = _context.SuKiens
                 .Include(s => s.LoaiSuKien)
                 .Include(s => s.DiaDiem)
                 .AsNoTracking();
@@ -29,7 +43,8 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
                     s.TenSuKien.Contains(search)
                     || s.MoTa.Contains(search)
                     || (s.LoaiSuKien != null && s.LoaiSuKien.TenLoaiSuKien.Contains(search))
-                    || (s.DiaDiem != null && s.DiaDiem.TenDiaDiem.Contains(search)));
+                    || (s.DiaDiem != null && s.DiaDiem.TenDiaDiem.Contains(search))
+                    || s.PhienSuKiens.Any(p => p.TenPhien.Contains(search)));
             }
 
             if (!string.IsNullOrWhiteSpace(trangThai))
@@ -37,9 +52,246 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
                 query = query.Where(s => s.TrangThai == trangThai);
             }
 
+            if (!string.IsNullOrWhiteSpace(maLoaiSuKien))
+            {
+                query = query.Where(s => s.MaLoaiSuKien == maLoaiSuKien);
+            }
+
+            if (!string.IsNullOrWhiteSpace(maDiaDiem))
+            {
+                query = query.Where(s => s.MaDiaDiem == maDiaDiem);
+            }
+
+            if (ngayBatDauTu.HasValue)
+            {
+                var ngayTu = ngayBatDauTu.Value.Date;
+                query = query.Where(s => s.ThoiGianKetThuc.Date >= ngayTu);
+            }
+
+            if (ngayBatDauDen.HasValue)
+            {
+                var ngayDen = ngayBatDauDen.Value.Date;
+                query = query.Where(s => s.ThoiGianBatDau.Date <= ngayDen);
+            }
+
+            query = ApplySort(query, sortBy, sortDescending);
+            var totalCount = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+            pageNumber = Math.Clamp(pageNumber, 1, Math.Max(1, totalPages));
+
             ViewBag.Search = search;
             ViewBag.TrangThai = trangThai;
-            return View(await query.OrderByDescending(s => s.ThoiGianBatDau).ToListAsync());
+            ViewBag.MaLoaiSuKien = maLoaiSuKien;
+            ViewBag.MaDiaDiem = maDiaDiem;
+            ViewBag.NgayBatDauTu = ngayBatDauTu?.ToString("yyyy-MM-dd");
+            ViewBag.NgayBatDauDen = ngayBatDauDen?.ToString("yyyy-MM-dd");
+            ViewBag.LoaiSuKien = new SelectList(
+                await _context.LoaiSuKiens.AsNoTracking().OrderBy(l => l.TenLoaiSuKien).ToListAsync(),
+                "MaLoaiSuKien", "TenLoaiSuKien", maLoaiSuKien);
+            ViewBag.DiaDiem = new SelectList(
+                await _context.DiaDiems.AsNoTracking().OrderBy(d => d.TenDiaDiem).ToListAsync(),
+                "MaDiaDiem", "TenDiaDiem", maDiaDiem);
+            ViewBag.SortBy = sortBy;
+            ViewBag.SortDescending = sortDescending;
+            ViewBag.PageNumber = pageNumber;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalCount = totalCount;
+            return View(await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync());
+        }
+
+        public async Task<IActionResult> Phien(
+            string maSuKien,
+            string? search,
+            string? trangThai,
+            string sortBy = "ThoiGianBatDau",
+            bool sortDescending = false,
+            int pageNumber = 1,
+            int pageSize = 10)
+        {
+            var suKien = await _context.SuKiens
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.MaSuKien == maSuKien);
+
+            if (suKien == null)
+            {
+                return NotFound();
+            }
+
+            pageNumber = Math.Max(1, pageNumber);
+            pageSize = Math.Clamp(pageSize, 5, 50);
+
+            var query = _context.PhienSuKiens
+                .Where(p => p.MaSuKien == maSuKien)
+                .AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim();
+                query = query.Where(p =>
+                    p.TenPhien.Contains(search)
+                    || p.DienGia.Contains(search)
+                    || p.NoiDung.Contains(search));
+            }
+
+            if (!string.IsNullOrWhiteSpace(trangThai))
+            {
+                query = query.Where(p => p.TrangThai == trangThai);
+            }
+
+            query = ApplyPhienSort(query, sortBy, sortDescending);
+            var totalCount = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+            pageNumber = Math.Clamp(pageNumber, 1, Math.Max(1, totalPages));
+
+            ViewBag.SuKien = suKien;
+            ViewBag.Search = search;
+            ViewBag.TrangThai = trangThai;
+            ViewBag.SortBy = sortBy;
+            ViewBag.SortDescending = sortDescending;
+            ViewBag.PageNumber = pageNumber;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalCount = totalCount;
+            return View("Phien", await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync());
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CreatePhien(string maSuKien)
+        {
+            var suKien = await _context.SuKiens
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.MaSuKien == maSuKien);
+
+            if (suKien == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.SuKien = suKien;
+            return View(new PhienSuKien
+            {
+                MaSuKien = suKien.MaSuKien,
+                ThoiGianBatDau = suKien.ThoiGianBatDau,
+                ThoiGianKetThuc = suKien.ThoiGianKetThuc
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreatePhien(string maSuKien, PhienSuKien phien)
+        {
+            var suKien = await _context.SuKiens
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.MaSuKien == maSuKien);
+
+            if (suKien == null || phien.MaSuKien != maSuKien)
+            {
+                return NotFound();
+            }
+
+            ValidatePhienTimeRange(phien, suKien);
+            ModelState.Remove(nameof(PhienSuKien.MaPhienSuKien));
+            phien.MaPhienSuKien = CreateCode("PSK");
+            if (!ModelState.IsValid)
+            {
+                ViewBag.SuKien = suKien;
+                return View(phien);
+            }
+
+            _context.PhienSuKiens.Add(phien);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Phien), new { maSuKien });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditPhien(string maSuKien, string id)
+        {
+            var phien = await _context.PhienSuKiens
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.MaPhienSuKien == id && p.MaSuKien == maSuKien);
+            var suKien = await _context.SuKiens
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.MaSuKien == maSuKien);
+
+            if (phien == null || suKien == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.SuKien = suKien;
+            return View(phien);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditPhien(string maSuKien, string id, PhienSuKien phien)
+        {
+            if (id != phien.MaPhienSuKien || phien.MaSuKien != maSuKien)
+            {
+                return NotFound();
+            }
+
+            var existingPhien = await _context.PhienSuKiens
+                .FirstOrDefaultAsync(p => p.MaPhienSuKien == id && p.MaSuKien == maSuKien);
+            var suKien = await _context.SuKiens
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.MaSuKien == maSuKien);
+
+            if (existingPhien == null || suKien == null)
+            {
+                return NotFound();
+            }
+
+            ValidatePhienTimeRange(phien, suKien);
+            if (!ModelState.IsValid)
+            {
+                ViewBag.SuKien = suKien;
+                return View(phien);
+            }
+
+            existingPhien.TenPhien = phien.TenPhien;
+            existingPhien.ThoiGianBatDau = phien.ThoiGianBatDau;
+            existingPhien.ThoiGianKetThuc = phien.ThoiGianKetThuc;
+            existingPhien.DienGia = phien.DienGia;
+            existingPhien.NoiDung = phien.NoiDung;
+            existingPhien.TrangThai = phien.TrangThai;
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Phien), new { maSuKien });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DeletePhien(string maSuKien, string id)
+        {
+            var phien = await _context.PhienSuKiens
+                .Include(p => p.SuKien)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.MaPhienSuKien == id && p.MaSuKien == maSuKien);
+
+            return phien == null ? NotFound() : View(phien);
+        }
+
+        [HttpPost, ActionName("DeletePhien")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePhienConfirmed(string maSuKien, string id)
+        {
+            var phien = await _context.PhienSuKiens
+                .FirstOrDefaultAsync(p => p.MaPhienSuKien == id && p.MaSuKien == maSuKien);
+
+            if (phien == null)
+            {
+                return NotFound();
+            }
+
+            if (await _context.DangKyPhiens.AnyAsync(d => d.MaPhien == id))
+            {
+                TempData["ThongBao"] = "Không thể xóa phiên đã có người đăng ký.";
+                return RedirectToAction(nameof(Phien), new { maSuKien });
+            }
+
+            _context.PhienSuKiens.Remove(phien);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Phien), new { maSuKien });
         }
 
         public async Task<IActionResult> Details(string id)
@@ -115,13 +367,36 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
                 ModelState.AddModelError(string.Empty, "Loại sự kiện và địa điểm phải đang hoạt động.");
             }
 
+            if (await _context.PhienSuKiens.AnyAsync(p =>
+                    p.MaSuKien == id
+                    && (p.ThoiGianBatDau < suKien.ThoiGianBatDau
+                        || p.ThoiGianKetThuc > suKien.ThoiGianKetThuc)))
+            {
+                ModelState.AddModelError(
+                    nameof(SuKien.ThoiGianBatDau),
+                    "Khoảng thời gian sự kiện không được loại bỏ các phiên đã có.");
+            }
+
             if (!ModelState.IsValid)
             {
                 await LoadSelections();
                 return View(suKien);
             }
 
-            _context.Update(suKien);
+            var existingSuKien = await _context.SuKiens
+                .FirstOrDefaultAsync(s => s.MaSuKien == id);
+            if (existingSuKien == null)
+            {
+                return NotFound();
+            }
+
+            existingSuKien.TenSuKien = suKien.TenSuKien;
+            existingSuKien.MaLoaiSuKien = suKien.MaLoaiSuKien;
+            existingSuKien.MaDiaDiem = suKien.MaDiaDiem;
+            existingSuKien.ThoiGianBatDau = suKien.ThoiGianBatDau;
+            existingSuKien.ThoiGianKetThuc = suKien.ThoiGianKetThuc;
+            existingSuKien.MoTa = suKien.MoTa;
+            existingSuKien.TrangThai = suKien.TrangThai;
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
@@ -143,12 +418,20 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
             var suKien = await _context.SuKiens.FindAsync(id);
-            if (suKien != null)
+            if (suKien == null)
             {
-                _context.SuKiens.Remove(suKien);
-                await _context.SaveChangesAsync();
+                return NotFound();
             }
 
+            if (await _context.PhienSuKiens.AnyAsync(p => p.MaSuKien == id)
+                || await _context.DangKyThamDus.AnyAsync(d => d.MaSuKien == id))
+            {
+                TempData["ThongBao"] = "Không thể xóa sự kiện đã có phiên chương trình hoặc đăng ký tham dự.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            _context.SuKiens.Remove(suKien);
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
@@ -168,11 +451,64 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
                 && await _context.DiaDiems.AnyAsync(d => d.MaDiaDiem == maDiaDiem && d.TrangThai);
         }
 
+        private static IQueryable<SuKien> ApplySort(IQueryable<SuKien> query, string sortBy, bool sortDescending)
+        {
+            return sortBy switch
+            {
+                "TenSuKien" => sortDescending
+                    ? query.OrderByDescending(s => s.TenSuKien).ThenBy(s => s.MaSuKien)
+                    : query.OrderBy(s => s.TenSuKien).ThenBy(s => s.MaSuKien),
+                "ThoiGianKetThuc" => sortDescending
+                    ? query.OrderByDescending(s => s.ThoiGianKetThuc).ThenBy(s => s.MaSuKien)
+                    : query.OrderBy(s => s.ThoiGianKetThuc).ThenBy(s => s.MaSuKien),
+                _ => sortDescending
+                    ? query.OrderByDescending(s => s.ThoiGianBatDau).ThenBy(s => s.MaSuKien)
+                    : query.OrderBy(s => s.ThoiGianBatDau).ThenBy(s => s.MaSuKien)
+            };
+        }
+
+        private static IQueryable<PhienSuKien> ApplyPhienSort(
+            IQueryable<PhienSuKien> query,
+            string sortBy,
+            bool sortDescending)
+        {
+            return sortBy switch
+            {
+                "TenPhien" => sortDescending
+                    ? query.OrderByDescending(p => p.TenPhien)
+                    : query.OrderBy(p => p.TenPhien),
+                "ThoiGianKetThuc" => sortDescending
+                    ? query.OrderByDescending(p => p.ThoiGianKetThuc)
+                    : query.OrderBy(p => p.ThoiGianKetThuc),
+                _ => sortDescending
+                    ? query.OrderByDescending(p => p.ThoiGianBatDau)
+                    : query.OrderBy(p => p.ThoiGianBatDau)
+            };
+        }
+
         private void ValidateTimeRange(SuKien suKien)
         {
-            if (suKien.ThoiGianKetThuc <= suKien.ThoiGianBatDau)
+            if (suKien.ThoiGianKetThuc < suKien.ThoiGianBatDau)
             {
-                ModelState.AddModelError(nameof(SuKien.ThoiGianKetThuc), "Thời gian kết thúc phải sau thời gian bắt đầu.");
+                ModelState.AddModelError(nameof(SuKien.ThoiGianKetThuc), "Ngày kết thúc phải bằng hoặc sau ngày bắt đầu.");
+            }
+        }
+
+        private void ValidatePhienTimeRange(PhienSuKien phien, SuKien suKien)
+        {
+            if (phien.ThoiGianKetThuc < phien.ThoiGianBatDau)
+            {
+                ModelState.AddModelError(
+                    nameof(PhienSuKien.ThoiGianKetThuc),
+                    "Thời gian kết thúc phải bằng hoặc sau thời gian bắt đầu.");
+            }
+
+            if (phien.ThoiGianBatDau < suKien.ThoiGianBatDau
+                || phien.ThoiGianKetThuc > suKien.ThoiGianKetThuc)
+            {
+                ModelState.AddModelError(
+                    nameof(PhienSuKien.ThoiGianBatDau),
+                    "Thời gian phiên phải nằm trong khoảng thời gian của sự kiện.");
             }
         }
 

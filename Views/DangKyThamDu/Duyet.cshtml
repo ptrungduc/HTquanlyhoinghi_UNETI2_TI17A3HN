@@ -23,7 +23,12 @@
     <div class="mb-3">
         <span>Mã đăng ký: <code>@Model.MaDangKy</code></span>
         <input asp-for="MaDangKy" type="hidden" />
+        <span asp-validation-for="MaDangKy" class="text-danger"></span>
     </div>
     <button type="submit" class="btn btn-success">Xác nhận duyệt</button>
     <a class="btn btn-outline-secondary" asp-action="Index">Hủy</a>
 </form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
