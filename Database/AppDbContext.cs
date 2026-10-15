@@ -24,6 +24,18 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Cố định tên bảng. Các DbSet alias không "s" ở trên (DiaDiem, SuKien, ...)
+            // làm EF lấy tên alias làm tên bảng (vd: "DiaDiem" thay vì "DiaDiems")
+            // → lỗi "Invalid object name". Khai báo ToTable để luôn đúng tên bảng trong DB.
+            modelBuilder.Entity<TaiKhoan>().ToTable("TaiKhoans");
+            modelBuilder.Entity<LoaiSuKien>().ToTable("LoaiSuKiens");
+            modelBuilder.Entity<DiaDiem>().ToTable("DiaDiems");
+            modelBuilder.Entity<SuKien>().ToTable("SuKiens");
+            modelBuilder.Entity<PhienSuKien>().ToTable("PhienSuKiens");
+            modelBuilder.Entity<NguoiThamDu>().ToTable("NguoiThamDus");
+            modelBuilder.Entity<DangKyThamDu>().ToTable("DangKyThamDus");
+            modelBuilder.Entity<DangKyPhien>().ToTable("DangKyPhiens");
+            modelBuilder.Entity<CheckIn>().ToTable("CheckIns");
             modelBuilder.Entity<LoaiSuKien>()
                 .HasIndex(l => l.TenLoaiSuKien)
                 .IsUnique();

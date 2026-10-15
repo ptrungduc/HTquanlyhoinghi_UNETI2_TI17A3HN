@@ -39,6 +39,69 @@ public class NguoiThamDuController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> Create()
+    {
+        if (!LaQuanTri())
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được thêm người tham dự.");
+        }
+
+        await NapTaiKhoanChuaCoNguoiThamDu();
+        return View(new NguoiThamDuQuanTriViewModel());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(NguoiThamDuQuanTriViewModel model)
+    {
+        if (!LaQuanTri())
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được thêm người tham dự.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            await NapTaiKhoanChuaCoNguoiThamDu(model.MaTaiKhoan);
+            return View(model);
+        }
+
+        var daCoNguoiThamDu = await _context.NguoiThamDus
+            .AnyAsync(n => n.MaTaiKhoan == model.MaTaiKhoan);
+        if (daCoNguoiThamDu)
+        {
+            ModelState.AddModelError(nameof(model.MaTaiKhoan), "Tài khoản này đã có hồ sơ người tham dự.");
+            await NapTaiKhoanChuaCoNguoiThamDu(model.MaTaiKhoan);
+            return View(model);
+        }
+
+        var email = model.Email.Trim();
+        var trungEmail = await _context.NguoiThamDus.AnyAsync(n => n.Email == email);
+        if (trungEmail)
+        {
+            ModelState.AddModelError(nameof(model.Email), "Email này đã được dùng bởi người tham dự khác.");
+            await NapTaiKhoanChuaCoNguoiThamDu(model.MaTaiKhoan);
+            return View(model);
+        }
+
+        var nguoiThamDu = new NguoiThamDu
+        {
+            MaNguoiThamDu = Guid.NewGuid().ToString("N"),
+            MaTaiKhoan = model.MaTaiKhoan,
+            HoTen = model.HoTen.Trim(),
+            SoDienThoai = model.SoDienThoai.Trim(),
+            Email = email,
+            DonViCongTac = model.DonViCongTac?.Trim() ?? string.Empty,
+            TrangThai = true
+        };
+
+        _context.NguoiThamDus.Add(nguoiThamDu);
+        await _context.SaveChangesAsync();
+
+        TempData["ThongBao"] = "Thêm người tham dự thành công.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpGet]
     public async Task<IActionResult> HoSo()
     {
         var maTaiKhoan = HttpContext.Session.GetString("MaTaiKhoan");
@@ -100,6 +163,7 @@ public class NguoiThamDuController : Controller
         var nguoiThamDu = await _context.NguoiThamDus
             .FirstOrDefaultAsync(n => n.MaTaiKhoan == maTaiKhoan);
         var email = model.Email.Trim();
+
         var emailNguoiKhac = _context.NguoiThamDus
             .Where(n => n.Email == email);
         if (nguoiThamDu != null)
@@ -131,151 +195,89 @@ public class NguoiThamDuController : Controller
         nguoiThamDu.DonViCongTac = model.DonViCongTac.Trim();
 
         await _context.SaveChangesAsync();
-        TempData["ThongBao"] = "Đã lưu hồ sơ người tham dự.";
-        return RedirectToAction("SuKienMoDangKy", "DangKy");
+
+        TempData["ThongBao"] = "Cập nhật hồ sơ thành công.";
+        return RedirectToAction(nameof(HoSo));
     }
 
+    // =========================================================
+    // 4. HIỂN THỊ FORM SỬA
+    // =========================================================
     [HttpGet]
-    public async Task<IActionResult> Create()
+    public async Task<IActionResult> Edit(string id)
     {
         if (!LaQuanTri())
         {
-            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được quản lý danh sách người tham dự.");
-        }
-
-        await NapTaiKhoanChuaCoNguoiThamDu();
-        return View(new NguoiThamDuQuanTriViewModel());
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(NguoiThamDuQuanTriViewModel model)
-    {
-        if (!LaQuanTri())
-        {
-            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được quản lý danh sách người tham dự.");
-        }
-
-        var taiKhoanHopLe = await _context.TaiKhoans.AnyAsync(t =>
-            t.MaTaiKhoan == model.MaTaiKhoan && t.TrangThai);
-        var daCoHoSo = await _context.NguoiThamDus
-            .AnyAsync(n => n.MaTaiKhoan == model.MaTaiKhoan);
-        if (!taiKhoanHopLe)
-        {
-            ModelState.AddModelError(nameof(model.MaTaiKhoan), "Tài khoản không tồn tại hoặc đã bị khóa.");
-        }
-        else if (daCoHoSo)
-        {
-            ModelState.AddModelError(nameof(model.MaTaiKhoan), "Tài khoản đã có hồ sơ người tham dự.");
-        }
-
-        if (!ModelState.IsValid)
-        {
-            await NapTaiKhoanChuaCoNguoiThamDu(model.MaTaiKhoan);
-            return View(model);
-        }
-
-        var email = model.Email.Trim();
-        if (await _context.NguoiThamDus.AnyAsync(n => n.Email == email))
-        {
-            ModelState.AddModelError(nameof(model.Email), "Email này đã được dùng bởi người tham dự khác.");
-            await NapTaiKhoanChuaCoNguoiThamDu(model.MaTaiKhoan);
-            return View(model);
-        }
-
-        var maNguoiThamDu = Guid.NewGuid().ToString("N");
-        _context.NguoiThamDus.Add(new NguoiThamDu
-        {
-            MaNguoiThamDu = maNguoiThamDu,
-            MaTaiKhoan = model.MaTaiKhoan,
-            HoTen = model.HoTen.Trim(),
-            SoDienThoai = model.SoDienThoai.Trim(),
-            Email = email,
-            DonViCongTac = model.DonViCongTac.Trim(),
-            TrangThai = true
-        });
-        await _context.SaveChangesAsync();
-        TempData["ThongBao"] = "Đã thêm người tham dự.";
-        return RedirectToAction(nameof(Index));
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Edit(string? id)
-    {
-        if (!LaQuanTri())
-        {
-            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được quản lý danh sách người tham dự.");
-        }
-
-        if (string.IsNullOrWhiteSpace(id))
-        {
-            return BadRequest();
+            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được sửa người tham dự.");
         }
 
         var nguoiThamDu = await _context.NguoiThamDus
             .AsNoTracking()
             .FirstOrDefaultAsync(n => n.MaNguoiThamDu == id);
+
         if (nguoiThamDu == null)
         {
             return NotFound();
         }
 
-        return View(new NguoiThamDuQuanTriViewModel
-        {
-            MaNguoiThamDu = nguoiThamDu.MaNguoiThamDu,
-            MaTaiKhoan = nguoiThamDu.MaTaiKhoan,
-            HoTen = nguoiThamDu.HoTen,
-            SoDienThoai = nguoiThamDu.SoDienThoai,
-            Email = nguoiThamDu.Email,
-            DonViCongTac = nguoiThamDu.DonViCongTac
-        });
+        return View(nguoiThamDu);
     }
 
+    // =========================================================
+    // 5. XỬ LÝ SỬA NGƯỜI THAM DỰ
+    // =========================================================
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(string id, NguoiThamDuQuanTriViewModel model)
+    public async Task<IActionResult> Edit(string id, NguoiThamDu nguoiThamDu)
     {
         if (!LaQuanTri())
         {
-            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được quản lý danh sách người tham dự.");
+            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được sửa người tham dự.");
         }
 
-        if (id != model.MaNguoiThamDu)
+        if (id != nguoiThamDu.MaNguoiThamDu)
         {
-            return BadRequest();
+            return NotFound();
         }
 
-        var nguoiThamDu = await _context.NguoiThamDus
+        var banGhi = await _context.NguoiThamDus
             .FirstOrDefaultAsync(n => n.MaNguoiThamDu == id);
-        if (nguoiThamDu == null)
+
+        if (banGhi == null)
         {
             return NotFound();
         }
 
         if (!ModelState.IsValid)
         {
-            model.MaTaiKhoan = nguoiThamDu.MaTaiKhoan;
-            return View(model);
+            return View(nguoiThamDu);
         }
 
-        var email = model.Email.Trim();
-        if (await _context.NguoiThamDus.AnyAsync(n =>
-            n.Email == email && n.MaNguoiThamDu != id))
+        var email = nguoiThamDu.Email.Trim();
+        bool trungEmail = await _context.NguoiThamDus
+            .AnyAsync(n => n.Email == email && n.MaNguoiThamDu != id);
+
+        if (trungEmail)
         {
-            ModelState.AddModelError(nameof(model.Email), "Email này đã được dùng bởi người tham dự khác.");
-            model.MaTaiKhoan = nguoiThamDu.MaTaiKhoan;
-            return View(model);
+            ModelState.AddModelError(nameof(nguoiThamDu.Email),
+                "Email này đã được dùng bởi người tham dự khác.");
+            return View(nguoiThamDu);
         }
 
-        nguoiThamDu.HoTen = model.HoTen.Trim();
-        nguoiThamDu.SoDienThoai = model.SoDienThoai.Trim();
-        nguoiThamDu.Email = email;
-        nguoiThamDu.DonViCongTac = model.DonViCongTac.Trim();
+        banGhi.HoTen = nguoiThamDu.HoTen.Trim();
+        banGhi.SoDienThoai = nguoiThamDu.SoDienThoai.Trim();
+        banGhi.Email = email;
+        banGhi.DonViCongTac = nguoiThamDu.DonViCongTac.Trim();
+
         await _context.SaveChangesAsync();
+
         TempData["ThongBao"] = "Đã cập nhật người tham dự.";
         return RedirectToAction(nameof(Index));
     }
 
+    // =========================================================
+    // 6. KHÓA / MỞ KHÓA NGƯỜI THAM DỰ
+    // =========================================================
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> KhoaMoKhoa(string id)
@@ -287,6 +289,7 @@ public class NguoiThamDuController : Controller
 
         var nguoiThamDu = await _context.NguoiThamDus
             .FirstOrDefaultAsync(n => n.MaNguoiThamDu == id);
+
         if (nguoiThamDu == null)
         {
             return NotFound();
@@ -294,78 +297,47 @@ public class NguoiThamDuController : Controller
 
         nguoiThamDu.TrangThai = !nguoiThamDu.TrangThai;
         await _context.SaveChangesAsync();
+
         TempData["ThongBao"] = nguoiThamDu.TrangThai
             ? "Đã mở khóa người tham dự."
             : "Đã khóa người tham dự.";
         return RedirectToAction(nameof(Index));
     }
 
-    // Trang xác nhận xóa, chỉ hiển thị thông tin và không xóa dữ liệu.
-    [HttpGet]
-    public async Task<IActionResult> XacNhanXoa(string id)
-    {
-        if (!LaQuanTri())
-        {
-            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được xóa người tham dự.");
-        }
-
-        if (string.IsNullOrWhiteSpace(id))
-        {
-            return BadRequest();
-        }
-
-        var nguoiThamDu = await _context.NguoiThamDus
-            .AsNoTracking()
-            .FirstOrDefaultAsync(n => n.MaNguoiThamDu == id);
-
-        if (nguoiThamDu == null)
-        {
-            return NotFound();
-        }
-
-        ViewBag.DaCoLichSu = await _context.DangKyThamDus
-            .AnyAsync(d => d.MaNguoiThamDu == id);
-
-        return View(nguoiThamDu);
-    }
-
+    // =========================================================
+    // 7. XÓA NGƯỜI THAM DỰ
+    // =========================================================
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(string id)
     {
         if (!LaQuanTri())
         {
-            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được quản lý danh sách người tham dự.");
-        }
-
-        if (string.IsNullOrWhiteSpace(id))
-        {
-            return BadRequest();
+            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được xóa người tham dự.");
         }
 
         var nguoiThamDu = await _context.NguoiThamDus
             .FirstOrDefaultAsync(n => n.MaNguoiThamDu == id);
+
         if (nguoiThamDu == null)
         {
             return NotFound();
         }
 
-        var dangKys = await _context.DangKyThamDus
-            .Where(d => d.MaNguoiThamDu == id)
-            .ToListAsync();
-        var maDangKys = dangKys.Select(d => d.MaDangKy).ToList();
+        var daCoDangKySuKien = await _context.DangKyThamDus
+            .AnyAsync(d => d.MaNguoiThamDu == id);
+        var daCoDangKyPhien = await _context.DangKyPhiens
+            .AnyAsync(d => d.MaNguoiThamDu == id);
 
-        if (maDangKys.Count > 0)
+        if (daCoDangKySuKien || daCoDangKyPhien)
         {
-            var checkIns = await _context.CheckIns
-                .Where(c => maDangKys.Contains(c.MaDangKy))
-                .ToListAsync();
-            _context.CheckIns.RemoveRange(checkIns);
-            _context.DangKyThamDus.RemoveRange(dangKys);
+            TempData["Loi"] = "Không thể xóa người tham dự đã có lịch sử đăng ký. Bạn có thể khóa người tham dự thay vì xóa.";
+            return RedirectToAction(nameof(Index));
         }
 
         _context.NguoiThamDus.Remove(nguoiThamDu);
         await _context.SaveChangesAsync();
+
         TempData["ThongBao"] = "Đã xóa người tham dự.";
         return RedirectToAction(nameof(Index));
     }

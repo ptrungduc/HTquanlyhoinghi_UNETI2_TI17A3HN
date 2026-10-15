@@ -38,6 +38,7 @@
             </div>
 
             <form asp-action="DangNhap" method="post">
+                @Html.AntiForgeryToken()
 
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 

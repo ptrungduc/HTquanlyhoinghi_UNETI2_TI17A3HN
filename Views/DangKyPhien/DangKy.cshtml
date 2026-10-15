@@ -18,7 +18,7 @@
 }
 
 <form asp-action="DangKy" method="post">
+    @Html.AntiForgeryToken()
     <input type="hidden" name="maPhien" value="@maPhien" />
-
     <button type="submit" class="btn btn-primary">Đăng ký phiên này</button>
 </form>
