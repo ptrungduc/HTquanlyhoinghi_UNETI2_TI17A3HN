@@ -1,52 +1,96 @@
-@model IEnumerable<dynamic>
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module3.DangKyDanhSachViewModel
 
 @{
     ViewData["Title"] = "Đăng ký của tôi";
 }
 
 <h2>Đăng ký của tôi</h2>
+<p><a asp-action="SuKienMoDangKy" class="btn btn-primary">Tìm sự kiện để đăng ký</a></p>
 
-@if (TempData["ThongBao"] != null)
+@if (TempData["ThongBao"] is string thongBao)
 {
-    <div class="alert alert-success">@TempData["ThongBao"]</div>
+    <div class="alert alert-success">@thongBao</div>
 }
-@if (TempData["Loi"] != null)
+@if (TempData["Loi"] is string loi)
 {
-    <div class="alert alert-danger">@TempData["Loi"]</div>
+    <div class="alert alert-danger">@loi</div>
 }
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Sự kiện</th>
-            <th>Ngày đăng ký</th>
-            <th>Thời gian bắt đầu</th>
-            <th>Trạng thái</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.TenSuKien</td>
-                <td>@item.NgayDangKy.ToString("dd/MM/yyyy")</td>
-                <td>@(item.ThoiGianBatDau == null ? "-" : item.ThoiGianBatDau.ToString("dd/MM/yyyy"))</td>
-                <td>@item.TrangThai</td>
-                <td>
-                    @if (item.TrangThai.ToString() != "DaHuy"
-                        && item.TrangThai.ToString() != "DaCheckIn"
-                        && item.TrangThai.ToString() != "HoanThanh")
-                    {
-                        <form asp-action="Huy" method="post" class="d-inline">
-                            <input type="hidden" name="maDangKy" value="@item.MaDangKy" />
-                            <input type="hidden" name="maNguoiThamDu" value="@item.MaNguoiThamDu" />
-                            <input type="text" name="lyDoHuy" placeholder="Lý do hủy" class="form-control d-inline" style="width: 150px;" />
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Hủy</button>
-                        </form>
-                    }
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-2">
+        <select name="trangThai" class="form-select">
+            <option value="">Tất cả trạng thái</option>
+            @foreach (var status in Enum.GetValues<HTquanlyhoinghi_UNETI2_TI17A3HN.Models.TrangThaiDangKy>())
+            {
+                <option value="@status" selected="@(Model.TrangThai == status.ToString())">@status</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select name="maLoaiSuKien" class="form-select">
+            <option value="">Tất cả loại sự kiện</option>
+            @foreach (var category in Model.LoaiSuKiens)
+            {
+                <option value="@category.MaLoaiSuKien" selected="@(Model.MaLoaiSuKien == category.MaLoaiSuKien)">@category.TenLoaiSuKien</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2"><input type="date" name="tuNgay" value="@Model.TuNgay?.ToString("yyyy-MM-dd")" class="form-control" aria-label="Từ ngày đăng ký" /></div>
+    <div class="col-md-2"><input type="date" name="denNgay" value="@Model.DenNgay?.ToString("yyyy-MM-dd")" class="form-control" aria-label="Đến ngày đăng ký" /></div>
+    <div class="col-md-2">
+        <select name="sapXep" class="form-select">
+            <option value="ngaydangky" selected="@(Model.SapXep == "ngaydangky")">Ngày đăng ký</option>
+            <option value="ngaytochuc" selected="@(Model.SapXep == "ngaytochuc")">Ngày tổ chức</option>
+        </select>
+    </div>
+    <div class="col-md-2"><button type="submit" class="btn btn-primary">Lọc</button></div>
+</form>
+
+@if (Model.DangKys.Count == 0)
+{
+    <div class="alert alert-info">
+        Không tìm thấy đăng ký nào phù hợp.
+        <a asp-action="SuKienMoDangKy">Tìm sự kiện đang mở đăng ký</a>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+            <thead>
+                <tr><th>Sự kiện</th><th>Ngày đăng ký</th><th>Ngày tổ chức</th><th>Trạng thái</th><th>Hạn hủy</th><th>Thao tác</th></tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model.DangKys)
+            {
+                <tr>
+                    <td>@item.TenSuKien</td>
+                    <td>@item.NgayDangKy.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@item.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@item.TrangThaiHienThi</td>
+                    <td>@(item.HanHuy == DateTime.MinValue ? "-" : item.HanHuy.ToString("dd/MM/yyyy HH:mm"))</td>
+                    <td>
+                        @if (item.TrangThai is HTquanlyhoinghi_UNETI2_TI17A3HN.Models.TrangThaiDangKy.ChoDuyet or HTquanlyhoinghi_UNETI2_TI17A3HN.Models.TrangThaiDangKy.DaDuyet)
+                        {
+                            @if (DateTime.Now < item.HanHuy)
+                            {
+                                <form asp-action="Huy" method="post" class="d-flex gap-1">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="maDangKy" value="@item.MaDangKy" />
+                                    <input type="text" name="lyDoHuy" placeholder="Lý do hủy (không bắt buộc)" aria-label="Lý do hủy đăng ký @item.TenSuKien" class="form-control" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Hủy</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Đã quá hạn hủy</span>
+                            }
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

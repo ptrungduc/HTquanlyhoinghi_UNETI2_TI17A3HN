@@ -133,54 +133,56 @@
                                 <td>@item.HanDangKy.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td>@item.SoLuongToiDa</td>
                                 <td>@TenTrangThai(item.TrangThai)</td>
-                                    <td class="text-center text-nowrap">
-                                        <a asp-action="Phien" asp-route-maSuKien="@item.MaSuKien"
-                                           class="btn btn-sm btn-outline-info">Phiên</a>
-                                        <a asp-action="Details" asp-route-id="@item.MaSuKien"
-                                           class="btn btn-sm btn-outline-primary">Chi tiết</a>
-                                        <a asp-action="Edit" asp-route-id="@item.MaSuKien"
-                                           class="btn btn-sm btn-outline-secondary">Sửa</a>
-                                        <a asp-action="Delete" asp-route-id="@item.MaSuKien"
-                                           class="btn btn-sm btn-outline-danger">Xóa</a>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                    else
-                        {
-                            <tr>
-                                <td colspan="8" class="text-center text-muted py-4">Không có sự kiện nào khớp.</td>
+                                <td class="text-center text-nowrap">
+                                    <a asp-action="Phien" asp-route-maSuKien="@item.MaSuKien"
+                                       class="btn btn-sm btn-outline-info">Phiên</a>
+                                    <a asp-action="Details" asp-route-id="@item.MaSuKien"
+                                       class="btn btn-sm btn-outline-primary">Chi tiết</a>
+                                    <a asp-action="Edit" asp-route-id="@item.MaSuKien"
+                                       class="btn btn-sm btn-outline-secondary">Sửa</a>
+                                    <a asp-action="Delete" asp-route-id="@item.MaSuKien"
+                                       class="btn btn-sm btn-outline-danger">Xóa</a>
+                                </td>
                             </tr>
                         }
-                    </tbody>
-                </table>
-            </div>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">Không có sự kiện nào khớp.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
-
-        @if (totalPages > 1)
-        {
-            <nav class="mt-3" aria-label="Phân trang">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item @(pageNumber <= 1 ? "disabled" : "")">
-                        <a class="page-link" asp-route-pageNumber="@(pageNumber - 1)" asp-route-search="@ViewBag.Search"
-                           asp-route-trangThai="@ViewBag.TrangThai" asp-route-sortBy="@sortBy"
-                           asp-route-sortDescending="@sortDescending" asp-route-maLoaiSuKien="@ViewBag.MaLoaiSuKien"
-                           asp-route-maDiaDiem="@ViewBag.MaDiaDiem" asp-route-ngayBatDauTu="@ViewBag.NgayBatDauTu"
-                           asp-route-ngayBatDauDen="@ViewBag.NgayBatDauDen" asp-route-tinhTrangDangKy="@ViewBag.TinhTrangDangKy"
-                           asp-route-soLuongTu="@ViewBag.SoLuongTu" asp-route-soLuongDen="@ViewBag.SoLuongDen"
-                           asp-route-pageSize="@pageSize">Trước</a>
-                    </li>
-                    <li class="page-item active"><span class="page-link">Trang @pageNumber / @totalPages</span></li>
-                    <li class="page-item @(pageNumber >= totalPages ? "disabled" : "")">
-                        <a class="page-link" asp-route-pageNumber="@(pageNumber + 1)" asp-route-search="@ViewBag.Search"
-                           asp-route-trangThai="@ViewBag.TrangThai" asp-route-sortBy="@sortBy"
-                           asp-route-sortDescending="@sortDescending" asp-route-maLoaiSuKien="@ViewBag.MaLoaiSuKien"
-                           asp-route-maDiaDiem="@ViewBag.MaDiaDiem" asp-route-ngayBatDauTu="@ViewBag.NgayBatDauTu"
-                           asp-route-ngayBatDauDen="@ViewBag.NgayBatDauDen" asp-route-tinhTrangDangKy="@ViewBag.TinhTrangDangKy"
-                           asp-route-soLuongTu="@ViewBag.SoLuongTu" asp-route-soLuongDen="@ViewBag.SoLuongDen"
-                           asp-route-pageSize="@pageSize">Sau</a>
-                    </li>
-                </ul>
-            </nav>
-        }
     </div>
+
+    @if (totalPages > 1)
+    {
+        <nav class="mt-3" aria-label="Phân trang">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(pageNumber <= 1 ? "disabled" : "")">
+                    <a class="page-link" asp-route-pageNumber="@(pageNumber - 1)" asp-route-search="@ViewBag.Search"
+                       asp-route-trangThai="@ViewBag.TrangThai" asp-route-sortBy="@sortBy"
+                       asp-route-sortDescending="@sortDescending" asp-route-maLoaiSuKien="@ViewBag.MaLoaiSuKien"
+                       asp-route-maDiaDiem="@ViewBag.MaDiaDiem" asp-route-ngayBatDauTu="@ViewBag.NgayBatDauTu"
+                       asp-route-ngayBatDauDen="@ViewBag.NgayBatDauDen"
+                       asp-route-tinhTrangDangKy="@ViewBag.TinhTrangDangKy"
+                       asp-route-soLuongTu="@ViewBag.SoLuongTu" asp-route-soLuongDen="@ViewBag.SoLuongDen"
+                       asp-route-pageSize="@pageSize">Trước</a>
+                </li>
+                <li class="page-item active"><span class="page-link">Trang @pageNumber / @totalPages</span></li>
+                <li class="page-item @(pageNumber >= totalPages ? "disabled" : "")">
+                    <a class="page-link" asp-route-pageNumber="@(pageNumber + 1)" asp-route-search="@ViewBag.Search"
+                       asp-route-trangThai="@ViewBag.TrangThai" asp-route-sortBy="@sortBy"
+                       asp-route-sortDescending="@sortDescending" asp-route-maLoaiSuKien="@ViewBag.MaLoaiSuKien"
+                       asp-route-maDiaDiem="@ViewBag.MaDiaDiem" asp-route-ngayBatDauTu="@ViewBag.NgayBatDauTu"
+                       asp-route-ngayBatDauDen="@ViewBag.NgayBatDauDen"
+                       asp-route-tinhTrangDangKy="@ViewBag.TinhTrangDangKy"
+                       asp-route-soLuongTu="@ViewBag.SoLuongTu" asp-route-soLuongDen="@ViewBag.SoLuongDen"
+                       asp-route-pageSize="@pageSize">Sau</a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>

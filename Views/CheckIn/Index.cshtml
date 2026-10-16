@@ -32,3 +32,7 @@
     <a class="btn btn-outline-secondary" asp-controller="DangKyThamDu" asp-action="Index">Danh sách xét duyệt</a>
     <a class="btn btn-outline-secondary" asp-controller="DiemDanhPhien" asp-action="Index">Điểm danh phiên</a>
 </form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

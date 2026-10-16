@@ -22,16 +22,11 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Database
         public DbSet<DangKyPhien> DangKyPhiens { get; set; }
         public DbSet<CheckIn> CheckIns { get; set; }
 
-        // === Alias không "s" - Module 3 sử dụng tên này ===
-        public DbSet<NguoiThamDu> NguoiThamDu => NguoiThamDus;
-        public DbSet<DangKyThamDu> DangKyThamDu => DangKyThamDus;
-        public DbSet<DangKyPhien> DangKyPhien => DangKyPhiens;
-        public DbSet<DiaDiem> DiaDiem => DiaDiems;
-        public DbSet<SuKien> SuKien => SuKiens;
-        public DbSet<PhienSuKien> PhienSuKien => PhienSuKiens;
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Keep table names aligned with the existing database schema.
+            modelBuilder.Entity<TaiKhoan>().ToTable("TaiKhoans");
+            modelBuilder.Entity<LoaiSuKien>().ToTable("LoaiSuKiens");
             modelBuilder.Entity<DiaDiem>().ToTable("DiaDiems");
             modelBuilder.Entity<SuKien>().ToTable("SuKiens");
             modelBuilder.Entity<PhienSuKien>().ToTable("PhienSuKiens");
@@ -39,7 +34,6 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Database
             modelBuilder.Entity<DangKyThamDu>().ToTable("DangKyThamDus");
             modelBuilder.Entity<DangKyPhien>().ToTable("DangKyPhiens");
             modelBuilder.Entity<CheckIn>().ToTable("CheckIns");
-
             modelBuilder.Entity<LoaiSuKien>()
                 .HasIndex(l => l.TenLoaiSuKien)
                 .IsUnique();

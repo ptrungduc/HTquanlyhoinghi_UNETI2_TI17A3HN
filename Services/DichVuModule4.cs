@@ -79,7 +79,8 @@ public class DichVuModule4 : IDichVuModule4
             TrangThai = dangKy.TrangThai.ToString(),
             NgayDangKy = dangKy.NgayDangKy,
             NgayDuyet = dangKy.NgayDuyet,
-            MaThamDu = dangKy.MaThamDu
+            MaThamDu = dangKy.MaThamDu,
+            GhiChu = dangKy.GhiChu
         };
     }
 
@@ -201,6 +202,9 @@ public class DichVuModule4 : IDichVuModule4
     {
         if (string.IsNullOrWhiteSpace(lyDoTuChoi))
             return KetQuaThatBai("Vui lòng nhập lý do từ chối.");
+
+        if (lyDoTuChoi.Length > 500)
+            return KetQuaThatBai("Lý do từ chối không được vượt quá 500 ký tự.");
 
         var dangKy = await _context.DangKyThamDus
             .FirstOrDefaultAsync(d => d.MaDangKy == maDangKy);
