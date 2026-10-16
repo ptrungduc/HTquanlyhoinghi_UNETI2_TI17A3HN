@@ -26,6 +26,18 @@
     <dd class="col-sm-9">@Model.SoLuongDangKyHieuLuc / @Model.SucChuaDiaDiem chỗ</dd>
 </dl>
 
+<h3>Thông tin người tham dự</h3>
+<dl class="row">
+    <dt class="col-sm-3">Họ và tên</dt>
+    <dd class="col-sm-9">@Model.HoTenNguoiThamDu</dd>
+    <dt class="col-sm-3">Số điện thoại</dt>
+    <dd class="col-sm-9">@Model.SoDienThoaiNguoiThamDu</dd>
+    <dt class="col-sm-3">Email</dt>
+    <dd class="col-sm-9">@Model.EmailNguoiThamDu</dd>
+    <dt class="col-sm-3">Đơn vị công tác / Lớp</dt>
+    <dd class="col-sm-9">@Model.DonViCongTacNguoiThamDu</dd>
+</dl>
+
 @if (!Model.CoTheDangKy)
 {
     <div class="alert alert-warning">@Model.LyDoKhongTheDangKy</div>
@@ -34,6 +46,12 @@
 <form asp-action="DangKy" method="post">
     @Html.AntiForgeryToken()
     <input type="hidden" name="maSuKien" value="@Model.MaSuKien" />
+    <div class="mb-3">
+        <label asp-for="GhiChu" class="form-label">Ghi chú</label>
+        <textarea asp-for="GhiChu" class="form-control" rows="3"
+                  placeholder="Yêu cầu hoặc ghi chú thêm..."></textarea>
+        <span asp-validation-for="GhiChu" class="text-danger"></span>
+    </div>
     <button type="submit" class="btn btn-primary" disabled="@(!Model.CoTheDangKy)">Xác nhận đăng ký</button>
     <a asp-action="SuKienMoDangKy" class="btn btn-secondary">Quay lại danh sách sự kiện</a>
 </form>
