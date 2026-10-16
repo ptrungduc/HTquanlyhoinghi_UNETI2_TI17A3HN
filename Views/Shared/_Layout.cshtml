@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="vi">
+<html lang="@(Context.Request.Cookies["ngon_ngu"] == "en" ? "en" : "vi")">
 
 <head>
     <meta charset="utf-8" />
@@ -24,9 +24,13 @@
 @{
     var currentController =
         ViewContext.RouteData.Values["controller"]?.ToString();
+
+    // Cài đặt người dùng (cookie) từ trang Cài đặt
+    var ngonNguTrang = Context.Request.Cookies["ngon_ngu"] == "en" ? "en" : "vi";
+    var themeTrang = Context.Request.Cookies["theme"] == "dark" ? "theme-dark" : "";
 }
 
-<body>
+<body class="@themeTrang">
 
     <div class="admin-page">
 

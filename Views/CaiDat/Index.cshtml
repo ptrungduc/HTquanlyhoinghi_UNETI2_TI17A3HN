@@ -1,0 +1,61 @@
+@* Họ và tên: [TÊN CỦA TÔI] *@
+@* Mã sinh viên: [MSSV CỦA TÔI] *@
+@* Nội dung thực hiện: Cài đặt giao diện - ngôn ngữ và theme sáng/tối. *@
+
+@{
+    ViewData["Title"] = "Cài đặt";
+    var ngonNguHienTai = ViewBag.NgonNgu as string ?? "vi";
+    var themeHienTai = ViewBag.Theme as string ?? "light";
+}
+
+<header class="admin-header">
+    <div>
+        <h2>⚙️ Cài đặt</h2>
+        <p>Tùy chỉnh ngôn ngữ và giao diện hiển thị</p>
+    </div>
+</header>
+
+<div class="container mt-4" style="max-width: 640px;">
+
+    @if (TempData["ThongBao"] is string thongBao)
+    {
+        <div class="alert alert-success">@thongBao</div>
+    }
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <form method="post" asp-controller="CaiDat" asp-action="LuuCaiDat">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-4">
+                    <label for="ngonNgu" class="form-label fw-bold">Ngôn ngữ</label>
+                    <select id="ngonNgu" name="ngonNgu" class="form-select">
+                        <option value="vi" selected="@(ngonNguHienTai == "vi")">Tiếng Việt</option>
+                        <option value="en" selected="@(ngonNguHienTai == "en")">English</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold d-block">Giao diện</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="theme" id="themeLight" value="light"
+                               checked="@(themeHienTai == "light")" />
+                        <label class="form-check-label" for="themeLight">☀️ Sáng</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="theme" id="themeDark" value="dark"
+                               checked="@(themeHienTai == "dark")" />
+                        <label class="form-check-label" for="themeDark">🌙 Tối</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Lưu cài đặt</button>
+            </form>
+
+            <p class="text-muted small mt-3 mb-0">
+                Lựa chọn được lưu trên trình duyệt này (cookie), không ảnh hưởng người dùng khác.
+                Ngôn ngữ hiện chỉ đổi thuộc tính <code>lang</code> của trang; giao diện chính vẫn là tiếng Việt.
+            </p>
+        </div>
+    </div>
+</div>
