@@ -23,8 +23,14 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Models
         [Required]
         public DateTime ThoiGianKetThuc { get; set; }
 
+        [Required]
+        public DateTime HanDangKy { get; set; }
+
+        [Range(1, int.MaxValue, ErrorMessage = "Số lượng tối đa phải lớn hơn 0.")]
+        public int SoLuongToiDa { get; set; }
+
         public string MoTa { get; set; } = string.Empty;
-        public string TrangThai { get; set; } = "SapDienRa";
+        public string TrangThai { get; set; } = nameof(TrangThaiSuKien.Nhap);
 
         public LoaiSuKien? LoaiSuKien { get; set; }
         public DiaDiem? DiaDiem { get; set; }
