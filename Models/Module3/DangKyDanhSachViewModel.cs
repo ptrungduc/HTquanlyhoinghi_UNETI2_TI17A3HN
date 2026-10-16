@@ -17,6 +17,7 @@ public class DangKyDongViewModel
 {
     public string MaDangKy { get; set; } = string.Empty;
     public string? MaNguoiThamDu { get; set; }
+    public string MaSuKien { get; set; } = string.Empty;
     public string TenNguoiThamDu { get; set; } = string.Empty;
     public string TenSuKien { get; set; } = string.Empty;
     public string MaLoaiSuKien { get; set; } = string.Empty;
@@ -25,7 +26,9 @@ public class DangKyDongViewModel
     public TrangThaiDangKy TrangThai { get; set; }
     public DateTime HanHuy { get; set; }
 
-    public string TrangThaiHienThi => TrangThai switch
+    public string TrangThaiHienThi => TenTrangThai(TrangThai);
+
+    public static string TenTrangThai(TrangThaiDangKy trangThai) => trangThai switch
     {
         TrangThaiDangKy.ChoDuyet => "Chờ duyệt",
         TrangThaiDangKy.DaDuyet => "Đã duyệt",
@@ -33,7 +36,7 @@ public class DangKyDongViewModel
         TrangThaiDangKy.HoanThanh => "Hoàn thành",
         TrangThaiDangKy.TuChoi => "Từ chối",
         TrangThaiDangKy.DaHuy => "Đã hủy",
-        _ => TrangThai.ToString()
+        _ => trangThai.ToString()
     };
 }
 
