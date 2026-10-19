@@ -4,7 +4,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Models
     public class TaiKhoan
     {
         [Key]
-        public string MaTaiKhoan { get; set; }
+        public string MaTaiKhoan { get; set; } = string.Empty;
         [Required(ErrorMessage = "Tên đăng nhập không được để trống")]
         [StringLength(50, ErrorMessage = "Tên đăng nhập không được vượt quá 50 ký tự")]
         public string TenDangNhap { get; set; } = string.Empty;

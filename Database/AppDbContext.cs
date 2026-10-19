@@ -24,6 +24,16 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Keep table names aligned with the existing database schema.
+            modelBuilder.Entity<TaiKhoan>().ToTable("TaiKhoans");
+            modelBuilder.Entity<LoaiSuKien>().ToTable("LoaiSuKiens");
+            modelBuilder.Entity<DiaDiem>().ToTable("DiaDiems");
+            modelBuilder.Entity<SuKien>().ToTable("SuKiens");
+            modelBuilder.Entity<PhienSuKien>().ToTable("PhienSuKiens");
+            modelBuilder.Entity<NguoiThamDu>().ToTable("NguoiThamDus");
+            modelBuilder.Entity<DangKyThamDu>().ToTable("DangKyThamDus");
+            modelBuilder.Entity<DangKyPhien>().ToTable("DangKyPhiens");
+            modelBuilder.Entity<CheckIn>().ToTable("CheckIns");
             modelBuilder.Entity<LoaiSuKien>()
                 .HasIndex(l => l.TenLoaiSuKien)
                 .IsUnique();
@@ -33,8 +43,8 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Database
 
             modelBuilder.Entity<SuKien>()
                 .HasOne(s => s.LoaiSuKien)
-                .WithOne(l => l.SuKien)
-                .HasForeignKey<SuKien>(s => s.MaLoaiSuKien)
+                .WithMany(l => l.SuKiens)
+                .HasForeignKey(s => s.MaLoaiSuKien)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
 

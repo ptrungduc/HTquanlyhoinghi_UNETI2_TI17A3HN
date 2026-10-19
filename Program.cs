@@ -52,6 +52,11 @@ app.UseAuthorization();
 app.MapStaticAssets();
 
 app.MapControllerRoute(
+    name: "nguoiThamDu",
+    pattern: "NguoiThamDu/{action=Index}/{id?}",
+    defaults: new { controller = "NguoiThamDu" });
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=TaiKhoan}/{action=DangNhap}/{id?}")
     .WithStaticAssets();

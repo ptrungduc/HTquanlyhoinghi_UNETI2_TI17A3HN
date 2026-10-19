@@ -1,0 +1,30 @@
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.PhienSuKien
+
+@{
+    ViewData["Title"] = "Xóa phiên";
+}
+
+<div class="container mt-4">
+    <h1>Xóa phiên sự kiện</h1>
+    <div class="alert alert-warning" role="alert">
+        Phiên đã có người đăng ký sẽ không thể bị xóa.
+    </div>
+    <dl class="row card card-body">
+        <dt class="col-sm-3">Sự kiện</dt>
+        <dd class="col-sm-9">@Model.SuKien?.TenSuKien</dd>
+        <dt class="col-sm-3">Tên phiên</dt>
+        <dd class="col-sm-9">@Model.TenPhien</dd>
+        <dt class="col-sm-3">Thời gian</dt>
+        <dd class="col-sm-9">@Model.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm") - @Model.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")</dd>
+        <dt class="col-sm-3">Phòng/khu vực</dt>
+        <dd class="col-sm-9">@Model.PhongKhuVuc</dd>
+        <dt class="col-sm-3">Diễn giả</dt>
+        <dd class="col-sm-9">@Model.DienGia</dd>
+    </dl>
+    <form asp-action="DeletePhien" asp-route-maSuKien="@Model.MaSuKien"
+          asp-route-id="@Model.MaPhienSuKien" method="post" class="mt-3">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-danger">Xác nhận xóa</button>
+        <a asp-action="Phien" asp-route-maSuKien="@Model.MaSuKien" class="btn btn-secondary">Hủy</a>
+    </form>
+</div>

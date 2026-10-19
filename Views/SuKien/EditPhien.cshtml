@@ -1,0 +1,74 @@
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.PhienSuKien
+
+@{
+    var suKien = (HTquanlyhoinghi_UNETI2_TI17A3HN.Models.SuKien)ViewBag.SuKien;
+    ViewData["Title"] = "Chỉnh sửa phiên";
+}
+
+<div class="container mt-4">
+    <h1>Chỉnh sửa phiên - @suKien.TenSuKien</h1>
+    <form asp-action="EditPhien" asp-route-maSuKien="@suKien.MaSuKien"
+          asp-route-id="@Model.MaPhienSuKien" method="post" class="card card-body">
+        @Html.AntiForgeryToken()
+        <input asp-for="MaSuKien" type="hidden" />
+        <input asp-for="MaPhienSuKien" type="hidden" />
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label asp-for="TenPhien" class="form-label">Tên phiên</label>
+            <input asp-for="TenPhien" class="form-control" />
+            <span asp-validation-for="TenPhien" class="text-danger"></span>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="ThoiGianBatDau" class="form-label">Thời gian bắt đầu</label>
+                <input asp-for="ThoiGianBatDau" type="datetime-local" asp-format="{0:yyyy-MM-ddTHH:mm}" class="form-control" />
+                <span asp-validation-for="ThoiGianBatDau" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="ThoiGianKetThuc" class="form-label">Thời gian kết thúc</label>
+                <input asp-for="ThoiGianKetThuc" type="datetime-local" asp-format="{0:yyyy-MM-ddTHH:mm}" class="form-control" />
+                <span asp-validation-for="ThoiGianKetThuc" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label asp-for="PhongKhuVuc" class="form-label">Phòng/khu vực</label>
+            <input asp-for="PhongKhuVuc" class="form-control" />
+            <span asp-validation-for="PhongKhuVuc" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="SoLuongToiDa" class="form-label">Số lượng tối đa</label>
+            <input asp-for="SoLuongToiDa" type="number" min="1" class="form-control" />
+            <span asp-validation-for="SoLuongToiDa" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="DienGia" class="form-label">Diễn giả</label>
+            <input asp-for="DienGia" class="form-control" />
+            <span asp-validation-for="DienGia" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="TrangThai" class="form-label">Trạng thái</label>
+            <select asp-for="TrangThai" class="form-select">
+                <option value="SapDienRa">Sắp diễn ra</option>
+                <option value="DangDienRa">Đang diễn ra</option>
+                <option value="DaKetThuc">Đã kết thúc</option>
+                <option value="Ngung">Ngừng</option>
+                <option value="DaHuy">Đã hủy</option>
+            </select>
+            <span asp-validation-for="TrangThai" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="NoiDung" class="form-label">Nội dung</label>
+            <textarea asp-for="NoiDung" class="form-control" rows="4"></textarea>
+            <span asp-validation-for="NoiDung" class="text-danger"></span>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+            <a asp-action="Phien" asp-route-maSuKien="@suKien.MaSuKien" class="btn btn-secondary">Quay lại</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,27 @@
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.SuKien
+
+@{
+    ViewData["Title"] = "Xóa sự kiện";
+}
+
+<div class="container mt-4">
+    <h1>Xóa sự kiện</h1>
+    <div class="alert alert-warning" role="alert">
+        Xác nhận xóa sự kiện này? Sự kiện đã có phiên chương trình hoặc đăng ký tham dự sẽ không thể bị xóa.
+    </div>
+    <dl class="row card card-body">
+        <dt class="col-sm-3">Tên sự kiện</dt>
+        <dd class="col-sm-9">@Model.TenSuKien</dd>
+        <dt class="col-sm-3">Loại sự kiện</dt>
+        <dd class="col-sm-9">@Model.LoaiSuKien?.TenLoaiSuKien</dd>
+        <dt class="col-sm-3">Địa điểm</dt>
+        <dd class="col-sm-9">@Model.DiaDiem?.TenDiaDiem</dd>
+        <dt class="col-sm-3">Thời gian</dt>
+        <dd class="col-sm-9">@Model.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm") - @Model.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")</dd>
+    </dl>
+    <form asp-action="Delete" asp-route-id="@Model.MaSuKien" method="post" class="mt-3">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-danger">Xác nhận xóa</button>
+        <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+    </form>
+</div>

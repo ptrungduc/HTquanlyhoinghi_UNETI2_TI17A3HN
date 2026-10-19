@@ -1,0 +1,57 @@
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module3.DangKyFormViewModel
+
+@{
+    ViewData["Title"] = "Đăng ký sự kiện";
+}
+
+<h2>Đăng ký sự kiện</h2>
+
+@if (TempData["Loi"] is string loi)
+{
+    <div class="alert alert-danger">@loi</div>
+}
+
+<dl class="row">
+    <dt class="col-sm-3">Sự kiện</dt>
+    <dd class="col-sm-9">@Model.TenSuKien</dd>
+    <dt class="col-sm-3">Loại sự kiện</dt>
+    <dd class="col-sm-9">@Model.TenLoaiSuKien</dd>
+    <dt class="col-sm-3">Địa điểm</dt>
+    <dd class="col-sm-9">@Model.TenDiaDiem (sức chứa @Model.SucChuaDiaDiem)</dd>
+    <dt class="col-sm-3">Thời gian</dt>
+    <dd class="col-sm-9">@Model.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm") - @Model.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")</dd>
+    <dt class="col-sm-3">Trạng thái</dt>
+    <dd class="col-sm-9">@Model.TrangThaiSuKien</dd>
+    <dt class="col-sm-3">Đăng ký đang hiệu lực</dt>
+    <dd class="col-sm-9">@Model.SoLuongDangKyHieuLuc / @Model.SucChuaDiaDiem chỗ</dd>
+</dl>
+
+<h3>Thông tin người tham dự</h3>
+<dl class="row">
+    <dt class="col-sm-3">Họ và tên</dt>
+    <dd class="col-sm-9">@Model.HoTenNguoiThamDu</dd>
+    <dt class="col-sm-3">Số điện thoại</dt>
+    <dd class="col-sm-9">@Model.SoDienThoaiNguoiThamDu</dd>
+    <dt class="col-sm-3">Email</dt>
+    <dd class="col-sm-9">@Model.EmailNguoiThamDu</dd>
+    <dt class="col-sm-3">Đơn vị công tác / Lớp</dt>
+    <dd class="col-sm-9">@Model.DonViCongTacNguoiThamDu</dd>
+</dl>
+
+@if (!Model.CoTheDangKy)
+{
+    <div class="alert alert-warning">@Model.LyDoKhongTheDangKy</div>
+}
+
+<form asp-action="DangKy" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="maSuKien" value="@Model.MaSuKien" />
+    <div class="mb-3">
+        <label asp-for="GhiChu" class="form-label">Ghi chú</label>
+        <textarea asp-for="GhiChu" class="form-control" rows="3"
+                  placeholder="Yêu cầu hoặc ghi chú thêm..."></textarea>
+        <span asp-validation-for="GhiChu" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary" disabled="@(!Model.CoTheDangKy)">Xác nhận đăng ký</button>
+    <a asp-action="SuKienMoDangKy" class="btn btn-secondary">Quay lại danh sách sự kiện</a>
+</form>

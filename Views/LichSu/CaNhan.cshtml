@@ -1,13 +1,12 @@
 @* Họ và tên: [TÊN CỦA TÔI] *@
 @* Mã sinh viên: [MSSV CỦA TÔI] *@
-@* Nội dung thực hiện: Module 5 - Lịch sử tham dự, Dashboard, thống kê LINQ, báo cáo. *@
+@* Nội dung thực hiện: Module 5 - Lịch sử tham dự (Bước 1). *@
 
 @model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module5.LichSuThamDuViewModel
 
 @{
     ViewData["Title"] = "Lịch sử tham dự";
 
-    // Hàm hiển thị tên trạng thái thân thiện
     string TenTrangThai(string trangThai) => trangThai switch
     {
         "ChoDuyet"  => "Chờ duyệt",
@@ -19,7 +18,6 @@
         _           => trangThai
     };
 
-    // Hàm trả về CSS class cho badge trạng thái
     string BadgeCss(string trangThai) => trangThai switch
     {
         "ChoDuyet"  => "bg-warning text-dark",
@@ -53,12 +51,10 @@
 
 <div class="container mt-4">
 
-    <!-- Tổng số đăng ký -->
     <div class="alert alert-info">
         📋 Bạn có tổng cộng <strong>@Model.DanhSachDangKy.Count</strong> lượt đăng ký sự kiện.
     </div>
 
-    <!-- Bảng lịch sử -->
     <div class="card shadow-sm border-0">
         <div class="card-body">
             <div class="table-responsive">
@@ -73,6 +69,7 @@
                             <th>Trạng thái</th>
                             <th>Check-in</th>
                             <th>Mã tham dự</th>
+                            <th>Phiên tham gia</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -104,9 +101,7 @@
                                         }
                                     </td>
 
-                                    <td>
-                                        @item.NgayDangKy.ToString("dd/MM/yyyy")
-                                    </td>
+                                    <td>@item.NgayDangKy.ToString("dd/MM/yyyy")</td>
 
                                     <td>
                                         <span class="badge @BadgeCss(item.TrangThai)">
@@ -137,13 +132,35 @@
                                             <span class="text-muted">—</span>
                                         }
                                     </td>
+
+                                    <td>
+                                        @if (item.DanhSachPhien.Any())
+                                        {
+                                            <ul class="list-unstyled mb-0 small">
+                                                @foreach (var p in item.DanhSachPhien)
+                                                {
+                                                    <li>
+                                                        <strong>@p.TenPhien</strong><br />
+                                                        <span class="text-muted">
+                                                            @p.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm") — @p.ThoiGianKetThuc.ToString("HH:mm")
+                                                        </span>
+                                                        <span class="badge @BadgeCss(p.TrangThai)">@TenTrangThai(p.TrangThai)</span>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
                                 </tr>
                             }
                         }
                         else
                         {
                             <tr>
-                                <td colspan="8" class="text-center text-muted py-4">
+                                <td colspan="9" class="text-center text-muted py-4">
                                     Bạn chưa đăng ký tham dự sự kiện nào.
                                 </td>
                             </tr>

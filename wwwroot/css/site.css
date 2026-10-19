@@ -142,7 +142,13 @@ body {
 
 .admin-sidebar {
   width: 250px;
-  min-height: 100vh;
+  height: 100vh;
+
+  /* Giữ cố định bên trái khi cuộn nội dung */
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  overflow-y: auto;
 
   background: #10294a;
   color: white;
@@ -212,10 +218,12 @@ body {
 
 .admin-content {
   flex: 1;
+  min-width: 0;
 
   padding: 25px 30px;
 
-  overflow: hidden;
+  /* Không cắt nội dung, để trang cuộn bình thường */
+  overflow: visible;
 }
 
 
@@ -1578,9 +1586,27 @@ body {
     border-radius: 4px;
     margin-bottom: 20px;
 }
+
 .validation-summary ul {
     margin: 0;
     padding-left: 20px;
+}
+
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    .form-field.full-width {
+        grid-column: span 1;
+    }
+    .form-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+    .btn-cancel, .btn-save {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 .input-readonly {
@@ -1601,4 +1627,80 @@ body {
 }
 .status-inactive .status-create-dot {
     background-color: #dc3545;
+}
+
+/* =========================================================
+   DARK THEME (Cài đặt -> Giao diện -> Tối)
+   Bật bằng class "theme-dark" trên <body>
+   ========================================================= */
+body.theme-dark {
+  background-color: #121826;
+  color: #e6edf7;
+}
+
+body.theme-dark .admin-page,
+body.theme-dark .admin-content {
+  background-color: #121826;
+  color: #e6edf7;
+}
+
+body.theme-dark .admin-header,
+body.theme-dark .card,
+body.theme-dark .card-header,
+body.theme-dark .card-body,
+body.theme-dark .table,
+body.theme-dark .modal-content,
+body.theme-dark .dropdown-menu {
+  background-color: #1c2538;
+  color: #e6edf7;
+  border-color: #2c3850;
+}
+
+body.theme-dark .card-header.bg-white {
+  background-color: #1c2538 !important;
+}
+
+body.theme-dark .table > :not(caption) > * > * {
+  background-color: transparent;
+  color: #e6edf7;
+  border-color: #2c3850;
+}
+
+body.theme-dark .table-light,
+body.theme-dark .table-light > th,
+body.theme-dark .table-light > td {
+  background-color: #243049 !important;
+  color: #e6edf7 !important;
+}
+
+body.theme-dark .form-control,
+body.theme-dark .form-select {
+  background-color: #243049;
+  color: #e6edf7;
+  border-color: #2c3850;
+}
+
+body.theme-dark .form-control:focus,
+body.theme-dark .form-select:focus {
+  background-color: #243049;
+  color: #e6edf7;
+}
+
+body.theme-dark .text-muted {
+  color: #9fb0c8 !important;
+}
+
+body.theme-dark .alert-info {
+  background-color: #17324a;
+  color: #cfe6ff;
+  border-color: #245a80;
+}
+
+body.theme-dark .alert-secondary {
+  background-color: #243049;
+  color: #e6edf7;
+}
+
+body.theme-dark .admin-sidebar {
+  background: #0b1424;
 }

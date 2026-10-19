@@ -20,6 +20,6 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Models
         public string MoTa { get; set; } = string.Empty;
         public bool TrangThai { get; set; } = true;
 
-        public SuKien? SuKien { get; set; }
+        public ICollection<SuKien> SuKiens { get; set; } = new List<SuKien>();
     }
 }

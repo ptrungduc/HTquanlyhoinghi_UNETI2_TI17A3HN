@@ -1,6 +1,6 @@
 // Họ và tên: [TÊN CỦA TÔI]
 // Mã sinh viên: [MSSV CỦA TÔI]
-// Nội dung thực hiện: Module 5 - Lịch sử tham dự, Dashboard, thống kê LINQ, báo cáo.
+// Nội dung thực hiện: Module 5 - Chi tiết lịch sử sự kiện cho Admin (Bước 1).
 
 namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module5;
 
@@ -37,6 +37,7 @@ public class ChiTietSuKienLichSuViewModel
 public class DangKyThamDuItem
 {
     public string MaDangKy { get; set; } = string.Empty;
+    public string MaNguoiThamDu { get; set; } = string.Empty;
     public string HoTenNguoiThamDu { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public DateTime NgayDangKy { get; set; }
@@ -45,6 +46,9 @@ public class DangKyThamDuItem
     public DateTime? ThoiGianCheckIn { get; set; }
     public string? MaThamDu { get; set; }
     public string KetQuaThamGia { get; set; } = string.Empty;
+
+    /// <summary>Các phiên người này đã đăng ký trong sự kiện (rỗng nếu không có).</summary>
+    public List<PhienDangKyItem> DanhSachPhien { get; set; } = [];
 }
 
 /// <summary>

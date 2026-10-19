@@ -8,17 +8,40 @@
     var pageSize = (int)(ViewBag.PageSize ?? 10);
     var totalPages = (int)(ViewBag.TotalPages ?? 1);
     var totalCount = (int)(ViewBag.TotalCount ?? Model.Count());
+    bool daHoanThanh = suKien.TrangThai == nameof(HTquanlyhoinghi_UNETI2_TI17A3HN.Models.TrangThaiSuKien.HoanThanh);
+    string TenTrangThaiPhien(string trangThai) => trangThai switch
+    {
+        "SapDienRa" => "Sắp diễn ra",
+        "DangDienRa" => "Đang diễn ra",
+        "DaKetThuc" => "Đã kết thúc",
+        "Ngung" => "Ngừng",
+        "DaHuy" => "Đã hủy",
+        _ => trangThai
+    };
 }
 
 <div class="container mt-4">
-    <h1>Phiên sự kiện - @suKien.TenSuKien</h1>
-    <p class="text-muted">Tìm, lọc và sắp xếp các phiên của sự kiện này.</p>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1>Phiên sự kiện - @suKien.TenSuKien</h1>
+            <p class="text-muted mb-0">Tìm, lọc và sắp xếp các phiên của sự kiện này.</p>
+        </div>
+        @if (!daHoanThanh)
+        {
+            <a asp-action="CreatePhien" asp-route-maSuKien="@suKien.MaSuKien" class="btn btn-success">+ Thêm phiên</a>
+        }
+    </div>
+
+    @if (TempData["ThongBao"] is string thongBao)
+    {
+        <div class="alert alert-warning" role="alert">@thongBao</div>
+    }
 
     <form method="get" class="row g-3 mb-3">
         <input type="hidden" name="maSuKien" value="@suKien.MaSuKien" />
         <div class="col-md-5">
             <input name="search" value="@ViewBag.Search" class="form-control"
-                   placeholder="Tìm tên phiên, diễn giả hoặc nội dung" />
+                   placeholder="Tìm tên phiên, diễn giả, nội dung hoặc phòng" />
         </div>
         <div class="col-md-3">
             <select name="trangThai" class="form-select">
@@ -26,6 +49,8 @@
                 <option value="SapDienRa" selected="@(ViewBag.TrangThai == "SapDienRa")">Sắp diễn ra</option>
                 <option value="DangDienRa" selected="@(ViewBag.TrangThai == "DangDienRa")">Đang diễn ra</option>
                 <option value="DaKetThuc" selected="@(ViewBag.TrangThai == "DaKetThuc")">Đã kết thúc</option>
+                <option value="Ngung" selected="@(ViewBag.TrangThai == "Ngung")">Ngừng</option>
+                <option value="DaHuy" selected="@(ViewBag.TrangThai == "DaHuy")">Đã hủy</option>
             </select>
         </div>
         <div class="col-md-2">
@@ -51,9 +76,12 @@
                     <tr>
                         <th>Tên phiên</th>
                         <th>Thời gian</th>
+                        <th>Phòng/khu vực</th>
+                        <th>Số lượng tối đa</th>
                         <th>Diễn giả</th>
                         <th>Nơi dung</th>
                         <th>Trạng thái</th>
+                        <th class="text-center">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -65,16 +93,27 @@
                                 <td><strong>@item.TenPhien</strong></td>
                                 <td>@item.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm") -
                                     @item.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td>@item.DienGia</td>
-                                    <td>@item.NoiDung</td>
-                                    <td>@item.TrangThai</td>
+                                <td>@item.PhongKhuVuc</td>
+                                <td>@item.SoLuongToiDa</td>
+                                <td>@item.DienGia</td>
+                                <td>@item.NoiDung</td>
+                                <td>@TenTrangThaiPhien(item.TrangThai)</td>
+                                    <td class="text-center text-nowrap">
+                                        @if (!daHoanThanh)
+                                        {
+                                            <a asp-action="EditPhien" asp-route-maSuKien="@suKien.MaSuKien"
+                                               asp-route-id="@item.MaPhienSuKien" class="btn btn-sm btn-outline-secondary">Sửa</a>
+                                        }
+                                        <a asp-action="DeletePhien" asp-route-maSuKien="@suKien.MaSuKien"
+                                           asp-route-id="@item.MaPhienSuKien" class="btn btn-sm btn-outline-danger">Xóa</a>
+                                    </td>
                                 </tr>
                             }
                         }
                     else
                         {
                             <tr>
-                                <td colspan="5" class="text-center text-muted py-4">Không có phiên nào khớp.</td>
+                                <td colspan="8" class="text-center text-muted py-4">Không có phiên nào khớp.</td>
                             </tr>
                         }
                     </tbody>
