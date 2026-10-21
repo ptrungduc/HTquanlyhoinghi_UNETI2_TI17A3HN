@@ -77,75 +77,77 @@ INSERT INTO DiaDiems (MaDiaDiem, TenDiaDiem, DiaChi, SucChuaToiDa, MoTa, TrangTh
 -- =============================================================
 
 -- -------- Sự kiện (đa dạng trạng thái, thời gian xoay quanh hôm nay) --------
+DECLARE @thoiDiemMau DATETIME = DATEADD(MINUTE, DATEDIFF(MINUTE, 0, GETDATE()), 0);
+
 INSERT INTO SuKiens (MaSuKien, TenSuKien, MaLoaiSuKien, MaDiaDiem, ThoiGianBatDau, ThoiGianKetThuc, HanDangKy, SoLuongToiDa, MoTa, TrangThai) VALUES
 -- SK1: Hoàn thành, 2 tháng trước
 ('SK_01', N'Hội thảo AI và Giáo dục',
  'LSK_01', 'DD_01',
- DATEADD(DAY,-60,GETDATE()), DATEADD(DAY,-60,DATEADD(HOUR,5,GETDATE())),
- DATEADD(DAY,-61,GETDATE()), 200,
+ DATEADD(DAY,-60,@thoiDiemMau), DATEADD(DAY,-60,DATEADD(HOUR,5,@thoiDiemMau)),
+ DATEADD(DAY,-61,@thoiDiemMau), 200,
  N'Ứng dụng trí tuệ nhân tạo trong giảng dạy đại học', 'HoanThanh'),
 
 -- SK2: Hoàn thành, 1 tháng trước
 ('SK_02', N'Workshop Git & GitHub',
  'LSK_02', 'DD_03',
- DATEADD(DAY,-30,GETDATE()), DATEADD(DAY,-30,DATEADD(HOUR,3,GETDATE())),
- DATEADD(DAY,-31,GETDATE()), 40,
+ DATEADD(DAY,-30,@thoiDiemMau), DATEADD(DAY,-30,DATEADD(HOUR,5,@thoiDiemMau)),
+ DATEADD(DAY,-31,@thoiDiemMau), 40,
  N'Thực hành quản lý phiên bản với Git', 'HoanThanh'),
 
 -- SK3: Hoàn thành, 2 tuần trước
 ('SK_03', N'Seminar An toàn thông tin',
  'LSK_03', 'DD_02',
- DATEADD(DAY,-14,GETDATE()), DATEADD(DAY,-14,DATEADD(HOUR,3,GETDATE())),
- DATEADD(DAY,-15,GETDATE()), 50,
+ DATEADD(DAY,-14,@thoiDiemMau), DATEADD(DAY,-14,DATEADD(HOUR,3,@thoiDiemMau)),
+ DATEADD(DAY,-15,@thoiDiemMau), 50,
  N'Bảo mật ứng dụng web', 'HoanThanh'),
 
 -- SK4: Đang diễn ra (bắt đầu hôm qua, kết thúc ngày mai)
 ('SK_04', N'Hội thảo Chuyển đổi số Doanh nghiệp',
  'LSK_01', 'DD_01',
- DATEADD(DAY,-1,GETDATE()), DATEADD(DAY,1,GETDATE()),
- DATEADD(DAY,-2,GETDATE()), 200,
+ DATEADD(DAY,-1,@thoiDiemMau), DATEADD(DAY,1,@thoiDiemMau),
+ DATEADD(DAY,-2,@thoiDiemMau), 200,
  N'Chuyển đổi số cho doanh nghiệp vừa và nhỏ', 'DangDienRa'),
 
 -- SK5: Mở đăng ký, 3 ngày tới (gần hạn)
 ('SK_05', N'Workshop Thuyết trình hiệu quả',
  'LSK_02', 'DD_02',
- DATEADD(DAY,3,GETDATE()), DATEADD(DAY,3,DATEADD(HOUR,4,GETDATE())),
- DATEADD(DAY,2,GETDATE()), 50,
+ DATEADD(DAY,3,@thoiDiemMau), DATEADD(DAY,3,DATEADD(HOUR,5,@thoiDiemMau)),
+ DATEADD(DAY,2,@thoiDiemMau), 50,
  N'Kỹ năng trình bày và thuyết trình', 'MoDangKy'),
 
 -- SK6: Mở đăng ký, 2 tuần tới
 ('SK_06', N'Hội thảo Cloud Computing',
  'LSK_01', 'DD_01',
- DATEADD(DAY,14,GETDATE()), DATEADD(DAY,14,DATEADD(HOUR,5,GETDATE())),
- DATEADD(DAY,13,GETDATE()), 200,
+ DATEADD(DAY,14,@thoiDiemMau), DATEADD(DAY,14,DATEADD(HOUR,5,@thoiDiemMau)),
+ DATEADD(DAY,13,@thoiDiemMau), 200,
  N'Điện toán đám mây AWS/Azure', 'MoDangKy'),
 
 -- SK7: Mở đăng ký, 5 ngày tới (gần hạn)
 ('SK_07', N'Seminar Khởi nghiệp Sinh viên',
  'LSK_03', 'DD_02',
- DATEADD(DAY,5,GETDATE()), DATEADD(DAY,5,DATEADD(HOUR,3,GETDATE())),
- DATEADD(DAY,4,GETDATE()), 50,
+ DATEADD(DAY,5,@thoiDiemMau), DATEADD(DAY,5,DATEADD(HOUR,3,@thoiDiemMau)),
+ DATEADD(DAY,4,@thoiDiemMau), 50,
  N'Chia sẻ từ startup thành công', 'MoDangKy'),
 
 -- SK8: Đóng đăng ký
 ('SK_08', N'Workshop Data Analysis',
  'LSK_02', 'DD_03',
- DATEADD(DAY,10,GETDATE()), DATEADD(DAY,10,DATEADD(HOUR,4,GETDATE())),
- DATEADD(DAY,9,GETDATE()), 40,
+ DATEADD(DAY,10,@thoiDiemMau), DATEADD(DAY,10,DATEADD(HOUR,4,@thoiDiemMau)),
+ DATEADD(DAY,9,@thoiDiemMau), 40,
  N'Phân tích dữ liệu với Python', 'DongDangKy'),
 
 -- SK9: Nháp
 ('SK_09', N'Hội thảo IoT (dự kiến)',
  'LSK_01', 'DD_01',
- DATEADD(DAY,30,GETDATE()), DATEADD(DAY,30,DATEADD(HOUR,5,GETDATE())),
- DATEADD(DAY,29,GETDATE()), 200,
+ DATEADD(DAY,30,@thoiDiemMau), DATEADD(DAY,30,DATEADD(HOUR,5,@thoiDiemMau)),
+ DATEADD(DAY,29,@thoiDiemMau), 200,
  N'Internet of Things trong công nghiệp', 'SapDienRa'),
 
 -- SK10: Đã hủy
 ('SK_10', N'Workshop React Native (đã hủy)',
  'LSK_02', 'DD_03',
- DATEADD(DAY,20,GETDATE()), DATEADD(DAY,20,DATEADD(HOUR,3,GETDATE())),
- DATEADD(DAY,19,GETDATE()), 40,
+ DATEADD(DAY,20,@thoiDiemMau), DATEADD(DAY,20,DATEADD(HOUR,3,@thoiDiemMau)),
+ DATEADD(DAY,19,@thoiDiemMau), 40,
  N'Bị hủy do diễn giả bận', 'DaHuy');
 
 -- -------- Phiên sự kiện --------
