@@ -2,7 +2,10 @@
 -- DỮ LIỆU MẪU ĐẦY ĐỦ CHO TẤT CẢ MODULE (1-5)
 -- Database: QuanLyHoiNghiDb trên (localdb)\mssqllocaldb
 --
--- Cách dùng: Mở trong SSMS → Execute (F5)
+-- Cách dùng: Chạy `dotnet ef database update` để tạo/cập nhật schema,
+-- sau đó mở file này trong SSMS và Execute (F5).
+-- Nếu chạy bằng sqlcmd, dùng `sqlcmd -f 65001 -i Database\DuLieuMau_Module5.sql`
+-- để giữ đúng bảng mã UTF-8 của dữ liệu tiếng Việt.
 -- Có thể chạy lại nhiều lần (script tự xóa dữ liệu mẫu cũ)
 --
 -- Mật khẩu tất cả tài khoản: 123456
@@ -23,6 +26,7 @@ BEGIN TRAN;
 -- =============================================================
 DELETE FROM CheckIns;
 DELETE FROM DangKyThamDus;
+DELETE FROM DangKyPhiens;
 DELETE FROM NguoiThamDus;
 DELETE FROM PhienSuKiens;
 DELETE FROM SuKiens;
@@ -73,111 +77,131 @@ INSERT INTO DiaDiems (MaDiaDiem, TenDiaDiem, DiaChi, SucChuaToiDa, MoTa, TrangTh
 -- =============================================================
 
 -- -------- Sự kiện (đa dạng trạng thái, thời gian xoay quanh hôm nay) --------
-INSERT INTO SuKiens (MaSuKien, TenSuKien, MaLoaiSuKien, MaDiaDiem, ThoiGianBatDau, ThoiGianKetThuc, MoTa, TrangThai) VALUES
+DECLARE @thoiDiemMau DATETIME = DATEADD(MINUTE, DATEDIFF(MINUTE, 0, GETDATE()), 0);
+
+INSERT INTO SuKiens (MaSuKien, TenSuKien, MaLoaiSuKien, MaDiaDiem, ThoiGianBatDau, ThoiGianKetThuc, HanDangKy, SoLuongToiDa, MoTa, TrangThai) VALUES
 -- SK1: Hoàn thành, 2 tháng trước
 ('SK_01', N'Hội thảo AI và Giáo dục',
  'LSK_01', 'DD_01',
- DATEADD(DAY,-60,GETDATE()), DATEADD(DAY,-60,DATEADD(HOUR,5,GETDATE())),
+ DATEADD(DAY,-60,@thoiDiemMau), DATEADD(DAY,-60,DATEADD(HOUR,5,@thoiDiemMau)),
+ DATEADD(DAY,-61,@thoiDiemMau), 200,
  N'Ứng dụng trí tuệ nhân tạo trong giảng dạy đại học', 'HoanThanh'),
 
 -- SK2: Hoàn thành, 1 tháng trước
 ('SK_02', N'Workshop Git & GitHub',
  'LSK_02', 'DD_03',
- DATEADD(DAY,-30,GETDATE()), DATEADD(DAY,-30,DATEADD(HOUR,3,GETDATE())),
+ DATEADD(DAY,-30,@thoiDiemMau), DATEADD(DAY,-30,DATEADD(HOUR,5,@thoiDiemMau)),
+ DATEADD(DAY,-31,@thoiDiemMau), 40,
  N'Thực hành quản lý phiên bản với Git', 'HoanThanh'),
 
 -- SK3: Hoàn thành, 2 tuần trước
 ('SK_03', N'Seminar An toàn thông tin',
  'LSK_03', 'DD_02',
- DATEADD(DAY,-14,GETDATE()), DATEADD(DAY,-14,DATEADD(HOUR,3,GETDATE())),
+ DATEADD(DAY,-14,@thoiDiemMau), DATEADD(DAY,-14,DATEADD(HOUR,3,@thoiDiemMau)),
+ DATEADD(DAY,-15,@thoiDiemMau), 50,
  N'Bảo mật ứng dụng web', 'HoanThanh'),
 
 -- SK4: Đang diễn ra (bắt đầu hôm qua, kết thúc ngày mai)
 ('SK_04', N'Hội thảo Chuyển đổi số Doanh nghiệp',
  'LSK_01', 'DD_01',
- DATEADD(DAY,-1,GETDATE()), DATEADD(DAY,1,GETDATE()),
+ DATEADD(DAY,-1,@thoiDiemMau), DATEADD(DAY,1,@thoiDiemMau),
+ DATEADD(DAY,-2,@thoiDiemMau), 200,
  N'Chuyển đổi số cho doanh nghiệp vừa và nhỏ', 'DangDienRa'),
 
 -- SK5: Mở đăng ký, 3 ngày tới (gần hạn)
 ('SK_05', N'Workshop Thuyết trình hiệu quả',
  'LSK_02', 'DD_02',
- DATEADD(DAY,3,GETDATE()), DATEADD(DAY,3,DATEADD(HOUR,4,GETDATE())),
+ DATEADD(DAY,3,@thoiDiemMau), DATEADD(DAY,3,DATEADD(HOUR,5,@thoiDiemMau)),
+ DATEADD(DAY,2,@thoiDiemMau), 50,
  N'Kỹ năng trình bày và thuyết trình', 'MoDangKy'),
 
 -- SK6: Mở đăng ký, 2 tuần tới
 ('SK_06', N'Hội thảo Cloud Computing',
  'LSK_01', 'DD_01',
- DATEADD(DAY,14,GETDATE()), DATEADD(DAY,14,DATEADD(HOUR,5,GETDATE())),
+ DATEADD(DAY,14,@thoiDiemMau), DATEADD(DAY,14,DATEADD(HOUR,5,@thoiDiemMau)),
+ DATEADD(DAY,13,@thoiDiemMau), 200,
  N'Điện toán đám mây AWS/Azure', 'MoDangKy'),
 
 -- SK7: Mở đăng ký, 5 ngày tới (gần hạn)
 ('SK_07', N'Seminar Khởi nghiệp Sinh viên',
  'LSK_03', 'DD_02',
- DATEADD(DAY,5,GETDATE()), DATEADD(DAY,5,DATEADD(HOUR,3,GETDATE())),
+ DATEADD(DAY,5,@thoiDiemMau), DATEADD(DAY,5,DATEADD(HOUR,3,@thoiDiemMau)),
+ DATEADD(DAY,4,@thoiDiemMau), 50,
  N'Chia sẻ từ startup thành công', 'MoDangKy'),
 
 -- SK8: Đóng đăng ký
 ('SK_08', N'Workshop Data Analysis',
  'LSK_02', 'DD_03',
- DATEADD(DAY,10,GETDATE()), DATEADD(DAY,10,DATEADD(HOUR,4,GETDATE())),
+ DATEADD(DAY,10,@thoiDiemMau), DATEADD(DAY,10,DATEADD(HOUR,4,@thoiDiemMau)),
+ DATEADD(DAY,9,@thoiDiemMau), 40,
  N'Phân tích dữ liệu với Python', 'DongDangKy'),
 
 -- SK9: Nháp
 ('SK_09', N'Hội thảo IoT (dự kiến)',
  'LSK_01', 'DD_01',
- DATEADD(DAY,30,GETDATE()), DATEADD(DAY,30,DATEADD(HOUR,5,GETDATE())),
+ DATEADD(DAY,30,@thoiDiemMau), DATEADD(DAY,30,DATEADD(HOUR,5,@thoiDiemMau)),
+ DATEADD(DAY,29,@thoiDiemMau), 200,
  N'Internet of Things trong công nghiệp', 'SapDienRa'),
 
 -- SK10: Đã hủy
 ('SK_10', N'Workshop React Native (đã hủy)',
  'LSK_02', 'DD_03',
- DATEADD(DAY,20,GETDATE()), DATEADD(DAY,20,DATEADD(HOUR,3,GETDATE())),
+ DATEADD(DAY,20,@thoiDiemMau), DATEADD(DAY,20,DATEADD(HOUR,3,@thoiDiemMau)),
+ DATEADD(DAY,19,@thoiDiemMau), 40,
  N'Bị hủy do diễn giả bận', 'DaHuy');
 
 -- -------- Phiên sự kiện --------
-INSERT INTO PhienSuKiens (MaPhienSuKien, MaSuKien, TenPhien, ThoiGianBatDau, ThoiGianKetThuc, DienGia, NoiDung, TrangThai) VALUES
+INSERT INTO PhienSuKiens (MaPhienSuKien, MaSuKien, TenPhien, ThoiGianBatDau, ThoiGianKetThuc, PhongKhuVuc, SoLuongToiDa, DienGia, NoiDung, TrangThai) VALUES
 -- Phiên SK1 (hoàn thành)
 ('PS_01', 'SK_01', N'Khai mạc & Báo cáo tổng quan',
  DATEADD(DAY,-60,DATEADD(HOUR,8,CAST(CAST(GETDATE() AS DATE) AS DATETIME))),
  DATEADD(DAY,-60,DATEADD(HOUR,10,CAST(CAST(GETDATE() AS DATE) AS DATETIME))),
+ N'Hội trường A', 200,
  N'PGS.TS Nguyễn Văn X', N'Tổng quan AI trong giáo dục', 'HoanThanh'),
 
 ('PS_02', 'SK_01', N'Báo cáo chuyên đề: ChatGPT',
  DATEADD(DAY,-60,DATEADD(HOUR,10,CAST(CAST(GETDATE() AS DATE) AS DATETIME))),
  DATEADD(DAY,-60,DATEADD(HOUR,12,CAST(CAST(GETDATE() AS DATE) AS DATETIME))),
+ N'Hội trường A', 200,
  N'ThS. Trần Thị Y', N'ChatGPT hỗ trợ giảng dạy', 'HoanThanh'),
 
 -- Phiên SK2 (hoàn thành)
 ('PS_03', 'SK_02', N'Git cơ bản: init, add, commit',
  DATEADD(DAY,-30,DATEADD(HOUR,8,CAST(CAST(GETDATE() AS DATE) AS DATETIME))),
  DATEADD(DAY,-30,DATEADD(HOUR,10,CAST(CAST(GETDATE() AS DATE) AS DATETIME))),
+ N'Phòng Lab CNTT', 40,
  N'KS. Lê Văn Z', N'Thực hành Git local', 'HoanThanh'),
 
 ('PS_04', 'SK_02', N'GitHub: push, pull, PR',
  DATEADD(DAY,-30,DATEADD(HOUR,10,CAST(CAST(GETDATE() AS DATE) AS DATETIME))),
  DATEADD(DAY,-30,DATEADD(HOUR,12,CAST(CAST(GETDATE() AS DATE) AS DATETIME))),
+ N'Phòng Lab CNTT', 40,
  N'KS. Lê Văn Z', N'Làm việc nhóm trên GitHub', 'HoanThanh'),
 
 -- Phiên SK4 (đang diễn ra)
 ('PS_05', 'SK_04', N'Phiên toàn thể: Xu hướng CĐS',
  DATEADD(DAY,-1,DATEADD(HOUR,8,CAST(CAST(GETDATE() AS DATE) AS DATETIME))),
  DATEADD(DAY,-1,DATEADD(HOUR,11,CAST(CAST(GETDATE() AS DATE) AS DATETIME))),
+ N'Hội trường A', 200,
  N'TS. Phạm Văn T', N'Xu hướng chuyển đổi số 2026', 'HoanThanh'),
 
 ('PS_06', 'SK_04', N'Thảo luận bàn tròn',
  DATEADD(HOUR,14,CAST(CAST(GETDATE() AS DATE) AS DATETIME)),
  DATEADD(HOUR,16,CAST(CAST(GETDATE() AS DATE) AS DATETIME)),
+ N'Hội trường A', 200,
  N'Panel', N'Thảo luận với doanh nghiệp', 'SapDienRa'),
 
 -- Phiên SK5 (sắp tới)
 ('PS_07', 'SK_05', N'Kỹ năng trình bày slide',
  DATEADD(DAY,3,DATEADD(HOUR,8,CAST(CAST(GETDATE() AS DATE) AS DATETIME))),
  DATEADD(DAY,3,DATEADD(HOUR,10,CAST(CAST(GETDATE() AS DATE) AS DATETIME))),
+ N'Phòng họp 301', 50,
  N'ThS. Hoàng Văn K', N'Thiết kế slide chuyên nghiệp', 'SapDienRa'),
 
 ('PS_08', 'SK_05', N'Thực hành thuyết trình',
  DATEADD(DAY,3,DATEADD(HOUR,10,CAST(CAST(GETDATE() AS DATE) AS DATETIME))),
  DATEADD(DAY,3,DATEADD(HOUR,12,CAST(CAST(GETDATE() AS DATE) AS DATETIME))),
+ N'Phòng họp 301', 50,
  N'ThS. Hoàng Văn K', N'Mỗi SV trình bày 5 phút', 'SapDienRa');
 
 -- =============================================================
