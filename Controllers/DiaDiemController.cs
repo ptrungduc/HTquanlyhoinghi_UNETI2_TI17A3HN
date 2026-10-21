@@ -37,7 +37,6 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
                 return RedirectToAction("DangNhap", "TaiKhoan");
             }
 
-            // Số địa điểm hiển thị trên 1 trang
             int pageSize = 4;
 
             // Không cho page nhỏ hơn 1
