@@ -1618,6 +1618,57 @@ body {
 .status-active {
     color: #28a745;
 }
+
+.event-filter-scroll {
+    width: 100%;
+    padding: 16px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.event-filter-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.event-filter-form > div {
+    width: 100%;
+    min-width: 0;
+}
+
+.event-filter-form .form-label {
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.event-filter-form .form-control,
+.event-filter-form .form-select {
+    min-height: 38px;
+}
+
+.event-filter-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    grid-column: 1 / -1;
+}
+
+.event-filter-actions .form-select {
+    flex: 0 1 180px;
+}
+
+.event-filter-actions .btn {
+    white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+    .event-filter-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
 .status-active .status-create-dot {
     background-color: #28a745;
 }
