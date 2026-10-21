@@ -1,5 +1,5 @@
-// Họ và tên: [TÊN CỦA TÔI]
-// Mã sinh viên: [MSSV CỦA TÔI]
+// Họ và tên: PHAM TRUNG DUC
+// Mã sinh viên: 23103100134
 // Nội dung thực hiện: Module 5 - Báo cáo theo thời gian (Mục 9.6).
 
 namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module5;
