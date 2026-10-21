@@ -33,13 +33,16 @@
         <div class="alert alert-info" role="alert">@thongBao</div>
     }
 
-    <form method="get" class="row g-3 mb-3">
-        <div class="col-md-5">
-            <input name="search" value="@ViewBag.Search" class="form-control"
+    <div class="event-filter-scroll mb-3">
+      <form method="get" class="event-filter-form">
+        <div class="event-filter-search">
+            <label for="eventSearch" class="form-label">Tìm kiếm</label>
+            <input id="eventSearch" name="search" value="@ViewBag.Search" class="form-control"
                    placeholder="Tìm sự kiện, loại, địa điểm hoặc phiên" />
         </div>
-        <div class="col-md-3">
-            <select name="trangThai" class="form-select">
+        <div class="event-filter-status">
+            <label for="eventStatus" class="form-label">Trạng thái</label>
+            <select id="eventStatus" name="trangThai" class="form-select">
                 <option value="">Tất cả trạng thái</option>
                 <option value="Nhap" selected="@(ViewBag.TrangThai == "Nhap")">Nháp</option>
                 <option value="MoDangKy" selected="@(ViewBag.TrangThai == "MoDangKy")">Mở đăng ký</option>
@@ -49,27 +52,29 @@
                 <option value="DaHuy" selected="@(ViewBag.TrangThai == "DaHuy")">Đã hủy</option>
             </select>
         </div>
-        <div class="col-md-3">
-            <select name="maLoaiSuKien" asp-items="ViewBag.LoaiSuKien" class="form-select">
+        <div class="event-filter-category">
+            <label for="eventCategory" class="form-label">Loại sự kiện</label>
+            <select id="eventCategory" name="maLoaiSuKien" asp-items="ViewBag.LoaiSuKien" class="form-select">
                 <option value="">Tất cả loại sự kiện</option>
             </select>
         </div>
-        <div class="col-md-3">
-            <select name="maDiaDiem" asp-items="ViewBag.DiaDiem" class="form-select">
+        <div class="event-filter-venue">
+            <label for="eventVenue" class="form-label">Địa điểm</label>
+            <select id="eventVenue" name="maDiaDiem" asp-items="ViewBag.DiaDiem" class="form-select">
                 <option value="">Tất cả địa điểm</option>
             </select>
         </div>
-        <div class="col-md-3">
+        <div class="event-filter-date">
             <label for="ngayBatDauTu" class="form-label">Tổ chức từ ngày</label>
             <input id="ngayBatDauTu" name="ngayBatDauTu" type="date"
                    value="@ViewBag.NgayBatDauTu" class="form-control" />
         </div>
-        <div class="col-md-3">
+        <div class="event-filter-date">
             <label for="ngayBatDauDen" class="form-label">Đến ngày</label>
             <input id="ngayBatDauDen" name="ngayBatDauDen" type="date"
                    value="@ViewBag.NgayBatDauDen" class="form-control" />
         </div>
-        <div class="col-md-3">
+        <div class="event-filter-deadline">
             <label for="tinhTrangDangKy" class="form-label">Hạn đăng ký</label>
             <select id="tinhTrangDangKy" name="tinhTrangDangKy" class="form-select">
                 <option value="">Tất cả</option>
@@ -77,32 +82,35 @@
                 <option value="HetHan" selected="@(ViewBag.TinhTrangDangKy == "HetHan")">Đã hết hạn</option>
             </select>
         </div>
-        <div class="col-md-2">
+        <div class="event-filter-quantity">
             <label for="soLuongTu" class="form-label">Số lượng từ</label>
             <input id="soLuongTu" name="soLuongTu" type="number" min="1"
                    value="@ViewBag.SoLuongTu" class="form-control" />
         </div>
-        <div class="col-md-2">
+        <div class="event-filter-quantity">
             <label for="soLuongDen" class="form-label">Số lượng đến</label>
             <input id="soLuongDen" name="soLuongDen" type="number" min="1"
                    value="@ViewBag.SoLuongDen" class="form-control" />
         </div>
-        <div class="col-md-2">
-            <select name="sortBy" class="form-select">
+        <div class="event-filter-sort">
+            <label for="eventSortBy" class="form-label">Sắp xếp theo</label>
+            <select id="eventSortBy" name="sortBy" class="form-select">
                 <option value="ThoiGianBatDau" selected="@(sortBy == "ThoiGianBatDau")">Bắt đầu</option>
                 <option value="TenSuKien" selected="@(sortBy == "TenSuKien")">Tên sự kiện</option>
                 <option value="HanDangKy" selected="@(sortBy == "HanDangKy")">Hạn đăng ký</option>
                 <option value="SoLuongToiDa" selected="@(sortBy == "SoLuongToiDa")">Số lượng</option>
             </select>
         </div>
-        <div class="col-md-2 d-flex gap-2">
-            <select name="sortDescending" class="form-select">
+        <div class="event-filter-actions">
+            <label for="eventSortDirection" class="visually-hidden">Thứ tự sắp xếp</label>
+            <select id="eventSortDirection" name="sortDescending" class="form-select">
                 <option value="true" selected="@(sortDescending)">Giảm dần</option>
                 <option value="false" selected="@(!sortDescending)">Tăng dần</option>
             </select>
             <button class="btn btn-primary" type="submit">Lọc &amp; sắp</button>
         </div>
-    </form>
+      </form>
+    </div>
 
     <div class="card shadow-sm">
         <div class="table-responsive">
