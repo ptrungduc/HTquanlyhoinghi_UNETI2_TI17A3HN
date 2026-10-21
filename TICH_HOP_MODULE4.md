@@ -4,19 +4,18 @@
 
 # Ghi chú tích hợp Module 4
 
-Module 4 hiện chưa kết nối database. Không tạo entity thay thế, DbSet, quan hệ hay dữ liệu mẫu cho Module 3. Các thao tác duyệt, từ chối và check-in trả về thông báo chưa tích hợp, không báo thành công.
+Module 4 đã có service dùng các DbSet/entity hiện có để xử lý duyệt, từ chối, cấp mã tham dự, check-in và điểm danh phiên. Đây chỉ là trạng thái của source code; chưa xác minh trên SQL Server thực tế. Không tạo entity thay thế, DbSet, quan hệ hay dữ liệu mẫu cho Module 3.
 
-Các phần sau đang chờ entity thật và quy tắc nghiệp vụ của Module 3:
+Các phần sau vẫn cần xác nhận hoặc tích hợp trước khi kết luận nghiệp vụ hoạt động đầy đủ:
 
-1. Duyệt `DangKyThamDu` thật, gồm trạng thái, trạng thái sự kiện, quy tắc đăng ký trùng và thời điểm duyệt.
-2. Kiểm tra sức chứa thật và quy tắc đếm số đăng ký được tính vào sức chứa.
-3. Sinh và lưu `MaThamDu` duy nhất trên đăng ký thật nếu entity chưa có thuộc tính này.
-4. Tạo entity `CheckIn` của Module 4 sau khi xác nhận kiểu khóa đăng ký và quan hệ.
-5. Cấu hình khóa ngoại từ `CheckIn` tới `DangKyThamDu` dựa trên khóa và navigation thật.
-6. Ngăn check-in trùng trong nghiệp vụ và bằng ràng buộc duy nhất phù hợp trong database.
-7. Kiểm tra khung thời gian check-in nếu hệ thống hiện có quy định.
-8. Đọc entity `DangKyPhien` thật và quan hệ đăng ký/điểm danh phiên.
-9. Đọc entity `PhienSuKien` thật và các trường thời gian trước khi làm điểm danh phiên.
-10. Chỉ triển khai điểm danh phiên nếu contract phiên và đăng ký hỗ trợ, với tối đa một bản ghi hợp lệ cho mỗi đăng ký/phiên.
+1. Xác minh trên SQL Server quy tắc duyệt `DangKyThamDu`, trạng thái sự kiện, đăng ký trùng và thời điểm duyệt.
+2. Xác nhận quy tắc sức chứa và các trạng thái được tính vào số đăng ký hiệu lực.
+3. Bổ sung ràng buộc duy nhất cho `MaThamDu` nếu được chủ sở hữu schema phê duyệt; code hiện kiểm tra trùng trước khi lưu nhưng database chưa có unique index này.
+4. Entity `CheckIn` và quan hệ một-một với `DangKyThamDu` đã có trong source/migration; cần xác minh migration đã được áp dụng đúng trên database mục tiêu.
+5. Xác nhận ràng buộc chống check-in trùng trên database mục tiêu; source có kiểm tra nghiệp vụ và migration định nghĩa unique index trên `CheckIns.MaDangKy`.
+6. Xác minh quy tắc khung thời gian check-in với nghiệp vụ sự kiện.
+7. Phối hợp Module 3 xác nhận entity, trạng thái và schema của `DangKyPhien`. Các migration hiện có chưa tạo bảng `DangKyPhiens`, nên điểm danh phiên phụ thuộc database/schema và chưa thể xác nhận hoạt động.
+8. Xác nhận entity `PhienSuKien`, trường thời gian và trạng thái hủy với schema được triển khai.
+9. Unit test, kiểm thử SQL Server và kiểm thử HTTP/giao diện chưa được xác nhận.
 
-Trước khi kết nối, cần xác nhận kiểu khóa, giá trị trạng thái, navigation, DbSet trong `AppDbContext`, phạm vi phân quyền Ban tổ chức và ảnh hưởng migration. Không tạo migration trước khi đọc các contract này.
+Trước khi áp dụng thay đổi schema, cần xác nhận kiểu khóa, giá trị trạng thái, navigation, DbSet trong `AppDbContext`, phạm vi phân quyền Ban tổ chức và ảnh hưởng migration với người phụ trách. Không tự tạo hoặc áp dụng migration trong quá trình hoàn thiện Module 4.
