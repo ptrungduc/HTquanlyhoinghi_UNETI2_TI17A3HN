@@ -57,7 +57,11 @@
                 @if (Model.DanhSachNguoiThamDu.Count == 0)
                 {
                     <tr>
-                        <td colspan="5" class="text-center text-muted py-4">Không có người tham dự đủ điều kiện.</td>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            @(string.IsNullOrWhiteSpace(Model.ThongBaoDanhSachRong)
+                                ? "Không có người tham dự đủ điều kiện."
+                                : Model.ThongBaoDanhSachRong)
+                        </td>
                     </tr>
                 }
                 else
