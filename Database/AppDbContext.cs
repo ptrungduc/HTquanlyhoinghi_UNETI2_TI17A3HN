@@ -1,5 +1,6 @@
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Database
 {
@@ -7,6 +8,12 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Database
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.ConfigureWarnings(w =>
+                w.Ignore(RelationalEventId.PendingModelChangesWarning));
         }
 
         // === DbSet chính (Module 1, 2) ===

@@ -1,0 +1,154 @@
+@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.DangKyViewModel
+
+@{
+    ViewData["Title"] = "Đăng ký tài khoản Người tham dự";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - QuanLyHoiNghi</title>
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+</head>
+
+<body style="margin-bottom: 0;">
+
+    <div class="login-page">
+        <h1>Hệ Thống Quản Lý Hội Nghị &amp; Sự Kiện</h1>
+        <h3>Quản lý chuyên nghiệp - Tổ chức hiệu quả</h3>
+
+        <div class="login-overlay"></div>
+
+        <div class="login-box" style="max-width: 580px;">
+
+            <div class="text-center mb-3">
+                <div class="login-icon" style="background: #198754;">📝</div>
+                <h2>Đăng ký tài khoản</h2>
+                <p class="text-muted mb-0">Dành cho <strong>Người tham dự</strong> sự kiện &amp; hội nghị</p>
+            </div>
+
+            <form asp-action="DangKy" method="post">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row g-3">
+                    <!-- Tên đăng nhập -->
+                    <div class="col-md-6">
+                        <label asp-for="TenDangNhap" class="form-label fw-semibold">
+                            Tên đăng nhập <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="TenDangNhap"
+                               class="form-control"
+                               placeholder="VD: nguyenvana" />
+                        <span asp-validation-for="TenDangNhap" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Họ và tên -->
+                    <div class="col-md-6">
+                        <label asp-for="HoTen" class="form-label fw-semibold">
+                            Họ và tên <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="HoTen"
+                               class="form-control"
+                               placeholder="VD: Nguyễn Văn A" />
+                        <span asp-validation-for="HoTen" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label fw-semibold">
+                            Email <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="Email"
+                               type="email"
+                               class="form-control"
+                               placeholder="VD: vana@gmail.com" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Số điện thoại -->
+                    <div class="col-md-6">
+                        <label asp-for="SoDienThoai" class="form-label fw-semibold">
+                            Số điện thoại <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="SoDienThoai"
+                               class="form-control"
+                               placeholder="VD: 0912345678" />
+                        <span asp-validation-for="SoDienThoai" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Đơn vị công tác -->
+                    <div class="col-12">
+                        <label asp-for="DonViCongTac" class="form-label fw-semibold">
+                            Đơn vị công tác / Trường học
+                        </label>
+                        <input asp-for="DonViCongTac"
+                               class="form-control"
+                               placeholder="VD: Đại học Kinh tế - Kỹ thuật Công nghiệp (UNETI)" />
+                        <span asp-validation-for="DonViCongTac" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Mật khẩu -->
+                    <div class="col-md-6">
+                        <label asp-for="MatKhau" class="form-label fw-semibold">
+                            Mật khẩu <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="MatKhau"
+                               type="password"
+                               class="form-control"
+                               placeholder="Tối thiểu 6 ký tự" />
+                        <span asp-validation-for="MatKhau" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Xác nhận mật khẩu -->
+                    <div class="col-md-6">
+                        <label asp-for="XacNhanMatKhau" class="form-label fw-semibold">
+                            Xác nhận mật khẩu <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="XacNhanMatKhau"
+                               type="password"
+                               class="form-control"
+                               placeholder="Nhập lại mật khẩu" />
+                        <span asp-validation-for="XacNhanMatKhau" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success w-100 py-2 fw-semibold">
+                        Hoàn tất đăng ký
+                    </button>
+                </div>
+            </form>
+
+            <hr class="my-3 text-muted" />
+
+            <div class="text-center">
+                <span class="text-muted">Đã có tài khoản?</span>
+                <a asp-action="DangNhap" class="text-primary text-decoration-none fw-bold ms-1">
+                    Đăng nhập ngay
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+
+</body>
+
+</html>
+

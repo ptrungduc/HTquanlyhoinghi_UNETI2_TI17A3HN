@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="@(Context.Request.Cookies["ngon_ngu"] == "en" ? "en" : "vi")">
 
 <head>
@@ -22,12 +22,32 @@
 </head>
 
 @{
-    var currentController =
-        ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
 
     // Cài đặt người dùng (cookie) từ trang Cài đặt
     var ngonNguTrang = Context.Request.Cookies["ngon_ngu"] == "en" ? "en" : "vi";
     var themeTrang = Context.Request.Cookies["theme"] == "dark" ? "theme-dark" : "";
+
+    var vaiTro = Context.Session.GetString("VaiTro");
+    var hoTen = Context.Session.GetString("HoTen");
+
+    var laQuanTri = string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase)
+                 || string.Equals(vaiTro, "Ban To Chuc", StringComparison.OrdinalIgnoreCase)
+                 || string.Equals(vaiTro, "Ban tổ chức", StringComparison.OrdinalIgnoreCase);
+
+    var laLeTan = string.Equals(vaiTro, "Le Tan", StringComparison.OrdinalIgnoreCase)
+               || string.Equals(vaiTro, "Lễ tân", StringComparison.OrdinalIgnoreCase)
+               || string.Equals(vaiTro, "Receptionist", StringComparison.OrdinalIgnoreCase);
+
+    var laNguoiThamDu = string.Equals(vaiTro, "Nguoi Tham Du", StringComparison.OrdinalIgnoreCase)
+                     || string.Equals(vaiTro, "Người tham dự", StringComparison.OrdinalIgnoreCase);
+
+    // Mặc định nếu chưa có session thì hiển thị menu quản trị
+    if (!laQuanTri && !laLeTan && !laNguoiThamDu)
+    {
+        laQuanTri = true;
+    }
 }
 
 <body class="@themeTrang">
@@ -38,7 +58,7 @@
              SIDEBAR
              ===================================== -->
 
-        <aside class="admin-sidebar">
+        <aside class="admin-sidebar d-flex flex-column">
 
             <!-- LOGO -->
             <div class="admin-logo">
@@ -54,135 +74,214 @@
 
             </div>
 
+            <!-- THÔNG TIN TÀI KHOẢN ĐANG ĐĂNG NHẬP -->
+            @if (!string.IsNullOrEmpty(vaiTro))
+            {
+                <div class="px-3 py-2 mb-3 text-white" style="background: rgba(255,255,255,0.08); border-radius: 8px;">
+                    <div class="d-flex align-items-center">
+                        <div style="width: 34px; height: 34px; border-radius: 50%; background: #1677ff; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 10px; flex-shrink: 0;">
+                            @(string.IsNullOrEmpty(hoTen) ? "U" : hoTen.Substring(0, 1).ToUpper())
+                        </div>
+                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            <div style="font-weight: 600; font-size: 13px;" title="@hoTen">@hoTen</div>
+                            <span class="badge bg-primary" style="font-size: 10px;">@vaiTro</span>
+                        </div>
+                    </div>
+                </div>
+            }
 
             <!-- =================================
-                 MENU
+                 MENU THEO PHÂN QUYỀN
                  ================================= -->
 
-            <nav class="admin-menu">
+            <nav class="admin-menu flex-grow-1">
 
-                <!-- TRANG CHỦ -->
-                <a asp-controller="Admin"
-                   asp-action="Index"
-                   class="@(currentController == "Admin" ? "active" : "")">
-                    🏠
-                    <span>Trang chủ</span>
-                </a>
+                @if (laQuanTri)
+                {
+                    <!-- TRANG CHỦ -->
+                    <a asp-controller="Admin"
+                       asp-action="Index"
+                       class="@(currentController == "Admin" ? "active" : "")">
+                        🏠
+                        <span>Trang chủ</span>
+                    </a>
 
+                    <!-- QUẢN LÝ SỰ KIỆN -->
+                    <a asp-controller="SuKien"
+                       asp-action="Index"
+                       class="@(currentController == "SuKien" ? "active" : "")">
+                        🗓️
+                        <span>Quản lý sự kiện</span>
+                    </a>
 
-                <!-- QUẢN LÝ SỰ KIỆN -->
-                <a asp-controller="LoaiSuKien"
-                   asp-action="Index">
-                    📅
-                    <span>Quản lý loại sự kiện</span>
-                </a>
+                    <!-- QUẢN LÝ LOẠI SỰ KIỆN -->
+                    <a asp-controller="LoaiSuKien"
+                       asp-action="Index"
+                       class="@(currentController == "LoaiSuKien" ? "active" : "")">
+                        📅
+                        <span>Quản lý loại sự kiện</span>
+                    </a>
 
-                <a asp-controller="SuKien"
-                   asp-action="Index"
-                   class="@(currentController == "SuKien" ? "active" : "")">
-                    🗓️
-                    <span>Quản lý sự kiện</span>
-                </a>
+                    <!-- ĐỊA ĐIỂM -->
+                    <a asp-controller="DiaDiem"
+                       asp-action="Index"
+                       class="@(currentController == "DiaDiem" ? "active" : "")">
+                        📍
+                        <span>Địa điểm</span>
+                    </a>
 
+                    <!-- NGƯỜI THAM DỰ -->
+                    <a asp-controller="NguoiThamDu"
+                       asp-action="Index"
+                       class="@(currentController == "NguoiThamDu" ? "active" : "")">
+                        👥
+                        <span>Người tham dự</span>
+                    </a>
 
-                <!-- ĐỊA ĐIỂM -->
-                <a asp-controller="DiaDiem"
-                   asp-action="Index"
-                   class="@(currentController == "DiaDiem" ? "active" : "")">
-                    📍
-                    <span>Địa điểm</span>
-                </a>
+                    <!-- QUẢN LÝ ĐĂNG KÝ -->
+                    <a asp-controller="DangKy"
+                       asp-action="Index"
+                       class="@(currentController == "DangKy" ? "active" : "")">
+                        📝
+                        <span>Quản lý đăng ký</span>
+                    </a>
 
+                    <!-- DUYỆT ĐĂNG KÝ (MODULE 4) -->
+                    <a asp-controller="DangKyThamDu"
+                       asp-action="Index"
+                       class="@(currentController == "DangKyThamDu" ? "active" : "")">
+                        ✅
+                        <span>Duyệt đăng ký</span>
+                    </a>
 
-                <!-- NGƯỜI THAM DỰ -->
-                <a asp-controller="NguoiThamDu"
-                   asp-action="Index"
-                   class="@(currentController == "NguoiThamDu" ? "active" : "")">
-                    👥
-                    <span>Người tham dự</span>
-                </a>
+                    <!-- CHECK-IN SỰ KIỆN -->
+                    <a asp-controller="CheckIn"
+                       asp-action="Index"
+                       class="@(currentController == "CheckIn" ? "active" : "")">
+                        🎟️
+                        <span>Check-in tham dự</span>
+                    </a>
 
-                <a asp-controller="DangKy"
-                   asp-action="Index"
-                   class="@(currentController == "DangKy" ? "active" : "")">
-                    📝
-                   <span>Quản lý đăng ký</span>
-                </a>
+                    <!-- ĐIỂM DANH PHIÊN -->
+                    <a asp-controller="DiemDanhPhien"
+                       asp-action="Index"
+                       class="@(currentController == "DiemDanhPhien" ? "active" : "")">
+                        📋
+                        <span>Điểm danh phiên</span>
+                    </a>
 
-                <!-- MODULE 4 -->
-                <a asp-controller="DangKyThamDu"
-                   asp-action="Index"
-                   class="@(currentController == "DangKyThamDu" ? "active" : "")">
-                    ✅
-                    <span>Duyệt đăng ký / Cấp mã tham dự</span>
-                </a>
+                    <!-- BÁO CÁO -->
+                    <a asp-controller="BaoCao"
+                       asp-action="Index"
+                       class="@(currentController == "BaoCao" ? "active" : "")">
+                        📊
+                        <span>Báo cáo</span>
+                    </a>
 
-                <a asp-controller="CheckIn"
-                   asp-action="Index"
-                   class="@(currentController == "CheckIn" ? "active" : "")">
-                    🎟️
-                    <span>Check-in tham dự</span>
-                </a>
+                    <!-- DASHBOARD (MODULE 5) -->
+                    <a asp-controller="Dashboard"
+                       asp-action="Index"
+                       class="@(currentController == "Dashboard" ? "active" : "")">
+                        📈
+                        <span>Dashboard</span>
+                    </a>
 
-                <a asp-controller="DiemDanhPhien"
-                   asp-action="Index"
-                   class="@(currentController == "DiemDanhPhien" ? "active" : "")">
-                    📋
-                    <span>Điểm danh phiên</span>
-                </a>
+                    <!-- THỐNG KÊ (MODULE 5) -->
+                    <a asp-controller="ThongKe"
+                       asp-action="Index"
+                       class="@(currentController == "ThongKe" ? "active" : "")">
+                        🏆
+                        <span>Thống kê &amp; Tỷ lệ</span>
+                    </a>
 
+                    <!-- LỊCH SỬ THAM DỰ -->
+                    <a asp-controller="LichSu"
+                       asp-action="CaNhan"
+                       class="@(currentController == "LichSu" ? "active" : "")">
+                        ⏳
+                        <span>Lịch sử tham dự</span>
+                    </a>
 
-                <!-- LỊCH TRÌNH -->
-                <a asp-controller="LichTrinh"
-                   asp-action="Index"
-                   class="@(currentController == "LichTrinh" ? "active" : "")">
-                    🕐
-                    <span>Lịch trình</span>
-                </a>
+                    <!-- CÀI ĐẶT -->
+                    <a asp-controller="CaiDat"
+                       asp-action="Index"
+                       class="@(currentController == "CaiDat" ? "active" : "")">
+                        ⚙️
+                        <span>Cài đặt</span>
+                    </a>
+                }
 
-                <!-- BÁO CÁO -->
-                <a asp-controller="BaoCao"
-                   asp-action="Index"
-                   class="@(currentController == "BaoCao" ? "active" : "")">
-                    📊
-                    <span>Báo cáo</span>
-                </a>
+                @if (laLeTan)
+                {
+                    <!-- LỄ TÂN / TIẾP ĐÓN -->
+                    <a asp-controller="Receptionist"
+                       asp-action="Index"
+                       class="@(currentController == "Receptionist" ? "active" : "")">
+                        🛎️
+                        <span>Bàn tiếp đón</span>
+                    </a>
 
+                    <!-- CHECK-IN SỰ KIỆN -->
+                    <a asp-controller="CheckIn"
+                       asp-action="Index"
+                       class="@(currentController == "CheckIn" ? "active" : "")">
+                        🎟️
+                        <span>Check-in tham dự</span>
+                    </a>
 
-                <!-- DASHBOARD (MODULE 5) -->
-                <a asp-controller="Dashboard"
-                   asp-action="Index"
-                   class="@(currentController == "Dashboard" ? "active" : "")">
-                    📈
-                    <span>Dashboard</span>
-                </a>
+                    <!-- ĐIỂM DANH PHIÊN -->
+                    <a asp-controller="DiemDanhPhien"
+                       asp-action="Index"
+                       class="@(currentController == "DiemDanhPhien" ? "active" : "")">
+                        📋
+                        <span>Điểm danh phiên</span>
+                    </a>
 
+                    <!-- CÀI ĐẶT -->
+                    <a asp-controller="CaiDat"
+                       asp-action="Index"
+                       class="@(currentController == "CaiDat" ? "active" : "")">
+                        ⚙️
+                        <span>Cài đặt</span>
+                    </a>
+                }
 
-                <!-- THỐNG KÊ (MODULE 5) -->
-                <a asp-controller="ThongKe"
-                   asp-action="Index"
-                   class="@(currentController == "ThongKe" ? "active" : "")">
-                    🏆
-                    <span>Thống kê &amp; Tỷ lệ</span>
-                </a>
+                @if (laNguoiThamDu)
+                {
+                    <!-- ĐĂNG KÝ SỰ KIỆN -->
+                    <a asp-controller="DangKy"
+                       asp-action="Index"
+                       class="@(currentController == "DangKy" ? "active" : "")">
+                        🎫
+                        <span>Đăng ký sự kiện</span>
+                    </a>
 
+                    <!-- LỊCH SỬ THAM DỰ CÁ NHÂN -->
+                    <a asp-controller="LichSu"
+                       asp-action="CaNhan"
+                       class="@(currentController == "LichSu" ? "active" : "")">
+                        ⏳
+                        <span>Lịch sử của tôi</span>
+                    </a>
 
-                <!-- LỊCH SỬ (MODULE 5) -->
-                <a asp-controller="LichSu"
-                   asp-action="CaNhan"
-                   class="@(currentController == "LichSu" ? "active" : "")">
-                    ⏳
-                    <span>Lịch sử tham dự</span>
-                </a>
+                    <!-- CÀI ĐẶT -->
+                    <a asp-controller="CaiDat"
+                       asp-action="Index"
+                       class="@(currentController == "CaiDat" ? "active" : "")">
+                        ⚙️
+                        <span>Cài đặt</span>
+                    </a>
+                }
 
-
-                <!-- CÀI ĐẶT -->
-                <a asp-controller="CaiDat"
-                   asp-action="Index"
-                   class="@(currentController == "CaiDat" ? "active" : "")">
-                    ⚙️
-                    <span>Cài đặt</span>
-                </a>
+                <!-- NÚT ĐĂNG XUẤT -->
+                <div class="mt-auto pt-3 border-top border-secondary">
+                    <a asp-controller="TaiKhoan"
+                       asp-action="DangXuat"
+                       class="text-danger">
+                        🚪
+                        <span>Đăng xuất</span>
+                    </a>
+                </div>
 
             </nav>
 

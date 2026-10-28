@@ -16,7 +16,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         {
             var vaiTro = HttpContext.Session.GetString("VaiTro");
 
-            if (vaiTro != "Receptionist")
+            if (vaiTro != "Le Tan")
             {
                 return RedirectToAction("DangNhap", "TaiKhoan");
             }
