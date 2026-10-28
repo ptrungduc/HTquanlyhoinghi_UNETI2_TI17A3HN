@@ -1,9 +1,10 @@
 // Họ và tên: PHAM TRUNG DUC
 // Mã sinh viên: 23103100134
-// Nội dung thực hiện: Module 5 - Báo cáo theo thời gian (Mục 9.6).
+// Nội dung thực hiện: Module 5 - Báo cáo theo thời gian (Mục 9.6) + xuất PDF.
 
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Database;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module5;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,11 +30,57 @@ public class BaoCaoController : Controller
         DateTime? denNgay)
     {
         // 1. KIỂM TRA QUYỀN
-        if (HttpContext.Session.GetString("VaiTro") != "Admin")
+        if (!LaAdmin())
         {
             return RedirectToAction("DangNhap", "TaiKhoan");
         }
 
+        var vm = await XayDungViewModel(thang, nam, tuNgay, denNgay);
+        return View(vm);
+    }
+
+    // =================================================================
+    // XUẤT BÁO CÁO PDF - CHỈ ADMIN
+    // =================================================================
+    [HttpGet]
+    public async Task<IActionResult> XuatPdf(
+        int? thang,
+        int? nam,
+        DateTime? tuNgay,
+        DateTime? denNgay)
+    {
+        if (!LaAdmin())
+        {
+            return RedirectToAction("DangNhap", "TaiKhoan");
+        }
+
+        var vm = await XayDungViewModel(thang, nam, tuNgay, denNgay);
+
+        if (!vm.DaLoc || !string.IsNullOrEmpty(vm.LoiValidation))
+        {
+            TempData["Loi"] = vm.LoiValidation ?? "Vui lòng chọn bộ lọc hợp lệ.";
+            return RedirectToAction(nameof(Index), new
+            {
+                thang,
+                nam,
+                tuNgay = tuNgay?.ToString("yyyy-MM-dd"),
+                denNgay = denNgay?.ToString("yyyy-MM-dd")
+            });
+        }
+
+        var bytes = BaoCaoPdfService.TaoPdf(vm);
+        return File(bytes, "application/pdf", $"BaoCao_{DateTime.Now:yyyyMMdd_HHmmss}.pdf");
+    }
+
+    // =================================================================
+    // XÂY DỰNG VIEWMODEL - dùng chung cho hiển thị và xuất PDF
+    // =================================================================
+    private async Task<BaoCaoViewModel> XayDungViewModel(
+        int? thang,
+        int? nam,
+        DateTime? tuNgay,
+        DateTime? denNgay)
+    {
         var vm = new BaoCaoViewModel
         {
             Thang = thang,
@@ -48,7 +95,7 @@ public class BaoCaoController : Controller
         // 2. CHƯA LỌC: hiển thị form trống
         if (!coKhoangNgay && !coThangNam)
         {
-            return View(vm);
+            return vm;
         }
 
         vm.DaLoc = true;
@@ -57,7 +104,7 @@ public class BaoCaoController : Controller
         if (coKhoangNgay && coThangNam)
         {
             vm.LoiValidation = "Chỉ chọn một kiểu lọc: hoặc Từ ngày/Đến ngày, hoặc Tháng/Năm.";
-            return View(vm);
+            return vm;
         }
 
         DateTime tu;   // mốc bắt đầu (bao gồm)
@@ -70,7 +117,7 @@ public class BaoCaoController : Controller
             if (tuNgay.HasValue && denNgay.HasValue && tuNgay.Value.Date > denNgay.Value.Date)
             {
                 vm.LoiValidation = "\"Từ ngày\" phải nhỏ hơn hoặc bằng \"Đến ngày\".";
-                return View(vm);
+                return vm;
             }
 
             tu = tuNgay?.Date ?? DateTime.MinValue;
@@ -91,12 +138,12 @@ public class BaoCaoController : Controller
             if (thang.HasValue && (thang.Value < 1 || thang.Value > 12))
             {
                 vm.LoiValidation = "Tháng phải nằm trong khoảng 1 đến 12.";
-                return View(vm);
+                return vm;
             }
             if (y < 1900 || y > 2100)
             {
                 vm.LoiValidation = "Năm không hợp lệ (1900 - 2100).";
-                return View(vm);
+                return vm;
             }
 
             if (thang.HasValue)
@@ -114,7 +161,6 @@ public class BaoCaoController : Controller
         }
 
         // 5. WHERE() - query gốc, dùng lại cho tổng hợp và nhóm
-        // Chưa thực thi SQL ở đây; EF chỉ dịch thành WHERE khi thực thi.
         var suKienQuery = _context.SuKiens
             .AsNoTracking()
             .Where(s => s.ThoiGianBatDau >= tu && s.ThoiGianBatDau < den);
@@ -127,12 +173,12 @@ public class BaoCaoController : Controller
             .AsNoTracking()
             .Where(c => c.ThoiGianCheckIn >= tu && c.ThoiGianCheckIn < den);
 
-        // 6. COUNT() - tổng hợp, thực thi SELECT COUNT(*) phía SQL Server
+        // 6. COUNT() - tổng hợp
         vm.TongSuKien = await suKienQuery.CountAsync();
         vm.TongDangKy = await dangKyQuery.CountAsync();
         vm.TongCheckIn = await checkInQuery.CountAsync();
 
-        // 7. GROUPBY() + SELECT() + COUNT() - theo tháng, gom nhóm phía SQL Server
+        // 7. GROUPBY() + SELECT() + COUNT() - theo tháng
         vm.SuKienTheoThang = await suKienQuery
             .GroupBy(s => new { s.ThoiGianBatDau.Year, s.ThoiGianBatDau.Month })
             .Select(g => new BaoCaoTheoThangItem
@@ -170,8 +216,6 @@ public class BaoCaoController : Controller
             .ToListAsync();
 
         // 8. SELECT() + COUNT() - chi tiết từng sự kiện trong khoảng
-        // Đăng ký và check-in được đếm theo cùng khoảng thời gian đã lọc.
-        // CheckIn không có MaSuKien trực tiếp nên đi qua DangKyThamDu.MaSuKien.
         vm.DanhSachSuKien = await suKienQuery
             .Select(s => new BaoCaoSuKienItem
             {
@@ -189,7 +233,12 @@ public class BaoCaoController : Controller
             .ThenBy(x => x.ThoiGianBatDau)
             .ToListAsync();
 
-        // 9. TRẢ VIEW
-        return View(vm);
+        return vm;
     }
+
+    private bool LaAdmin() =>
+        string.Equals(
+            HttpContext.Session.GetString("VaiTro"),
+            "Admin",
+            StringComparison.OrdinalIgnoreCase);
 }
