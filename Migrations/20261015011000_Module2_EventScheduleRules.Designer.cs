@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace QuanLyHoiNghi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261021022427_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20261015011000_Module2_EventScheduleRules")]
+    partial class Module2_EventScheduleRules
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -179,7 +179,7 @@ namespace QuanLyHoiNghi.Migrations
                     b.HasIndex("TenLoaiSuKien")
                         .IsUnique();
 
-                    b.ToTable("LoaiSuKiens", (string)null);
+                    b.ToTable("LoaiSuKiens");
                 });
 
             modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.NguoiThamDu", b =>
@@ -236,6 +236,14 @@ namespace QuanLyHoiNghi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PhongKhuVuc")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("SoLuongToiDa")
+                        .HasColumnType("int");
+
                     b.Property<string>("TenPhien")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -263,6 +271,9 @@ namespace QuanLyHoiNghi.Migrations
                     b.Property<string>("MaSuKien")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<DateTime>("HanDangKy")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("MaDiaDiem")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -274,6 +285,9 @@ namespace QuanLyHoiNghi.Migrations
                     b.Property<string>("MoTa")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SoLuongToiDa")
+                        .HasColumnType("int");
 
                     b.Property<string>("TenSuKien")
                         .IsRequired()
@@ -334,7 +348,7 @@ namespace QuanLyHoiNghi.Migrations
                     b.HasIndex("TenDangNhap")
                         .IsUnique();
 
-                    b.ToTable("TaiKhoans", (string)null);
+                    b.ToTable("TaiKhoans");
                 });
 
             modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.CheckIn", b =>

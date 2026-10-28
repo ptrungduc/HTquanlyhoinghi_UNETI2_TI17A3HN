@@ -36,23 +36,38 @@
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label asp-for="ThoiGianBatDau" class="form-label">Thời gian bắt đầu</label>
-                <input asp-for="ThoiGianBatDau" type="datetime-local" class="form-control" />
+                <input asp-for="ThoiGianBatDau" type="datetime-local" asp-format="{0:yyyy-MM-ddTHH:mm}" class="form-control" />
                 <span asp-validation-for="ThoiGianBatDau" class="text-danger"></span>
             </div>
             <div class="col-md-6 mb-3">
                 <label asp-for="ThoiGianKetThuc" class="form-label">Thời gian kết thúc</label>
-                <input asp-for="ThoiGianKetThuc" type="datetime-local" class="form-control" />
+                <input asp-for="ThoiGianKetThuc" type="datetime-local" asp-format="{0:yyyy-MM-ddTHH:mm}" class="form-control" />
                 <span asp-validation-for="ThoiGianKetThuc" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="HanDangKy" class="form-label">Hạn đăng ký</label>
+                <input asp-for="HanDangKy" type="datetime-local" asp-format="{0:yyyy-MM-ddTHH:mm}" class="form-control" />
+                <span asp-validation-for="HanDangKy" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="SoLuongToiDa" class="form-label">Số lượng tối đa</label>
+                <input asp-for="SoLuongToiDa" type="number" min="1" class="form-control" />
+                <span asp-validation-for="SoLuongToiDa" class="text-danger"></span>
             </div>
         </div>
         <div class="mb-3">
             <label asp-for="TrangThai" class="form-label">Trạng thái</label>
             <select asp-for="TrangThai" class="form-select">
-                <option value="SapDienRa">Sắp diễn ra</option>
+                <option value="Nhap">Nháp</option>
+                <option value="MoDangKy">Mở đăng ký</option>
+                <option value="DongDangKy">Đóng đăng ký</option>
                 <option value="DangDienRa">Đang diễn ra</option>
-                <option value="DaKetThuc">Đã kết thúc</option>
+                <option value="HoanThanh">Hoàn thành</option>
                 <option value="DaHuy">Đã hủy</option>
             </select>
+            <span asp-validation-for="TrangThai" class="text-danger"></span>
         </div>
         <div class="mb-3">
             <label asp-for="MoTa" class="form-label">Mô tả</label>

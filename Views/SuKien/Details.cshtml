@@ -22,6 +22,10 @@
         <dd class="col-sm-9">@Model.DiaDiem?.TenDiaDiem</dd>
         <dt class="col-sm-3">Thời gian</dt>
         <dd class="col-sm-9">@Model.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm") - @Model.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")</dd>
+        <dt class="col-sm-3">Hạn đăng ký</dt>
+        <dd class="col-sm-9">@Model.HanDangKy.ToString("dd/MM/yyyy HH:mm")</dd>
+        <dt class="col-sm-3">Số lượng tối đa</dt>
+        <dd class="col-sm-9">@Model.SoLuongToiDa</dd>
         <dt class="col-sm-3">Trạng thái</dt>
         <dd class="col-sm-9">@Model.TrangThai</dd>
         <dt class="col-sm-3">Mô tả</dt>
@@ -37,6 +41,8 @@
                     <tr>
                         <th>Tên phiên</th>
                         <th>Thời gian</th>
+                        <th>Phòng/khu vực</th>
+                        <th>Số lượng tối đa</th>
                         <th>Diễn giả</th>
                         <th>Trạng thái</th>
                     </tr>
@@ -47,6 +53,8 @@
                         <tr>
                             <td>@phien.TenPhien</td>
                             <td>@phien.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm") - @phien.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@phien.PhongKhuVuc</td>
+                            <td>@phien.SoLuongToiDa</td>
                             <td>@phien.DienGia</td>
                             <td>@phien.TrangThai</td>
                         </tr>

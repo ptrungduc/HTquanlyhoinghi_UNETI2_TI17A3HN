@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="@(Context.Request.Cookies["ngon_ngu"] == "en" ? "en" : "vi")">
 
 <head>
     <meta charset="utf-8" />
@@ -24,6 +24,11 @@
 @{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+    // Cài đặt người dùng (cookie) từ trang Cài đặt
+    var ngonNguTrang = Context.Request.Cookies["ngon_ngu"] == "en" ? "en" : "vi";
+    var themeTrang = Context.Request.Cookies["theme"] == "dark" ? "theme-dark" : "";
+
     var vaiTro = Context.Session.GetString("VaiTro");
     var hoTen = Context.Session.GetString("HoTen");
 
@@ -45,7 +50,7 @@
     }
 }
 
-<body>
+<body class="@themeTrang">
 
     <div class="admin-page">
 
@@ -105,7 +110,7 @@
                     <a asp-controller="SuKien"
                        asp-action="Index"
                        class="@(currentController == "SuKien" ? "active" : "")">
-                        🎯
+                        🗓️
                         <span>Quản lý sự kiện</span>
                     </a>
 
@@ -141,6 +146,30 @@
                         <span>Quản lý đăng ký</span>
                     </a>
 
+                    <!-- DUYỆT ĐĂNG KÝ (MODULE 4) -->
+                    <a asp-controller="DangKyThamDu"
+                       asp-action="Index"
+                       class="@(currentController == "DangKyThamDu" ? "active" : "")">
+                        ✅
+                        <span>Duyệt đăng ký</span>
+                    </a>
+
+                    <!-- CHECK-IN SỰ KIỆN -->
+                    <a asp-controller="CheckIn"
+                       asp-action="Index"
+                       class="@(currentController == "CheckIn" ? "active" : "")">
+                        🎟️
+                        <span>Check-in tham dự</span>
+                    </a>
+
+                    <!-- ĐIỂM DANH PHIÊN -->
+                    <a asp-controller="DiemDanhPhien"
+                       asp-action="Index"
+                       class="@(currentController == "DiemDanhPhien" ? "active" : "")">
+                        📋
+                        <span>Điểm danh phiên</span>
+                    </a>
+
                     <!-- BÁO CÁO -->
                     <a asp-controller="BaoCao"
                        asp-action="Index"
@@ -172,6 +201,14 @@
                         ⏳
                         <span>Lịch sử tham dự</span>
                     </a>
+
+                    <!-- CÀI ĐẶT -->
+                    <a asp-controller="CaiDat"
+                       asp-action="Index"
+                       class="@(currentController == "CaiDat" ? "active" : "")">
+                        ⚙️
+                        <span>Cài đặt</span>
+                    </a>
                 }
 
                 @if (laLeTan)
@@ -188,8 +225,8 @@
                     <a asp-controller="CheckIn"
                        asp-action="Index"
                        class="@(currentController == "CheckIn" ? "active" : "")">
-                        ✅
-                        <span>Check-in sự kiện</span>
+                        🎟️
+                        <span>Check-in tham dự</span>
                     </a>
 
                     <!-- ĐIỂM DANH PHIÊN -->
@@ -198,6 +235,14 @@
                        class="@(currentController == "DiemDanhPhien" ? "active" : "")">
                         📋
                         <span>Điểm danh phiên</span>
+                    </a>
+
+                    <!-- CÀI ĐẶT -->
+                    <a asp-controller="CaiDat"
+                       asp-action="Index"
+                       class="@(currentController == "CaiDat" ? "active" : "")">
+                        ⚙️
+                        <span>Cài đặt</span>
                     </a>
                 }
 
@@ -217,6 +262,14 @@
                        class="@(currentController == "LichSu" ? "active" : "")">
                         ⏳
                         <span>Lịch sử của tôi</span>
+                    </a>
+
+                    <!-- CÀI ĐẶT -->
+                    <a asp-controller="CaiDat"
+                       asp-action="Index"
+                       class="@(currentController == "CaiDat" ? "active" : "")">
+                        ⚙️
+                        <span>Cài đặt</span>
                     </a>
                 }
 
@@ -262,7 +315,5 @@
     @await RenderSectionAsync("Scripts", required: false)
 
 </body>
-
-</html>
 
 </html>

@@ -27,6 +27,14 @@ public class DichVuModule4 : IDichVuModule4
         TrangThaiDangKy.HoanThanh
     ];
 
+    private static readonly TrangThaiDangKy[] TrangThaiDangKyPhienDuocDiemDanh =
+    [
+        TrangThaiDangKy.DaDuyet,
+        TrangThaiDangKy.DaCheckIn
+    ];
+
+    private const int SoLanThuTaoMaThamDuToiDa = 10;
+
     private readonly AppDbContext _context;
 
     public DichVuModule4(AppDbContext context)
@@ -127,16 +135,28 @@ public class DichVuModule4 : IDichVuModule4
 
         viewModel.TenPhien = phien.TenPhien;
         viewModel.TenSuKien = phien.SuKien.TenSuKien;
+        int soDangKySuKienDaDuyet = await _context.DangKyThamDus
+            .CountAsync(d =>
+                d.MaSuKien == phien.MaSuKien &&
+                TrangThaiDangKySuKienDaDuyet.Contains(d.TrangThai));
+
+        var thongKeDangKyPhien = await _context.DangKyPhiens
+            .Where(d => d.MaPhien == phien.MaPhienSuKien)
+            .GroupBy(d => d.TrangThai)
+            .Select(g => new { TrangThai = g.Key, SoLuong = g.Count() })
+            .ToListAsync();
+
         viewModel.DanhSachNguoiThamDu = await (
             from dangKyPhien in _context.DangKyPhiens.AsNoTracking()
-            join dangKySuKien in _context.DangKyThamDus.AsNoTracking()
-                on dangKyPhien.MaNguoiThamDu equals dangKySuKien.MaNguoiThamDu
             join nguoiThamDu in _context.NguoiThamDus.AsNoTracking()
                 on dangKyPhien.MaNguoiThamDu equals nguoiThamDu.MaNguoiThamDu
             where dangKyPhien.MaPhien == phien.MaPhienSuKien &&
-                TrangThaiDangKyHieuLuc.Contains(dangKyPhien.TrangThai) &&
-                dangKySuKien.MaSuKien == phien.MaSuKien &&
-                TrangThaiDangKySuKienDaDuyet.Contains(dangKySuKien.TrangThai)
+                TrangThaiDangKyPhienDuocDiemDanh.Contains(dangKyPhien.TrangThai) &&
+                nguoiThamDu.TrangThai &&
+                _context.DangKyThamDus.Any(d =>
+                    d.MaNguoiThamDu == dangKyPhien.MaNguoiThamDu &&
+                    d.MaSuKien == phien.MaSuKien &&
+                    TrangThaiDangKySuKienDaDuyet.Contains(d.TrangThai))
             orderby nguoiThamDu.HoTen
             select new NguoiDiemDanhPhienViewModel
             {
@@ -147,11 +167,32 @@ public class DichVuModule4 : IDichVuModule4
             })
             .ToListAsync();
 
+        if (viewModel.DanhSachNguoiThamDu.Count == 0)
+        {
+            int soDangKyPhien = thongKeDangKyPhien.Sum(g => g.SoLuong);
+            int soDangKyPhienChoDuyet = thongKeDangKyPhien
+                .Where(g => g.TrangThai == TrangThaiDangKy.ChoDuyet)
+                .Sum(g => g.SoLuong);
+
+            viewModel.ThongBaoDanhSachRong = soDangKySuKienDaDuyet == 0
+                ? "Chưa có đăng ký sự kiện được duyệt cho phiên này."
+                : soDangKyPhien == 0
+                    ? "Đã có đăng ký sự kiện được duyệt, nhưng chưa có người đăng ký phiên này."
+                    : soDangKyPhienChoDuyet > 0
+                        ? $"Có {soDangKyPhienChoDuyet} đăng ký phiên đang chờ duyệt. Chỉ đăng ký phiên đã duyệt mới đủ điều kiện điểm danh; hiện chưa có chức năng duyệt đăng ký phiên trong luồng Module 3."
+                        : "Có đăng ký phiên, nhưng không có đăng ký nào vừa được duyệt phiên vừa thuộc đăng ký sự kiện đã duyệt.";
+        }
+
         return viewModel;
     }
 
     public async Task<KetQuaThaoTacViewModel> DuyetDangKyAsync(string maDangKy)
     {
+        if (string.IsNullOrWhiteSpace(maDangKy))
+            return KetQuaThatBai("Mã đăng ký không hợp lệ.");
+
+        maDangKy = maDangKy.Trim();
+
         await using var transaction = await _context.Database
             .BeginTransactionAsync(IsolationLevel.Serializable);
 
@@ -188,7 +229,22 @@ public class DichVuModule4 : IDichVuModule4
         if (soLuongDangKyHieuLuc >= dangKy.SuKien.DiaDiem.SucChuaToiDa)
             return KetQuaThatBai("Sự kiện đã đủ sức chứa, không thể duyệt thêm.");
 
-        dangKy.MaThamDu = await TaoMaThamDuChuaSuDungAsync();
+        string? maThamDu = dangKy.MaThamDu;
+        if (!string.IsNullOrWhiteSpace(maThamDu))
+        {
+            bool maDaDuocCapChoDangKyKhac = await _context.DangKyThamDus
+                .AnyAsync(d => d.MaDangKy != dangKy.MaDangKy && d.MaThamDu == maThamDu);
+            if (maDaDuocCapChoDangKyKhac)
+                return KetQuaThatBai("Mã tham dự hiện tại bị trùng; cần kiểm tra dữ liệu trước khi duyệt.");
+        }
+        else
+        {
+            maThamDu = await TaoMaThamDuChuaSuDungAsync();
+            if (maThamDu == null)
+                return KetQuaThatBai("Không thể tạo mã tham dự. Vui lòng thử lại.");
+        }
+
+        dangKy.MaThamDu = maThamDu;
         dangKy.TrangThai = TrangThaiDangKy.DaDuyet;
         dangKy.NgayDuyet = DateTime.Now;
 
@@ -200,13 +256,20 @@ public class DichVuModule4 : IDichVuModule4
 
     public async Task<KetQuaThaoTacViewModel> TuChoiDangKyAsync(string maDangKy, string lyDoTuChoi)
     {
+        if (string.IsNullOrWhiteSpace(maDangKy))
+            return KetQuaThatBai("Mã đăng ký không hợp lệ.");
+
         if (string.IsNullOrWhiteSpace(lyDoTuChoi))
             return KetQuaThatBai("Vui lòng nhập lý do từ chối.");
+
+        maDangKy = maDangKy.Trim();
+        lyDoTuChoi = lyDoTuChoi.Trim();
 
         if (lyDoTuChoi.Length > 500)
             return KetQuaThatBai("Lý do từ chối không được vượt quá 500 ký tự.");
 
         var dangKy = await _context.DangKyThamDus
+            .AsNoTracking()
             .FirstOrDefaultAsync(d => d.MaDangKy == maDangKy);
 
         if (dangKy == null)
@@ -215,13 +278,23 @@ public class DichVuModule4 : IDichVuModule4
         if (dangKy.TrangThai != TrangThaiDangKy.ChoDuyet)
             return KetQuaThatBai("Chỉ đăng ký đang chờ duyệt mới được từ chối.");
 
-        var ghiChuTuChoi = $"Lý do từ chối: {lyDoTuChoi.Trim()}";
-        dangKy.GhiChu = string.IsNullOrWhiteSpace(dangKy.GhiChu)
+        var ghiChuTuChoi = $"Lý do từ chối: {lyDoTuChoi}";
+        string ghiChuMoi = string.IsNullOrWhiteSpace(dangKy.GhiChu)
             ? ghiChuTuChoi
             : $"{dangKy.GhiChu}{Environment.NewLine}{ghiChuTuChoi}";
-        dangKy.TrangThai = TrangThaiDangKy.TuChoi;
 
-        await _context.SaveChangesAsync();
+        int soDongCapNhat = await _context.DangKyThamDus
+            .Where(d =>
+                d.MaDangKy == maDangKy &&
+                d.TrangThai == TrangThaiDangKy.ChoDuyet)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(d => d.GhiChu, ghiChuMoi)
+                .SetProperty(d => d.MaThamDu, (string?)null)
+                .SetProperty(d => d.TrangThai, TrangThaiDangKy.TuChoi));
+
+        if (soDongCapNhat == 0)
+            return KetQuaThatBai("Đăng ký đã được xử lý; không thể từ chối.");
+
         return KetQuaThanhCong("Đã từ chối đăng ký.");
     }
 
@@ -229,6 +302,15 @@ public class DichVuModule4 : IDichVuModule4
         string maPhienSuKien,
         string maNguoiThamDu)
     {
+        if (string.IsNullOrWhiteSpace(maPhienSuKien) ||
+            string.IsNullOrWhiteSpace(maNguoiThamDu))
+        {
+            return KetQuaThatBai("Phiên hoặc người tham dự không hợp lệ.");
+        }
+
+        maPhienSuKien = maPhienSuKien.Trim();
+        maNguoiThamDu = maNguoiThamDu.Trim();
+
         var phien = await _context.PhienSuKiens
             .Include(p => p.SuKien)
             .FirstOrDefaultAsync(p => p.MaPhienSuKien == maPhienSuKien);
@@ -258,6 +340,11 @@ public class DichVuModule4 : IDichVuModule4
         if (!coDangKySuKienDaDuyet)
             return KetQuaThatBai("Người tham dự chưa có đăng ký sự kiện được duyệt.");
 
+        bool nguoiThamDuConHoatDong = await _context.NguoiThamDus
+            .AnyAsync(n => n.MaNguoiThamDu == maNguoiThamDu && n.TrangThai);
+        if (!nguoiThamDuConHoatDong)
+            return KetQuaThatBai("Người tham dự không tồn tại hoặc đã ngừng hoạt động.");
+
         var cacDangKyPhien = await _context.DangKyPhiens
             .Where(d =>
                 d.MaNguoiThamDu == maNguoiThamDu &&
@@ -268,7 +355,7 @@ public class DichVuModule4 : IDichVuModule4
             return KetQuaThatBai("Người tham dự đã được điểm danh phiên này.");
 
         var dangKyPhienHopLe = cacDangKyPhien
-            .Where(d => TrangThaiDangKyHieuLuc.Contains(d.TrangThai))
+            .Where(d => TrangThaiDangKyPhienDuocDiemDanh.Contains(d.TrangThai))
             .ToList();
 
         if (dangKyPhienHopLe.Count == 0)
@@ -281,8 +368,7 @@ public class DichVuModule4 : IDichVuModule4
         int soDongCapNhat = await _context.DangKyPhiens
             .Where(d =>
                 d.MaDangKyPhien == maDangKyPhien &&
-                d.TrangThai != TrangThaiDangKy.DaCheckIn &&
-                TrangThaiDangKyHieuLuc.Contains(d.TrangThai))
+                d.TrangThai == TrangThaiDangKy.DaDuyet)
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(d => d.TrangThai, TrangThaiDangKy.DaCheckIn));
 
@@ -359,16 +445,16 @@ public class DichVuModule4 : IDichVuModule4
         return KetQuaThanhCong("Check-in thành công.");
     }
 
-    private async Task<string> TaoMaThamDuChuaSuDungAsync()
+    private async Task<string?> TaoMaThamDuChuaSuDungAsync()
     {
-        string maThamDu;
-        do
+        for (int lanThu = 0; lanThu < SoLanThuTaoMaThamDuToiDa; lanThu++)
         {
-            maThamDu = $"UN-{Guid.NewGuid():N}".ToUpperInvariant();
+            string maThamDu = $"UN-{Guid.NewGuid():N}".ToUpperInvariant();
+            if (!await _context.DangKyThamDus.AnyAsync(d => d.MaThamDu == maThamDu))
+                return maThamDu;
         }
-        while (await _context.DangKyThamDus.AnyAsync(d => d.MaThamDu == maThamDu));
 
-        return maThamDu;
+        return null;
     }
 
     private static KetQuaThaoTacViewModel KetQuaThanhCong(string thongBao) =>
