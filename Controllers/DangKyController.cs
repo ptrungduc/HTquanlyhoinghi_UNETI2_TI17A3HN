@@ -95,6 +95,7 @@ public class DangKyController : Controller
         var batDauTu = DateTime.Now;
         var querySuKien = _context.SuKiens.AsNoTracking()
             .Where(s => s.TrangThai == nameof(TrangThaiSuKien.MoDangKy)
+                && s.HanDangKy > batDauTu
                 && s.ThoiGianBatDau > batDauTu
                 && s.DiaDiem != null);
 
@@ -116,16 +117,18 @@ public class DangKyController : Controller
                 TenSuKien = s.TenSuKien,
                 TenLoaiSuKien = s.LoaiSuKien == null ? string.Empty : s.LoaiSuKien.TenLoaiSuKien,
                 TenDiaDiem = s.DiaDiem == null ? string.Empty : s.DiaDiem.TenDiaDiem,
-                SucChua = s.DiaDiem == null ? 0 : s.DiaDiem.SucChuaToiDa,
+                SucChua = s.DiaDiem == null
+                    ? 0
+                    : s.SoLuongToiDa < s.DiaDiem.SucChuaToiDa
+                        ? s.SoLuongToiDa
+                        : s.DiaDiem.SucChuaToiDa,
                 BatDau = s.ThoiGianBatDau,
                 SoLuongHieuLuc = _context.DangKyThamDus.Count(d =>
                     d.MaSuKien == s.MaSuKien && trangThaiHieuLuc.Contains(d.TrangThai))
             })
+            .Where(s => s.SoLuongHieuLuc < s.SucChua)
             .OrderBy(s => s.BatDau)
             .ToListAsync();
-        model.SuKiens = model.SuKiens
-            .Where(s => s.SoLuongHieuLuc < s.SucChua)
-            .ToList();
 
         if (nguoiThamDu != null)
         {
@@ -206,6 +209,7 @@ public class DangKyController : Controller
                 s.ThoiGianBatDau,
                 s.ThoiGianKetThuc,
                 s.TrangThai,
+                s.SoLuongToiDa,
                 TenLoaiSuKien = s.LoaiSuKien == null ? string.Empty : s.LoaiSuKien.TenLoaiSuKien,
                 TenDiaDiem = s.DiaDiem == null ? string.Empty : s.DiaDiem.TenDiaDiem,
                 SucChua = s.DiaDiem == null ? 0 : s.DiaDiem.SucChuaToiDa
@@ -228,6 +232,10 @@ public class DangKyController : Controller
             TenLoaiSuKien = suKien.TenLoaiSuKien,
             TenDiaDiem = suKien.TenDiaDiem,
             SucChuaDiaDiem = suKien.SucChua,
+            SoLuongToiDaSuKien = suKien.SoLuongToiDa,
+            SucChuaDangKy = suKien.SucChua == 0
+                ? 0
+                : Math.Min(suKien.SoLuongToiDa, suKien.SucChua),
             ThoiGianBatDau = suKien.ThoiGianBatDau,
             ThoiGianKetThuc = suKien.ThoiGianKetThuc,
             TrangThaiSuKien = suKien.TrangThai,
