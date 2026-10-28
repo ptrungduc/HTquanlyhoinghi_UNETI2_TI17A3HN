@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="vi">
+<html lang="@(Context.Request.Cookies["ngon_ngu"] == "en" ? "en" : "vi")">
 
 <head>
     <meta charset="utf-8" />
@@ -24,9 +24,13 @@
 @{
     var currentController =
         ViewContext.RouteData.Values["controller"]?.ToString();
+
+    // Cài đặt người dùng (cookie) từ trang Cài đặt
+    var ngonNguTrang = Context.Request.Cookies["ngon_ngu"] == "en" ? "en" : "vi";
+    var themeTrang = Context.Request.Cookies["theme"] == "dark" ? "theme-dark" : "";
 }
 
-<body>
+<body class="@themeTrang">
 
     <div class="admin-page">
 
@@ -68,10 +72,16 @@
 
                 <!-- QUẢN LÝ SỰ KIỆN -->
                 <a asp-controller="LoaiSuKien"
-                   asp-action="Index"
-                   class="@(currentController == "LoaiSuKien" ? "active" : "")">
+                   asp-action="Index">
                     📅
                     <span>Quản lý loại sự kiện</span>
+                </a>
+
+                <a asp-controller="SuKien"
+                   asp-action="Index"
+                   class="@(currentController == "SuKien" ? "active" : "")">
+                    🗓️
+                    <span>Quản lý sự kiện</span>
                 </a>
 
 
@@ -99,6 +109,28 @@
                    <span>Quản lý đăng ký</span>
                 </a>
 
+                <!-- MODULE 4 -->
+                <a asp-controller="DangKyThamDu"
+                   asp-action="Index"
+                   class="@(currentController == "DangKyThamDu" ? "active" : "")">
+                    ✅
+                    <span>Duyệt đăng ký / Cấp mã tham dự</span>
+                </a>
+
+                <a asp-controller="CheckIn"
+                   asp-action="Index"
+                   class="@(currentController == "CheckIn" ? "active" : "")">
+                    🎟️
+                    <span>Check-in tham dự</span>
+                </a>
+
+                <a asp-controller="DiemDanhPhien"
+                   asp-action="Index"
+                   class="@(currentController == "DiemDanhPhien" ? "active" : "")">
+                    📋
+                    <span>Điểm danh phiên</span>
+                </a>
+
 
                 <!-- LỊCH TRÌNH -->
                 <a asp-controller="LichTrinh"
@@ -107,16 +139,6 @@
                     🕐
                     <span>Lịch trình</span>
                 </a>
-
-
-                <!-- TÀI LIỆU -->
-                <a asp-controller="TaiLieu"
-                   asp-action="Index"
-                   class="@(currentController == "TaiLieu" ? "active" : "")">
-                    📄
-                    <span>Tài liệu &amp; Tài nguyên</span>
-                </a>
-
 
                 <!-- BÁO CÁO -->
                 <a asp-controller="BaoCao"

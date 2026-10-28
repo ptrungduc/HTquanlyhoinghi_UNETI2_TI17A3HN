@@ -8,6 +8,7 @@ public class DiemDanhPhienViewModel
     public string TenPhien { get; set; } = string.Empty;
     public string TenSuKien { get; set; } = string.Empty;
     public string ThongBao { get; set; } = string.Empty;
+    public string ThongBaoDanhSachRong { get; set; } = string.Empty;
     public KetQuaThaoTacViewModel? KetQua { get; set; }
 }
 

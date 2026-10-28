@@ -178,7 +178,8 @@ else if (Model.Tab == "ca-nhan")
                                 {
                                     @if (DateTime.Now < item.HanHuy)
                                     {
-                                        <form asp-action="Huy" method="post" class="d-flex gap-1">
+                                        <form asp-action="Huy" method="post" class="d-flex gap-1"
+                                              onsubmit="return confirm('Bạn có chắc muốn hủy đăng ký này?');">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="maDangKy" value="@item.MaDangKy" />
                                             <input type="text" name="lyDoHuy" placeholder="Lý do hủy (không bắt buộc)"
