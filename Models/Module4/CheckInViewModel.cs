@@ -20,4 +20,7 @@ public class CheckInViewModel
 
     [BindNever]
     public KetQuaThaoTacViewModel? KetQua { get; set; }
+
+    [BindNever]
+    public ChiTietDangKyViewModel? DangKy { get; set; }
 }

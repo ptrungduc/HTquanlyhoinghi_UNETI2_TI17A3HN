@@ -1,24 +1,20 @@
-using HTquanlyhoinghi_UNETI2_TI17A3HN.Database;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Helper;
 using Microsoft.AspNetCore.Mvc;
 namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
 {
     public class ReceptionistController : Controller
     {
-        private readonly AppDbContext _context;
-
-        public ReceptionistController(AppDbContext context)
-        {
-            _context = context;
-        }
-
         [HttpGet]
         public IActionResult Index()
         {
-            var vaiTro = HttpContext.Session.GetString("VaiTro");
-
-            if (vaiTro != "Le Tan")
+            if (string.IsNullOrWhiteSpace(HttpContext.Session.GetString("MaTaiKhoan")))
             {
                 return RedirectToAction("DangNhap", "TaiKhoan");
+            }
+
+            if (!KiemTraQuyenModule4.CoQuyenTiepDon(HttpContext.Session.GetString("VaiTro")))
+            {
+                return StatusCode(StatusCodes.Status403Forbidden);
             }
 
             return View();

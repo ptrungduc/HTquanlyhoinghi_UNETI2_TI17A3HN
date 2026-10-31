@@ -4,6 +4,7 @@
 
 using System.Data.Common;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Helper;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Models;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module4;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -25,17 +26,37 @@ public class DangKyThamDuController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string? maSuKien, string? trangThai, string? tuKhoa)
     {
-        var ketQuaPhanQuyen = KiemTraQuyenQuanTri();
+        var ketQuaPhanQuyen = KiemTraQuyenTruyCap();
         if (ketQuaPhanQuyen is not null)
         {
             return ketQuaPhanQuyen;
         }
 
+        TrangThaiDangKy? trangThaiLoc = null;
+        string thongBaoLoiLoc = string.Empty;
+        if (!string.IsNullOrWhiteSpace(trangThai))
+        {
+            if (Enum.TryParse<TrangThaiDangKy>(trangThai, true, out var trangThaiDaParse) &&
+                Enum.IsDefined(trangThaiDaParse))
+            {
+                trangThaiLoc = trangThaiDaParse;
+            }
+            else
+            {
+                thongBaoLoiLoc = "Trạng thái lọc không hợp lệ.";
+            }
+        }
+
         try
         {
-            return View(await _dichVuModule4.LayDanhSachChoDuyetAsync());
+            var viewModel = await _dichVuModule4.LayDanhSachChoDuyetAsync(
+                maSuKien,
+                trangThaiLoc,
+                tuKhoa);
+            viewModel.ThongBao = thongBaoLoiLoc;
+            return View(viewModel);
         }
         catch (Exception ex) when (ex is DbUpdateException or DbException)
         {
@@ -50,7 +71,7 @@ public class DangKyThamDuController : Controller
     [HttpGet]
     public async Task<IActionResult> ChiTiet(string? maDangKy)
     {
-        var ketQuaPhanQuyen = KiemTraQuyenQuanTri();
+        var ketQuaPhanQuyen = KiemTraQuyenTruyCap();
         if (ketQuaPhanQuyen is not null)
         {
             return ketQuaPhanQuyen;
@@ -78,7 +99,7 @@ public class DangKyThamDuController : Controller
     [HttpGet]
     public IActionResult Duyet(string? maDangKy)
     {
-        var ketQuaPhanQuyen = KiemTraQuyenQuanTri();
+        var ketQuaPhanQuyen = KiemTraQuyenTruyCap();
         if (ketQuaPhanQuyen is not null)
         {
             return ketQuaPhanQuyen;
@@ -91,7 +112,7 @@ public class DangKyThamDuController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Duyet(XacNhanDuyetDangKyViewModel model)
     {
-        var ketQuaPhanQuyen = KiemTraQuyenQuanTri();
+        var ketQuaPhanQuyen = KiemTraQuyenTruyCap();
         if (ketQuaPhanQuyen is not null)
         {
             return ketQuaPhanQuyen;
@@ -131,7 +152,7 @@ public class DangKyThamDuController : Controller
     [HttpGet]
     public IActionResult TuChoi(string? maDangKy)
     {
-        var ketQuaPhanQuyen = KiemTraQuyenQuanTri();
+        var ketQuaPhanQuyen = KiemTraQuyenTruyCap();
         if (ketQuaPhanQuyen is not null)
         {
             return ketQuaPhanQuyen;
@@ -144,7 +165,7 @@ public class DangKyThamDuController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> TuChoi(TuChoiDangKyViewModel model)
     {
-        var ketQuaPhanQuyen = KiemTraQuyenQuanTri();
+        var ketQuaPhanQuyen = KiemTraQuyenTruyCap();
         if (ketQuaPhanQuyen is not null)
         {
             return ketQuaPhanQuyen;
@@ -181,14 +202,14 @@ public class DangKyThamDuController : Controller
         return View(model);
     }
 
-    private IActionResult? KiemTraQuyenQuanTri()
+    private IActionResult? KiemTraQuyenTruyCap()
     {
         if (string.IsNullOrWhiteSpace(HttpContext.Session.GetString("MaTaiKhoan")))
         {
             return RedirectToAction("DangNhap", "TaiKhoan");
         }
 
-        if (!KiemTraQuyenModule4.CoQuyenQuanTri(HttpContext.Session.GetString("VaiTro")))
+        if (!KiemTraQuyenModule4.CoQuyenTiepDon(HttpContext.Session.GetString("VaiTro")))
         {
             return StatusCode(StatusCodes.Status403Forbidden, "Bạn không có quyền truy cập chức năng Module 4.");
         }

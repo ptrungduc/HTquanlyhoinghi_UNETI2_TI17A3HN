@@ -15,6 +15,66 @@
         @Model.KetQua.ThongBao
     </div>
 }
+
+<form asp-controller="CheckIn" asp-action="Index" method="get" class="card card-body mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-8">
+            <label for="maThamDu" class="form-label">Tra cứu mã tham dự</label>
+            <input id="maThamDu" name="maThamDu" value="@Model.MaThamDu" class="form-control"
+                   autocomplete="off" maxlength="100" required />
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-primary">Tra cứu</button>
+        </div>
+    </div>
+</form>
+
+@if (Model.DangKy is not null)
+{
+    @if (string.IsNullOrWhiteSpace(Model.DangKy.MaDangKy))
+    {
+        <div class="alert alert-warning" role="status">@Model.DangKy.ThongBao</div>
+    }
+    else
+    {
+        var trangThaiDangKy = Model.DangKy.TrangThai switch
+        {
+            "ChoDuyet" => "Chờ duyệt",
+            "DaDuyet" => "Đã duyệt",
+            "DaCheckIn" => "Đã check-in",
+            "HoanThanh" => "Hoàn thành",
+            "TuChoi" => "Từ chối",
+            "DaHuy" => "Đã hủy",
+            _ => Model.DangKy.TrangThai
+        };
+
+        <div class="card mb-4">
+            <div class="card-header fw-semibold">Thông tin đăng ký</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">Mã đăng ký</dt>
+                    <dd class="col-sm-9"><code>@Model.DangKy.MaDangKy</code></dd>
+                    <dt class="col-sm-3">Người tham dự</dt>
+                    <dd class="col-sm-9">@Model.DangKy.TenNguoiThamDu</dd>
+                    <dt class="col-sm-3">Email</dt>
+                    <dd class="col-sm-9">@Model.DangKy.Email</dd>
+                    <dt class="col-sm-3">Sự kiện</dt>
+                    <dd class="col-sm-9">@Model.DangKy.TenSuKien</dd>
+                    <dt class="col-sm-3">Trạng thái</dt>
+                    <dd class="col-sm-9">@trangThaiDangKy</dd>
+                    @if (Model.DangKy.NgayCheckIn.HasValue)
+                    {
+                        <dt class="col-sm-3">Đã check-in lúc</dt>
+                        <dd class="col-sm-9">@Model.DangKy.NgayCheckIn.Value.ToString("dd/MM/yyyy HH:mm:ss")</dd>
+                        <dt class="col-sm-3">Người thực hiện</dt>
+                        <dd class="col-sm-9">@Model.DangKy.NguoiCheckIn</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    }
+}
+
 <form asp-controller="CheckIn" asp-action="Index" method="post" class="mt-3">
     @Html.AntiForgeryToken()
     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
@@ -29,7 +89,7 @@
         <span asp-validation-for="GhiChu" class="text-danger"></span>
     </div>
     <button type="submit" class="btn btn-primary">Check-in</button>
-    <a class="btn btn-outline-secondary" asp-controller="DangKyThamDu" asp-action="Index">Danh sách xét duyệt</a>
+    <a class="btn btn-outline-secondary" asp-controller="DangKyThamDu" asp-action="Index">Quản lý đăng ký</a>
     <a class="btn btn-outline-secondary" asp-controller="DiemDanhPhien" asp-action="Index">Điểm danh phiên</a>
 </form>
 

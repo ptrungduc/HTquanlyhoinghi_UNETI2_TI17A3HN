@@ -14,6 +14,8 @@ public class ChiTietDangKyViewModel
     public string TrangThai { get; set; } = string.Empty;
     public DateTime? NgayDangKy { get; set; }
     public DateTime? NgayDuyet { get; set; }
+    public DateTime? NgayCheckIn { get; set; }
+    public string? NguoiCheckIn { get; set; }
     public string? MaThamDu { get; set; }
     public string? GhiChu { get; set; }
     public string ThongBao { get; set; } = string.Empty;

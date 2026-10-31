@@ -58,6 +58,9 @@ namespace QuanLyHoiNghi.Migrations
 
             modelBuilder.Entity("HTquanlyhoinghi_UNETI2_TI17A3HN.Models.DangKyPhien", b =>
                 {
+                    b.Property<int?>("KetQuaDiemDanh")
+                        .HasColumnType("int");
+
                     b.Property<string>("MaDangKyPhien")
                         .HasColumnType("nvarchar(450)");
 
@@ -70,6 +73,13 @@ namespace QuanLyHoiNghi.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("NgayDangKy")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NguoiDiemDanh")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("ThoiGianDiemDanh")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("TrangThai")
@@ -123,6 +133,10 @@ namespace QuanLyHoiNghi.Migrations
                     b.HasIndex("MaNguoiThamDu");
 
                     b.HasIndex("MaSuKien");
+
+                    b.HasIndex("MaThamDu")
+                        .IsUnique()
+                        .HasFilter("[MaThamDu] IS NOT NULL");
 
                     b.ToTable("DangKyThamDus", (string)null);
                 });

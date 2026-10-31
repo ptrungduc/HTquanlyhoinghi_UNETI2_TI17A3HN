@@ -1,8 +1,34 @@
-@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.DangNhapViewModels
 @{
-    ViewData["Title"] = "Receptionist Dashboard";
+    ViewData["Title"] = "Tác vụ tiếp đón";
 }
-<div class="container mt-5">
-    <h1>Welcome</h1>
-    <p>Giao diện lễ tân</p>
+<div class="container py-4">
+    <h1 class="h3 mb-2">Tác vụ tiếp đón</h1>
+    <p class="text-muted mb-4">Tra cứu mã tham dự và xử lý đăng ký đủ điều kiện.</p>
+
+    <div class="row g-3">
+        <div class="col-md-6 col-xl-3">
+            <a class="card card-body h-100 text-decoration-none" asp-controller="DangKyThamDu" asp-action="Index">
+                <strong>Quản lý đăng ký sự kiện</strong>
+                <span class="text-muted small mt-1">Tìm kiếm, xem chi tiết và duyệt hoặc từ chối.</span>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a class="card card-body h-100 text-decoration-none" asp-controller="CheckIn" asp-action="Index">
+                <strong>Check-in sự kiện</strong>
+                <span class="text-muted small mt-1">Tra cứu mã và ghi nhận check-in.</span>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a class="card card-body h-100 text-decoration-none" asp-controller="DiemDanhPhien" asp-action="ChoDuyet">
+                <strong>Duyệt đăng ký phiên</strong>
+                <span class="text-muted small mt-1">Xử lý đăng ký phiên đang chờ duyệt.</span>
+            </a>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <a class="card card-body h-100 text-decoration-none" asp-controller="DiemDanhPhien" asp-action="Index">
+                <strong>Điểm danh phiên</strong>
+                <span class="text-muted small mt-1">Xem danh sách đủ điều kiện và ghi nhận tham dự.</span>
+            </a>
+        </div>
+    </div>
 </div>

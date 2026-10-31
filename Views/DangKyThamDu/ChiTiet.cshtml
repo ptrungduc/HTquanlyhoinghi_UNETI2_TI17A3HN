@@ -46,7 +46,14 @@
         <dd class="col-sm-9">@(Model.NgayDuyet?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
         <dt class="col-sm-3">Mã tham dự</dt>
         <dd class="col-sm-9">@(Model.MaThamDu ?? "-")</dd>
-        <dt class="col-sm-3">@(Model.TrangThai == "TuChoi" ? "Ghi chú / lý do từ chối" : "Ghi chú")</dt>
+        @if (Model.NgayCheckIn.HasValue)
+        {
+            <dt class="col-sm-3">Thời gian check-in</dt>
+            <dd class="col-sm-9">@Model.NgayCheckIn.Value.ToString("dd/MM/yyyy HH:mm:ss")</dd>
+            <dt class="col-sm-3">Tài khoản check-in</dt>
+            <dd class="col-sm-9">@Model.NguoiCheckIn</dd>
+        }
+        <dt class="col-sm-3">@(Model.TrangThai == "TuChoi" ? "Lý do từ chối" : "Ghi chú")</dt>
         <dd class="col-sm-9">
             <span style="white-space: pre-line">@(string.IsNullOrWhiteSpace(Model.GhiChu) ? "-" : Model.GhiChu)</span>
         </dd>
