@@ -1,4 +1,5 @@
-@model HTquanlyhoinghi_UNETI2_TI17A3HN.Models.DangNhapViewModels
+@using HTquanlyhoinghi_UNETI2_TI17A3HN.Models
+@model AdminDashboardViewModel
 @{
     ViewData["Title"] = "Admin Dashboard";
 }
@@ -36,15 +37,15 @@
 <!-- Thống kê -->
 <section class="stat-grid">
 
-    <div class="stat-card" onclick="window.location.href='/LoaiSuKien/Index';">
+    <div class="stat-card" onclick="window.location.href='/SuKien/Index';">
         <div class="stat-icon blue">
             📅
         </div>
 
         <div>
             <span>Tổng sự kiện</span>
-            <strong></strong>
-            <small></small>
+            <strong>@Model.TongSuKien</strong>
+            <small>sự kiện trong hệ thống</small>
         </div>
     
     </div>
@@ -57,8 +58,8 @@
 
         <div>
             <span>Người tham dự</span>
-            <strong></strong>
-            <small></small>
+            <strong>@Model.TongNguoiThamDu</strong>
+            <small>người đã đăng ký</small>
         </div>
     </div>
 
@@ -70,21 +71,21 @@
 
         <div>
             <span>Địa điểm</span>
-            <strong></strong>
-            <small></small>
+            <strong>@Model.TongDiaDiem</strong>
+            <small>địa điểm tổ chức</small>
         </div>
     </div>
 
 
-    <div class="stat-card">
+    <div class="stat-card" onclick="window.location.href='/BaoCao/Index';">
         <div class="stat-icon orange">
             📄
         </div>
 
         <div>
             <span>Tài liệu</span>
-            <strong></strong>
-            <small></small>
+            <strong>Báo cáo &amp; Thống kê</strong>
+            <small>@Model.TongDangKy đăng ký tham dự</small>
         </div>
     </div>
 
@@ -100,13 +101,61 @@
         <div class="card-header">
             <h3>📅 Sự kiện sắp tới</h3>
 
-            <a href="#">
+            <a href="/SuKien/Index">
                 Xem tất cả →
             </a>
         </div>
 
 
         <div class="event-list">
+
+            @if (Model.SuKienSapTois.Any())
+            {
+                @foreach (var sk in Model.SuKienSapTois)
+                {
+                    <div class="event-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee;">
+                        <div>
+                            <strong>
+                                <a href="/SuKien/Details/@sk.MaSuKien" style="text-decoration: none; color: #333;">
+                                    @sk.TenSuKien
+                                </a>
+                            </strong>
+                            <br />
+                            <small style="color: #888;">
+                                📅 @sk.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm") &nbsp; | &nbsp;
+                                📍 @sk.TenDiaDiem
+                            </small>
+                        </div>
+                        <div>
+                            @if (sk.SoNgayConLai == 0)
+                            {
+                                <span class="badge" style="background-color: #e74c3c; color: #fff; padding: 4px 10px; border-radius: 12px; font-size: 0.85em;">
+                                    Hôm nay
+                                </span>
+                            }
+                            else if (sk.SoNgayConLai == 1)
+                            {
+                                <span class="badge" style="background-color: #f39c12; color: #fff; padding: 4px 10px; border-radius: 12px; font-size: 0.85em;">
+                                    Ngày mai
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge" style="background-color: #3498db; color: #fff; padding: 4px 10px; border-radius: 12px; font-size: 0.85em;">
+                                    Còn @sk.SoNgayConLai ngày
+                                </span>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div style="text-align: center; padding: 30px 0; color: #999;">
+                    <p style="font-size: 2em;">📭</p>
+                    <p>Hiện chưa có sự kiện sắp tới</p>
+                </div>
+            }
 
         </div>
 
@@ -123,7 +172,7 @@
 
         <div class="quick-actions">
 
-            <a href="/LoaiSuKien/Create">
+            <a href="/SuKien/Create">
                 <span>📅</span>
                 <strong>Tạo sự kiện mới</strong>
                 <small>Tạo một sự kiện</small>
@@ -161,7 +210,7 @@
 
         <h3>📋 Danh sách sự kiện gần đây</h3>
 
-        <a href="#">
+        <a href="/SuKien/Index">
             Xem tất cả →
         </a>
 
@@ -184,7 +233,60 @@
 
             <tbody>
 
-            
+                @if (Model.SuKienGanDays.Any())
+                {
+                    @foreach (var sk in Model.SuKienGanDays)
+                    {
+                        <tr>
+                            <td>
+                                <a href="/SuKien/Details/@sk.MaSuKien" style="text-decoration: none; color: #2980b9; font-weight: 600;">
+                                    @sk.TenSuKien
+                                </a>
+                            </td>
+                            <td>@sk.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@sk.TenDiaDiem</td>
+                            <td>
+                                <span style="font-weight: 600;">@sk.SoNguoiDangKy</span> người
+                            </td>
+                            <td>
+                                @{
+                                    var badgeColor = sk.TrangThai switch
+                                    {
+                                        nameof(TrangThaiSuKien.Nhap) => "background-color: #95a5a6;",
+                                        nameof(TrangThaiSuKien.MoDangKy) => "background-color: #3498db;",
+                                        nameof(TrangThaiSuKien.DongDangKy) => "background-color: #f39c12;",
+                                        nameof(TrangThaiSuKien.DangDienRa) => "background-color: #27ae60;",
+                                        nameof(TrangThaiSuKien.HoanThanh) => "background-color: #2c3e50;",
+                                        nameof(TrangThaiSuKien.DaHuy) => "background-color: #e74c3c;",
+                                        _ => "background-color: #bdc3c7;"
+                                    };
+
+                                    var badgeText = sk.TrangThai switch
+                                    {
+                                        nameof(TrangThaiSuKien.Nhap) => "Nháp",
+                                        nameof(TrangThaiSuKien.MoDangKy) => "Mở đăng ký",
+                                        nameof(TrangThaiSuKien.DongDangKy) => "Đóng đăng ký",
+                                        nameof(TrangThaiSuKien.DangDienRa) => "Đang diễn ra",
+                                        nameof(TrangThaiSuKien.HoanThanh) => "Hoàn thành",
+                                        nameof(TrangThaiSuKien.DaHuy) => "Đã hủy",
+                                        _ => sk.TrangThai
+                                    };
+                                }
+                                <span class="badge" style="@badgeColor color: #fff; padding: 4px 12px; border-radius: 12px; font-size: 0.85em; white-space: nowrap;">
+                                    @badgeText
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 20px; color: #999;">
+                            Chưa có sự kiện nào trong hệ thống.
+                        </td>
+                    </tr>
+                }
 
             </tbody>
 
