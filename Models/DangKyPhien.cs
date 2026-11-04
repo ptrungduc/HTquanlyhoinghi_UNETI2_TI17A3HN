@@ -20,6 +20,13 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Models
 
         public TrangThaiDangKy TrangThai { get; set; } = TrangThaiDangKy.ChoDuyet;
 
+        public KetQuaDiemDanhPhien? KetQuaDiemDanh { get; set; }
+
+        public DateTime? ThoiGianDiemDanh { get; set; }
+
+        [StringLength(100)]
+        public string? NguoiDiemDanh { get; set; }
+
         // Navigation Property
         public NguoiThamDu? NguoiThamDu { get; set; }
         public PhienSuKien? Phien { get; set; }

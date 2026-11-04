@@ -25,22 +25,40 @@ public class CheckInController : Controller
     }
 
     [HttpGet]
-    public IActionResult Index()
+    public async Task<IActionResult> Index(string? maThamDu)
     {
-        var ketQuaPhanQuyen = KiemTraQuyenQuanTri();
+        var ketQuaPhanQuyen = KiemTraQuyenTruyCap();
         if (ketQuaPhanQuyen is not null)
         {
             return ketQuaPhanQuyen;
         }
 
-        return View(new CheckInViewModel());
+        var model = new CheckInViewModel { MaThamDu = maThamDu ?? string.Empty };
+        if (!string.IsNullOrWhiteSpace(maThamDu))
+        {
+            try
+            {
+                model.DangKy = await _dichVuModule4.TraCuuMaThamDuAsync(maThamDu);
+            }
+            catch (Exception ex) when (ex is DbUpdateException or DbException)
+            {
+                _logger.LogError(ex, "Module 4 failed to look up an attendance code.");
+                model.KetQua = new KetQuaThaoTacViewModel
+                {
+                    ThanhCong = false,
+                    ThongBao = "Không thể tra cứu mã tham dự. Vui lòng thử lại."
+                };
+            }
+        }
+
+        return View(model);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Index(CheckInViewModel model)
     {
-        var ketQuaPhanQuyen = KiemTraQuyenQuanTri();
+        var ketQuaPhanQuyen = KiemTraQuyenTruyCap();
         if (ketQuaPhanQuyen is not null)
         {
             return ketQuaPhanQuyen;
@@ -53,10 +71,20 @@ public class CheckInController : Controller
 
         try
         {
-            model.KetQua = await _dichVuModule4.CheckInAsync(
-                model.MaThamDu,
-                HttpContext.Session.GetString("MaTaiKhoan") ?? string.Empty,
-                model.GhiChu);
+            model.DangKy = await _dichVuModule4.TraCuuMaThamDuAsync(model.MaThamDu);
+            model.KetQua = string.IsNullOrWhiteSpace(model.DangKy.MaDangKy)
+                ? new KetQuaThaoTacViewModel
+                {
+                    ThanhCong = false,
+                    ThongBao = model.DangKy.ThongBao
+                }
+                : await _dichVuModule4.CheckInAsync(
+                    model.MaThamDu,
+                    HttpContext.Session.GetString("MaTaiKhoan") ?? string.Empty,
+                    model.GhiChu);
+
+            if (model.KetQua?.ThanhCong == true)
+                model.DangKy = await _dichVuModule4.TraCuuMaThamDuAsync(model.MaThamDu);
         }
         catch (Exception ex) when (ex is DbUpdateException or DbException)
         {
@@ -71,14 +99,14 @@ public class CheckInController : Controller
         return View(model);
     }
 
-    private IActionResult? KiemTraQuyenQuanTri()
+    private IActionResult? KiemTraQuyenTruyCap()
     {
         if (string.IsNullOrWhiteSpace(HttpContext.Session.GetString("MaTaiKhoan")))
         {
             return RedirectToAction("DangNhap", "TaiKhoan");
         }
 
-        if (!KiemTraQuyenModule4.CoQuyenQuanTri(HttpContext.Session.GetString("VaiTro")))
+        if (!KiemTraQuyenModule4.CoQuyenTiepDon(HttpContext.Session.GetString("VaiTro")))
         {
             return StatusCode(StatusCodes.Status403Forbidden, "Bạn không có quyền truy cập chức năng Module 4.");
         }

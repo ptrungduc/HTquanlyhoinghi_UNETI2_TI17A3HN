@@ -5,10 +5,12 @@ public class DiemDanhPhienViewModel
     public List<PhienDiemDanhLuaChonViewModel> DanhSachPhien { get; set; } = [];
     public List<NguoiDiemDanhPhienViewModel> DanhSachNguoiThamDu { get; set; } = [];
     public string? MaPhienSuKien { get; set; }
+    public string? TuKhoa { get; set; }
     public string TenPhien { get; set; } = string.Empty;
     public string TenSuKien { get; set; } = string.Empty;
     public string ThongBao { get; set; } = string.Empty;
     public string ThongBaoDanhSachRong { get; set; } = string.Empty;
+    public int SoNguoiCoDangKyPhienTrung { get; set; }
     public KetQuaThaoTacViewModel? KetQua { get; set; }
 }
 
@@ -23,5 +25,10 @@ public class NguoiDiemDanhPhienViewModel
     public string MaNguoiThamDu { get; set; } = string.Empty;
     public string HoTen { get; set; } = string.Empty;
     public TrangThaiDangKy TrangThaiDangKyPhien { get; set; }
+    public KetQuaDiemDanhPhien? KetQuaDiemDanh { get; set; }
+    public DateTime? ThoiGianDiemDanh { get; set; }
+    public string? NguoiDiemDanh { get; set; }
     public bool DaDiemDanh { get; set; }
+    public bool CoTheDanhDauCoMat { get; set; }
+    public bool CoTheDanhDauVangMat { get; set; }
 }

@@ -41,13 +41,9 @@
                || string.Equals(vaiTro, "Receptionist", StringComparison.OrdinalIgnoreCase);
 
     var laNguoiThamDu = string.Equals(vaiTro, "Nguoi Tham Du", StringComparison.OrdinalIgnoreCase)
-                     || string.Equals(vaiTro, "Người tham dự", StringComparison.OrdinalIgnoreCase);
-
-    // Mặc định nếu chưa có session thì hiển thị menu quản trị
-    if (!laQuanTri && !laLeTan && !laNguoiThamDu)
-    {
-        laQuanTri = true;
-    }
+                     || string.Equals(vaiTro, "Người tham dự", StringComparison.OrdinalIgnoreCase)
+                     || string.Equals(vaiTro, "Attendee", StringComparison.OrdinalIgnoreCase)
+                     || string.Equals(vaiTro, "User", StringComparison.OrdinalIgnoreCase);
 }
 
 <body class="@themeTrang">
@@ -170,6 +166,13 @@
                         <span>Điểm danh phiên</span>
                     </a>
 
+                    <a asp-controller="DiemDanhPhien"
+                       asp-action="ChoDuyet"
+                       class="@(currentController == "DiemDanhPhien" && currentAction == "ChoDuyet" ? "active" : "")">
+                        ✅
+                        <span>Duyệt đăng ký phiên</span>
+                    </a>
+
                     <!-- BÁO CÁO -->
                     <a asp-controller="BaoCao"
                        asp-action="Index"
@@ -229,12 +232,26 @@
                         <span>Check-in tham dự</span>
                     </a>
 
+                    <a asp-controller="DangKyThamDu"
+                       asp-action="Index"
+                       class="@(currentController == "DangKyThamDu" ? "active" : "")">
+                        ✅
+                        <span>Quản lý đăng ký</span>
+                    </a>
+
                     <!-- ĐIỂM DANH PHIÊN -->
                     <a asp-controller="DiemDanhPhien"
                        asp-action="Index"
                        class="@(currentController == "DiemDanhPhien" ? "active" : "")">
                         📋
                         <span>Điểm danh phiên</span>
+                    </a>
+
+                    <a asp-controller="DiemDanhPhien"
+                       asp-action="ChoDuyet"
+                       class="@(currentController == "DiemDanhPhien" && currentAction == "ChoDuyet" ? "active" : "")">
+                        ✅
+                        <span>Duyệt đăng ký phiên</span>
                     </a>
 
                     <!-- CÀI ĐẶT -->

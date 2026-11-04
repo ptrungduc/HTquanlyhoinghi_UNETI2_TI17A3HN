@@ -6,7 +6,10 @@
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <h1 class="h3 mb-0">Điểm danh theo phiên</h1>
-    <a class="btn btn-outline-secondary" asp-controller="DangKyThamDu" asp-action="Index">Xét duyệt đăng ký</a>
+    <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-outline-primary" asp-action="ChoDuyet">Duyệt đăng ký phiên</a>
+        <a class="btn btn-outline-secondary" asp-controller="DangKyThamDu" asp-action="Index">Quản lý đăng ký</a>
+    </div>
 </div>
 
 @if (Model.KetQua is not null)
@@ -35,13 +38,40 @@
         </select>
     </div>
     <div class="col-auto">
-        <button type="submit" class="btn btn-primary">Xem danh sách</button>
+        <button type="submit" class="btn btn-primary">Chọn phiên</button>
     </div>
 </form>
 
 @if (!string.IsNullOrWhiteSpace(Model.MaPhienSuKien) && string.IsNullOrWhiteSpace(Model.ThongBao))
 {
     <h2 class="h5">@Model.TenSuKien / @Model.TenPhien</h2>
+    <form asp-action="Index" method="get" class="row g-2 align-items-end mb-3">
+        <input type="hidden" name="maPhienSuKien" value="@Model.MaPhienSuKien" />
+        <div class="col-md-8">
+            <label for="tuKhoa" class="form-label">Tra cứu người tham dự / lịch sử điểm danh</label>
+            <input id="tuKhoa" name="tuKhoa" value="@Model.TuKhoa" class="form-control"
+                   placeholder="Mã người tham dự, họ tên hoặc email" />
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-primary">Tra cứu</button>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.TuKhoa))
+        {
+            <div class="col-auto">
+                <a asp-action="Index" asp-route-maPhienSuKien="@Model.MaPhienSuKien"
+                   class="btn btn-outline-secondary">Xóa tìm kiếm</a>
+            </div>
+        }
+    </form>
+
+    @if (Model.SoNguoiCoDangKyPhienTrung > 0)
+    {
+        <div class="alert alert-warning" role="status">
+            Có @Model.SoNguoiCoDangKyPhienTrung người có nhiều đăng ký phiên đủ điều kiện bị trùng.
+            Các trường hợp này đã bị loại khỏi danh sách điểm danh để tránh ghi nhận nhầm.
+        </div>
+    }
+
     <div class="table-responsive">
         <table class="table table-striped table-hover align-middle">
             <thead>
@@ -49,7 +79,9 @@
                     <th>Mã người tham dự</th>
                     <th>Người tham dự</th>
                     <th>Trạng thái đăng ký phiên</th>
-                    <th>Điểm danh</th>
+                    <th>Kết quả điểm danh</th>
+                    <th>Thời gian</th>
+                    <th>Tài khoản thực hiện</th>
                     <th class="text-end">Thao tác</th>
                 </tr>
             </thead>
@@ -57,10 +89,12 @@
                 @if (Model.DanhSachNguoiThamDu.Count == 0)
                 {
                     <tr>
-                        <td colspan="5" class="text-center text-muted py-4">
-                            @(string.IsNullOrWhiteSpace(Model.ThongBaoDanhSachRong)
-                                ? "Không có người tham dự đủ điều kiện."
-                                : Model.ThongBaoDanhSachRong)
+                        <td colspan="7" class="text-center text-muted py-4">
+                            @(!string.IsNullOrWhiteSpace(Model.TuKhoa)
+                                ? "Không tìm thấy người tham dự phù hợp."
+                                : string.IsNullOrWhiteSpace(Model.ThongBaoDanhSachRong)
+                                    ? "Không có người tham dự đủ điều kiện."
+                                    : Model.ThongBaoDanhSachRong)
                         </td>
                     </tr>
                 }
@@ -78,21 +112,49 @@
                             HTquanlyhoinghi_UNETI2_TI17A3HN.Models.TrangThaiDangKy.DaHuy => "Đã hủy",
                             _ => nguoi.TrangThaiDangKyPhien.ToString()
                         };
+                        var ketQuaDiemDanhHienThi = nguoi.KetQuaDiemDanh switch
+                        {
+                            HTquanlyhoinghi_UNETI2_TI17A3HN.Models.KetQuaDiemDanhPhien.CoMat => "Có mặt",
+                            HTquanlyhoinghi_UNETI2_TI17A3HN.Models.KetQuaDiemDanhPhien.VangMat => "Vắng mặt",
+                            _ when nguoi.DaDiemDanh => "Đã có mặt (ghi nhận trước đây)",
+                            _ => "Chưa điểm danh"
+                        };
 
                         <tr>
                             <td>@nguoi.MaNguoiThamDu</td>
                             <td>@nguoi.HoTen</td>
                             <td>@trangThaiHienThi</td>
-                            <td>@(nguoi.DaDiemDanh ? "Đã điểm danh" : "Chưa điểm danh")</td>
+                            <td>@ketQuaDiemDanhHienThi</td>
+                            <td>@(nguoi.ThoiGianDiemDanh?.ToString("dd/MM/yyyy HH:mm:ss") ?? "-")</td>
+                            <td>@(nguoi.NguoiDiemDanh ?? "-")</td>
                             <td class="text-end">
-                                @if (!nguoi.DaDiemDanh)
+                                @if (nguoi.CoTheDanhDauCoMat && !nguoi.DaDiemDanh)
                                 {
                                     <form asp-action="DiemDanh" method="post" class="d-inline">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="maPhienSuKien" value="@Model.MaPhienSuKien" />
                                         <input type="hidden" name="maNguoiThamDu" value="@nguoi.MaNguoiThamDu" />
-                                        <button type="submit" class="btn btn-sm btn-success">Điểm danh</button>
+                                        <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                                        <button type="submit" name="ketQuaDiemDanh" value="CoMat"
+                                                class="btn btn-sm btn-success">Có mặt</button>
                                     </form>
+                                }
+                                @if (nguoi.CoTheDanhDauVangMat && !nguoi.DaDiemDanh)
+                                {
+                                    <form asp-action="DiemDanh" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="maPhienSuKien" value="@Model.MaPhienSuKien" />
+                                        <input type="hidden" name="maNguoiThamDu" value="@nguoi.MaNguoiThamDu" />
+                                        <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                                        <button type="submit" name="ketQuaDiemDanh" value="VangMat"
+                                                class="btn btn-sm btn-outline-danger">Vắng mặt</button>
+                                    </form>
+                                }
+                                @if (!nguoi.DaDiemDanh &&
+                                    !nguoi.CoTheDanhDauCoMat &&
+                                    !nguoi.CoTheDanhDauVangMat)
+                                {
+                                    <span class="text-muted">Chưa đến giờ</span>
                                 }
                             </td>
                         </tr>
