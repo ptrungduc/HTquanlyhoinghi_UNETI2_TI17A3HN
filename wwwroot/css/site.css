@@ -1755,3 +1755,25 @@ body.theme-dark .alert-secondary {
 body.theme-dark .admin-sidebar {
   background: #0b1424;
 }
+
+body.theme-dark .stat-card,
+body.theme-dark .dashboard-card {
+  background-color: #1c2538;
+  color: #e6edf7;
+  border: 1px solid #2c3850;
+}
+
+body.theme-dark .stat-card strong,
+body.theme-dark .dashboard-card h3 {
+  color: #e6edf7;
+}
+
+body.theme-dark .stat-card span {
+  color: #9fb0c8;
+}
+
+body.theme-dark .list-group-item {
+  background-color: #1c2538;
+  color: #e6edf7;
+  border-color: #2c3850;
+}

@@ -2,11 +2,23 @@
 
 @{
     ViewData["Title"] = "Điểm danh theo phiên";
+    var vaiTro = Context.Session.GetString("VaiTro");
+    bool laLeTan = string.Equals(vaiTro, "Le Tan", StringComparison.OrdinalIgnoreCase);
 }
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-    <h1 class="h3 mb-0">Điểm danh theo phiên</h1>
-    <a class="btn btn-outline-secondary" asp-controller="DangKyThamDu" asp-action="Index">Xét duyệt đăng ký</a>
+    <h1 class="h3 mb-0">📋 Điểm danh theo phiên</h1>
+    <div class="d-flex gap-2">
+        @if (laLeTan)
+        {
+            <a class="btn btn-outline-primary" asp-controller="Receptionist" asp-action="Index">🛎️ Bàn tiếp đón</a>
+        }
+        else
+        {
+            <a class="btn btn-outline-secondary" asp-controller="DangKyThamDu" asp-action="Index">Xét duyệt đăng ký</a>
+        }
+        <a class="btn btn-outline-secondary" asp-controller="CheckIn" asp-action="Index">🎟️ Check-in tham dự</a>
+    </div>
 </div>
 
 @if (Model.KetQua is not null)
