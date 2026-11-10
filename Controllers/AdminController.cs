@@ -1,4 +1,5 @@
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Database;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Helper;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         {
             var vaiTro = HttpContext.Session.GetString("VaiTro");
 
-            if (vaiTro != "Admin")
+            if (!KiemTraQuyenModule4.LaAdminHoacBanToChuc(vaiTro))
             {
                 return RedirectToAction("DangNhap", "TaiKhoan");
             }

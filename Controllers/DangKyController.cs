@@ -1,4 +1,5 @@
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Database;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Helper;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module3;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Services;
@@ -443,8 +444,5 @@ public class DangKyController : Controller
     }
 
     private bool LaQuanTri() =>
-        string.Equals(
-            HttpContext.Session.GetString("VaiTro"),
-            "Admin",
-            StringComparison.OrdinalIgnoreCase);
+        KiemTraQuyenModule4.LaAdminHoacBanToChuc(HttpContext.Session.GetString("VaiTro"));
 }

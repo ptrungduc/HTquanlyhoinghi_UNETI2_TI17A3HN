@@ -1,4 +1,5 @@
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Database;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Helper;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,8 +18,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         private bool LaAdmin()
         {
             var vaiTro = HttpContext.Session.GetString("VaiTro");
-
-            return vaiTro == "Admin";
+            return KiemTraQuyenModule4.LaAdminHoacBanToChuc(vaiTro);
         }
 
         public async Task<IActionResult> Index(

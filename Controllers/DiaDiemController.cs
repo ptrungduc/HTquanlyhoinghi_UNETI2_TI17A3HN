@@ -1,4 +1,5 @@
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Database;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Helper;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,12 +15,11 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             _context = context;
         }
 
-        // Kiểm tra tài khoản hiện tại có phải Admin hay không
+        // Kiểm tra tài khoản hiện tại có quyền quản trị (Admin hoặc Ban tổ chức)
         private bool LaAdmin()
         {
             var vaiTro = HttpContext.Session.GetString("VaiTro");
-
-            return vaiTro == "Admin";
+            return KiemTraQuyenModule4.LaAdminHoacBanToChuc(vaiTro);
         }
 
 

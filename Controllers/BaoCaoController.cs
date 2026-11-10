@@ -3,6 +3,7 @@
 // Nội dung thực hiện: Module 5 - Báo cáo theo thời gian (Mục 9.6).
 
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Database;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Helper;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module5;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -29,7 +30,7 @@ public class BaoCaoController : Controller
         DateTime? denNgay)
     {
         // 1. KIỂM TRA QUYỀN
-        if (HttpContext.Session.GetString("VaiTro") != "Admin")
+        if (!KiemTraQuyenModule4.LaAdminHoacBanToChuc(HttpContext.Session.GetString("VaiTro")))
         {
             return RedirectToAction("DangNhap", "TaiKhoan");
         }

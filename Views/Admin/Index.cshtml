@@ -2,6 +2,7 @@
 @model AdminDashboardViewModel
 @{
     ViewData["Title"] = "Admin Dashboard";
+    var hoTen = Context.Session.GetString("HoTen") ?? "Ban Quản Trị";
 }
 
 <!-- Header -->
@@ -19,7 +20,7 @@
 <section class="welcome-box">
 
     <div>
-        <h1>Xin chào, Admin! 👋</h1>
+        <h1>Xin chào, @hoTen! 👋</h1>
 
         <p>
             Chào mừng bạn quay trở lại hệ thống quản lý

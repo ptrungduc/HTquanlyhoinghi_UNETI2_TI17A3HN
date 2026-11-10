@@ -172,18 +172,10 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
 
             var vt = vaiTro.Trim();
 
-            // 1. Admin: chuyển hướng đến trang tổng quan Admin
-            if (string.Equals(vt, "Admin", StringComparison.OrdinalIgnoreCase))
+            // 1. Quản trị viên & Ban tổ chức: có cùng chức năng, chuyển hướng đến trang tổng quan Admin
+            if (KiemTraQuyenModule4.LaAdminHoacBanToChuc(vt))
             {
                 return RedirectToAction("Index", "Admin");
-            }
-
-            // 2. Ban tổ chức: quản lý sự kiện, phiên, đăng ký
-            if (string.Equals(vt, "Ban To Chuc", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(vt, "Ban tổ chức", StringComparison.OrdinalIgnoreCase) ||
-                vt.ToLower().Contains("to chuc") || vt.ToLower().Contains("tổ chức"))
-            {
-                return RedirectToAction("Index", "SuKien");
             }
 
             // 3. Nhân viên tiếp đón / Lễ tân: kiểm tra mã tham dự, check-in
