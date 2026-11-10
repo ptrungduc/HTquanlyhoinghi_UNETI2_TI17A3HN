@@ -31,4 +31,20 @@ public static class KiemTraQuyenModule4
             || string.Equals(vt, "Lễ tân", StringComparison.OrdinalIgnoreCase)
             || string.Equals(vt, "Receptionist", StringComparison.OrdinalIgnoreCase);
     }
+
+    /// <summary>
+    /// Trả về trang điều hướng mặc định phù hợp cho từng vai trò.
+    /// </summary>
+    public static (string controller, string action) LayTrangDieuHuongTheoVaiTro(string? vaiTro)
+    {
+        if (string.IsNullOrWhiteSpace(vaiTro)) return ("TaiKhoan", "DangNhap");
+        if (LaAdminHoacBanToChuc(vaiTro)) return ("Admin", "Index");
+        if (string.Equals(vaiTro, "Le Tan", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(vaiTro, "Lễ tân", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(vaiTro, "Receptionist", StringComparison.OrdinalIgnoreCase))
+        {
+            return ("Receptionist", "Index");
+        }
+        return ("DangKy", "Index");
+    }
 }

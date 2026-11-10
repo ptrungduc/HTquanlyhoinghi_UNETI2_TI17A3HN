@@ -298,7 +298,9 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
                 !string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase) &&
                 !string.Equals(vaiTro, "Ban To Chuc", StringComparison.OrdinalIgnoreCase))
             {
-                return StatusCode(StatusCodes.Status403Forbidden, "Bạn không có quyền truy cập chức năng Lễ tân.");
+                TempData["ThongBaoSaiVaiTro"] = "Bạn không có quyền truy cập vào mục Lễ tân do sai vai trò!";
+                var (ctrl, act) = Helper.KiemTraQuyenModule4.LayTrangDieuHuongTheoVaiTro(vaiTro);
+                return RedirectToAction(act, ctrl);
             }
 
             return null;

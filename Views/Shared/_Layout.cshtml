@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="@(Context.Request.Cookies["ngon_ngu"] == "en" ? "en" : "vi")">
 
 <head>
@@ -300,6 +300,19 @@
         </main>
 
     </div>
+
+    @if (TempData["ThongBaoSaiVaiTro"] is string thongBaoSaiVaiTro)
+    {
+        <script>
+            alert('@Html.Raw(thongBaoSaiVaiTro)');
+        </script>
+    }
+    @if (TempData["CanhBaoSaiVaiTro"] is string canhBaoVaiTro)
+    {
+        <script>
+            alert('@Html.Raw(canhBaoVaiTro)');
+        </script>
+    }
 
 
     <!-- =====================================

@@ -36,9 +36,18 @@ public class ThongKeController : Controller
         DateTime? denNgay)
     {
         // 1. KIỂM TRA QUYỀN Ở SERVER
-        if (!KiemTraQuyenModule4.CoQuyenQuanTri(HttpContext.Session.GetString("VaiTro")))
+        var vaiTro = HttpContext.Session.GetString("VaiTro");
+        if (!KiemTraQuyenModule4.CoQuyenQuanTri(vaiTro))
         {
-            return RedirectToAction("DangNhap", "TaiKhoan");
+            var maTaiKhoan = HttpContext.Session.GetString("MaTaiKhoan");
+            if (string.IsNullOrWhiteSpace(maTaiKhoan))
+            {
+                return RedirectToAction("DangNhap", "TaiKhoan");
+            }
+
+            TempData["ThongBaoSaiVaiTro"] = "Bạn không có quyền truy cập vào mục Thống kê do sai vai trò!";
+            var (ctrl, act) = KiemTraQuyenModule4.LayTrangDieuHuongTheoVaiTro(vaiTro);
+            return RedirectToAction(act, ctrl);
         }
 
         var vm = new ThongKeViewModel

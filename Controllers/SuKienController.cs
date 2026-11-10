@@ -26,7 +26,9 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             var vaiTro = HttpContext.Session.GetString("VaiTro");
             if (!KiemTraQuyenModule4.LaAdminHoacBanToChuc(vaiTro))
             {
-                return StatusCode(StatusCodes.Status403Forbidden);
+                TempData["ThongBaoSaiVaiTro"] = "Bạn không có quyền truy cập vào trang Quản lý sự kiện do sai vai trò!";
+                var (ctrl, act) = KiemTraQuyenModule4.LayTrangDieuHuongTheoVaiTro(vaiTro);
+                return RedirectToAction(act, ctrl);
             }
 
             return null;

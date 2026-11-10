@@ -22,7 +22,7 @@ public class NguoiThamDuController : Controller
     {
         if (!LaQuanTri())
         {
-            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được quản lý danh sách người tham dự.");
+            return XuLyKhongCoQuyen();
         }
 
         var query = _context.NguoiThamDus.AsNoTracking();
@@ -44,7 +44,7 @@ public class NguoiThamDuController : Controller
     {
         if (!LaQuanTri())
         {
-            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được thêm người tham dự.");
+            return XuLyKhongCoQuyen();
         }
 
         await NapTaiKhoanChuaCoNguoiThamDu();
@@ -57,7 +57,7 @@ public class NguoiThamDuController : Controller
     {
         if (!LaQuanTri())
         {
-            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được thêm người tham dự.");
+            return XuLyKhongCoQuyen();
         }
 
         if (!ModelState.IsValid)
@@ -209,7 +209,7 @@ public class NguoiThamDuController : Controller
     {
         if (!LaQuanTri())
         {
-            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được sửa người tham dự.");
+            return XuLyKhongCoQuyen();
         }
 
         var nguoiThamDu = await _context.NguoiThamDus
@@ -233,7 +233,7 @@ public class NguoiThamDuController : Controller
     {
         if (!LaQuanTri())
         {
-            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được sửa người tham dự.");
+            return XuLyKhongCoQuyen();
         }
 
         if (id != nguoiThamDu.MaNguoiThamDu)
@@ -285,7 +285,7 @@ public class NguoiThamDuController : Controller
     {
         if (!LaQuanTri())
         {
-            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được quản lý danh sách người tham dự.");
+            return XuLyKhongCoQuyen();
         }
 
         var nguoiThamDu = await _context.NguoiThamDus
@@ -314,7 +314,7 @@ public class NguoiThamDuController : Controller
     {
         if (!LaQuanTri())
         {
-            return StatusCode(StatusCodes.Status403Forbidden, "Chỉ ban tổ chức mới được xóa người tham dự.");
+            return XuLyKhongCoQuyen();
         }
 
         var nguoiThamDu = await _context.NguoiThamDus
@@ -345,6 +345,20 @@ public class NguoiThamDuController : Controller
 
     private bool LaQuanTri() =>
         KiemTraQuyenModule4.LaAdminHoacBanToChuc(HttpContext.Session.GetString("VaiTro"));
+
+    private IActionResult XuLyKhongCoQuyen(string duongDan = "/NguoiThamDu")
+    {
+        var maTaiKhoan = HttpContext.Session.GetString("MaTaiKhoan");
+        if (string.IsNullOrWhiteSpace(maTaiKhoan))
+        {
+            return RedirectToAction("DangNhap", "TaiKhoan");
+        }
+
+        var vaiTro = HttpContext.Session.GetString("VaiTro");
+        TempData["ThongBaoSaiVaiTro"] = "Bạn không có quyền truy cập vào mục Người tham dự do sai vai trò!";
+        var (ctrl, act) = KiemTraQuyenModule4.LayTrangDieuHuongTheoVaiTro(vaiTro);
+        return RedirectToAction(act, ctrl);
+    }
 
     private async Task NapTaiKhoanChuaCoNguoiThamDu(string? selected = null)
     {

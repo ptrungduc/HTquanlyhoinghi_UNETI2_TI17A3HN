@@ -152,9 +152,12 @@ public class CheckInController : Controller
             return RedirectToAction("DangNhap", "TaiKhoan");
         }
 
-        if (!KiemTraQuyenModule4.CoQuyenQuanTri(HttpContext.Session.GetString("VaiTro")))
+        var vaiTro = HttpContext.Session.GetString("VaiTro");
+        if (!KiemTraQuyenModule4.CoQuyenQuanTri(vaiTro))
         {
-            return StatusCode(StatusCodes.Status403Forbidden, "Bạn không có quyền truy cập chức năng Module 4.");
+            TempData["ThongBaoSaiVaiTro"] = "Bạn không có quyền truy cập vào mục Check-in do sai vai trò!";
+            var (ctrl, act) = KiemTraQuyenModule4.LayTrangDieuHuongTheoVaiTro(vaiTro);
+            return RedirectToAction(act, ctrl);
         }
 
         return null;

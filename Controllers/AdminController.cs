@@ -18,11 +18,19 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
+            var maTaiKhoan = HttpContext.Session.GetString("MaTaiKhoan");
+            if (string.IsNullOrWhiteSpace(maTaiKhoan))
+            {
+                return RedirectToAction("DangNhap", "TaiKhoan");
+            }
+
             var vaiTro = HttpContext.Session.GetString("VaiTro");
 
             if (!KiemTraQuyenModule4.LaAdminHoacBanToChuc(vaiTro))
             {
-                return RedirectToAction("DangNhap", "TaiKhoan");
+                TempData["ThongBaoSaiVaiTro"] = "Bạn không có quyền truy cập vào trang Quản trị viên do sai vai trò!";
+                var (ctrl, act) = KiemTraQuyenModule4.LayTrangDieuHuongTheoVaiTro(vaiTro);
+                return RedirectToAction(act, ctrl);
             }
 
             var now = DateTime.Now;

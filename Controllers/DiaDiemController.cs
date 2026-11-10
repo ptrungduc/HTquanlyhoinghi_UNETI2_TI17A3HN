@@ -22,6 +22,20 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             return KiemTraQuyenModule4.LaAdminHoacBanToChuc(vaiTro);
         }
 
+        private IActionResult XuLyKhongCoQuyen(string duongDan = "/DiaDiem")
+        {
+            var maTaiKhoan = HttpContext.Session.GetString("MaTaiKhoan");
+            if (string.IsNullOrWhiteSpace(maTaiKhoan))
+            {
+                return RedirectToAction("DangNhap", "TaiKhoan");
+            }
+
+            var vaiTro = HttpContext.Session.GetString("VaiTro");
+            TempData["ThongBaoSaiVaiTro"] = "Bạn không có quyền truy cập vào mục Địa điểm do sai vai trò!";
+            var (ctrl, act) = KiemTraQuyenModule4.LayTrangDieuHuongTheoVaiTro(vaiTro);
+            return RedirectToAction(act, ctrl);
+        }
+
 
         // =========================================================
         // INDEX - DANH SÁCH ĐỊA ĐIỂM
@@ -34,12 +48,11 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             // Chỉ Admin được truy cập
             if (!LaAdmin())
             {
-                return RedirectToAction("DangNhap", "TaiKhoan");
+                return XuLyKhongCoQuyen();
             }
 
-            int pageSize = 4;
+            int pageSize = 6;
 
-            // Không cho page nhỏ hơn 1
             if (page < 1)
             {
                 page = 1;
@@ -109,7 +122,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         {
             if (!LaAdmin())
             {
-                return RedirectToAction("DangNhap", "TaiKhoan");
+                return XuLyKhongCoQuyen();
             }
 
             return View();
@@ -125,7 +138,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         {
             if (!LaAdmin())
             {
-                return RedirectToAction("DangNhap", "TaiKhoan");
+                return XuLyKhongCoQuyen();
             }
 
 
@@ -193,7 +206,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         {
             if (!LaAdmin())
             {
-                return RedirectToAction("DangNhap", "TaiKhoan");
+                return XuLyKhongCoQuyen();
             }
 
             if (string.IsNullOrEmpty(id))
@@ -227,7 +240,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         {
             if (!LaAdmin())
             {
-                return RedirectToAction("DangNhap", "TaiKhoan");
+                return XuLyKhongCoQuyen();
             }
 
 
@@ -306,7 +319,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         {
             if (!LaAdmin())
             {
-                return RedirectToAction("DangNhap", "TaiKhoan");
+                return XuLyKhongCoQuyen();
             }
 
 
@@ -338,7 +351,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         {
             if (!LaAdmin())
             {
-                return RedirectToAction("DangNhap", "TaiKhoan");
+                return XuLyKhongCoQuyen();
             }
 
 
