@@ -175,8 +175,13 @@ public class DiemDanhPhienController : Controller
         if (string.IsNullOrWhiteSpace(HttpContext.Session.GetString("MaTaiKhoan")))
             return RedirectToAction("DangNhap", "TaiKhoan");
 
-        if (!KiemTraQuyenModule4.CoQuyenTiepDon(HttpContext.Session.GetString("VaiTro")))
-            return StatusCode(StatusCodes.Status403Forbidden, "Bạn không có quyền truy cập chức năng Module 4.");
+        var vaiTro = HttpContext.Session.GetString("VaiTro");
+        if (!KiemTraQuyenModule4.CoQuyenTiepDon(vaiTro))
+        {
+            TempData["ThongBaoSaiVaiTro"] = "Bạn không có quyền truy cập vào mục Điểm danh phiên do sai vai trò!";
+            var (ctrl, act) = KiemTraQuyenModule4.LayTrangDieuHuongTheoVaiTro(vaiTro);
+            return RedirectToAction(act, ctrl);
+        }
 
         return null;
     }

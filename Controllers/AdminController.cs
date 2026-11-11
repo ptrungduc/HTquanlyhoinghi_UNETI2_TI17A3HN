@@ -1,4 +1,5 @@
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Database;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Helper;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,11 +18,19 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var vaiTro = HttpContext.Session.GetString("VaiTro");
-
-            if (vaiTro != "Admin")
+            var maTaiKhoan = HttpContext.Session.GetString("MaTaiKhoan");
+            if (string.IsNullOrWhiteSpace(maTaiKhoan))
             {
                 return RedirectToAction("DangNhap", "TaiKhoan");
+            }
+
+            var vaiTro = HttpContext.Session.GetString("VaiTro");
+
+            if (!KiemTraQuyenModule4.LaAdminHoacBanToChuc(vaiTro))
+            {
+                TempData["ThongBaoSaiVaiTro"] = "Bạn không có quyền truy cập vào trang Quản trị viên do sai vai trò!";
+                var (ctrl, act) = KiemTraQuyenModule4.LayTrangDieuHuongTheoVaiTro(vaiTro);
+                return RedirectToAction(act, ctrl);
             }
 
             var now = DateTime.Now;

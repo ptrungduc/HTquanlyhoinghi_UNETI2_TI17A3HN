@@ -23,4 +23,23 @@ public class CheckInViewModel
 
     [BindNever]
     public ChiTietDangKyViewModel? DangKy { get; set; }
+
+    [BindNever]
+    public List<NguoiThamDuCheckInItemViewModel> DanhSachSanSang { get; set; } = new();
+
+    [BindNever]
+    public List<NguoiThamDuCheckInItemViewModel> DanhSachVuaCheckIn { get; set; } = new();
+}
+
+public class NguoiThamDuCheckInItemViewModel
+{
+    public string MaDangKy { get; set; } = string.Empty;
+    public string MaThamDu { get; set; } = string.Empty;
+    public string HoTen { get; set; } = string.Empty;
+    public string SoDienThoai { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string TenSuKien { get; set; } = string.Empty;
+    public string MaSuKien { get; set; } = string.Empty;
+    public DateTime? ThoiGianCheckIn { get; set; }
+    public string? GhiChu { get; set; }
 }

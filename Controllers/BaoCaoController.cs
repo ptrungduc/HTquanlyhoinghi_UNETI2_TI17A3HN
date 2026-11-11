@@ -3,6 +3,7 @@
 // Nội dung thực hiện: Module 5 - Báo cáo theo thời gian (Mục 9.6) + xuất PDF.
 
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Database;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Helper;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module5;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -30,9 +31,18 @@ public class BaoCaoController : Controller
         DateTime? denNgay)
     {
         // 1. KIỂM TRA QUYỀN
-        if (!LaAdmin())
+        var vaiTro = HttpContext.Session.GetString("VaiTro");
+        if (!KiemTraQuyenModule4.LaAdminHoacBanToChuc(vaiTro))
         {
-            return RedirectToAction("DangNhap", "TaiKhoan");
+            var maTaiKhoan = HttpContext.Session.GetString("MaTaiKhoan");
+            if (string.IsNullOrWhiteSpace(maTaiKhoan))
+            {
+                return RedirectToAction("DangNhap", "TaiKhoan");
+            }
+
+            TempData["ThongBaoSaiVaiTro"] = "Bạn không có quyền truy cập vào mục Báo cáo do sai vai trò!";
+            var (ctrl, act) = KiemTraQuyenModule4.LayTrangDieuHuongTheoVaiTro(vaiTro);
+            return RedirectToAction(act, ctrl);
         }
 
         var vm = await XayDungViewModel(thang, nam, tuNgay, denNgay);
@@ -237,8 +247,5 @@ public class BaoCaoController : Controller
     }
 
     private bool LaAdmin() =>
-        string.Equals(
-            HttpContext.Session.GetString("VaiTro"),
-            "Admin",
-            StringComparison.OrdinalIgnoreCase);
+        KiemTraQuyenModule4.LaAdminHoacBanToChuc(HttpContext.Session.GetString("VaiTro"));
 }

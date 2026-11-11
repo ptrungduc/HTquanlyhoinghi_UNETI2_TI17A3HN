@@ -3,6 +3,7 @@
 // Nội dung thực hiện: Module 5 - Lịch sử tham dự (Bước 1).
 
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Database;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Helper;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module5;
 using Microsoft.AspNetCore.Mvc;
@@ -115,9 +116,9 @@ public class LichSuController : Controller
     [HttpGet]
     public async Task<IActionResult> ChiTietSuKien(string id)
     {
-        // Bước 1: Kiểm tra quyền Admin ở server
+        // Bước 1: Kiểm tra quyền Admin/Ban tổ chức ở server
         var vaiTro = HttpContext.Session.GetString("VaiTro");
-        if (vaiTro != "Admin")
+        if (!KiemTraQuyenModule4.LaAdminHoacBanToChuc(vaiTro))
         {
             return RedirectToAction("DangNhap", "TaiKhoan");
         }

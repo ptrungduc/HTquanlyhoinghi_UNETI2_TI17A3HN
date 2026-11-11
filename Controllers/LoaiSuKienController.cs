@@ -1,4 +1,5 @@
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Database;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Helper;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,8 +18,21 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         private bool LaAdmin()
         {
             var vaiTro = HttpContext.Session.GetString("VaiTro");
+            return KiemTraQuyenModule4.LaAdminHoacBanToChuc(vaiTro);
+        }
 
-            return vaiTro == "Admin";
+        private IActionResult XuLyKhongCoQuyen(string duongDan = "/LoaiSuKien")
+        {
+            var maTaiKhoan = HttpContext.Session.GetString("MaTaiKhoan");
+            if (string.IsNullOrWhiteSpace(maTaiKhoan))
+            {
+                return RedirectToAction("DangNhap", "TaiKhoan");
+            }
+
+            var vaiTro = HttpContext.Session.GetString("VaiTro");
+            TempData["ThongBaoSaiVaiTro"] = "Bạn không có quyền truy cập vào mục Loại sự kiện do sai vai trò!";
+            var (ctrl, act) = KiemTraQuyenModule4.LayTrangDieuHuongTheoVaiTro(vaiTro);
+            return RedirectToAction(act, ctrl);
         }
 
         public async Task<IActionResult> Index(
@@ -31,7 +45,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         {
             if (!LaAdmin())
             {
-                return RedirectToAction("DangNhap", "TaiKhoan");
+                return XuLyKhongCoQuyen();
             }
 
             pageNumber = Math.Max(1, pageNumber);
@@ -99,7 +113,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         {
             if (!LaAdmin())
             {
-                return RedirectToAction("DangNhap", "TaiKhoan");
+                return XuLyKhongCoQuyen();
             }
 
             return View();
@@ -111,7 +125,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         {
             if (!LaAdmin())
             {
-                return RedirectToAction("DangNhap", "TaiKhoan");
+                return XuLyKhongCoQuyen();
             }
 
             bool trungMa = await _context.LoaiSuKiens
@@ -153,7 +167,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         {
             if (!LaAdmin())
             {
-                return RedirectToAction("DangNhap", "TaiKhoan");
+                return XuLyKhongCoQuyen();
             }
 
             if (string.IsNullOrEmpty(id))
@@ -180,7 +194,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         {
             if (!LaAdmin())
             {
-                return RedirectToAction("DangNhap", "TaiKhoan");
+                return XuLyKhongCoQuyen();
             }
 
             if (id != model.MaLoaiSuKien)
@@ -228,7 +242,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         {
             if (!LaAdmin())
             {
-                return RedirectToAction("DangNhap", "TaiKhoan");
+                return XuLyKhongCoQuyen();
             }
 
             var loaiSuKien = await _context.LoaiSuKiens
@@ -253,7 +267,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
         {
             if (!LaAdmin())
             {
-                return RedirectToAction("DangNhap", "TaiKhoan");
+                return XuLyKhongCoQuyen();
             }
 
             var loaiSuKien = await _context.LoaiSuKiens
