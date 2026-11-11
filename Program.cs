@@ -16,6 +16,11 @@ builder.Services.AddScoped<HTquanlyhoinghi_UNETI2_TI17A3HN.Services.DangKyServic
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
+
+// QuestPDF (xuất báo cáo PDF) - giấy phép Community miễn phí và dùng font hệ thống cho tiếng Việt.
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+QuestPDF.Settings.UseSystemFonts = true;
+
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {

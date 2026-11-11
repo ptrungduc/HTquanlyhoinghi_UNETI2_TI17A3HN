@@ -30,15 +30,32 @@ public class CheckInController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string? maThamDu)
     {
-        var ketQuaPhanQuyen = KiemTraQuyenQuanTri();
+        var ketQuaPhanQuyen = KiemTraQuyenTruyCap();
         if (ketQuaPhanQuyen is not null)
         {
             return ketQuaPhanQuyen;
         }
 
-        var model = new CheckInViewModel();
+        var model = new CheckInViewModel { MaThamDu = maThamDu ?? string.Empty };
+        if (!string.IsNullOrWhiteSpace(maThamDu))
+        {
+            try
+            {
+                model.DangKy = await _dichVuModule4.TraCuuMaThamDuAsync(maThamDu);
+            }
+            catch (Exception ex) when (ex is DbUpdateException or DbException)
+            {
+                _logger.LogError(ex, "Module 4 failed to look up an attendance code.");
+                model.KetQua = new KetQuaThaoTacViewModel
+                {
+                    ThanhCong = false,
+                    ThongBao = "Không thể tra cứu mã tham dự. Vui lòng thử lại."
+                };
+            }
+        }
+
         await TaiDuLieuCheckInViewAsync(model);
         return View(model);
     }
@@ -47,7 +64,7 @@ public class CheckInController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Index(CheckInViewModel model)
     {
-        var ketQuaPhanQuyen = KiemTraQuyenQuanTri();
+        var ketQuaPhanQuyen = KiemTraQuyenTruyCap();
         if (ketQuaPhanQuyen is not null)
         {
             return ketQuaPhanQuyen;
@@ -61,17 +78,21 @@ public class CheckInController : Controller
 
         try
         {
-            model.KetQua = await _dichVuModule4.CheckInAsync(
-                model.MaThamDu,
-                HttpContext.Session.GetString("MaTaiKhoan") ?? string.Empty,
-                model.GhiChu);
+            model.DangKy = await _dichVuModule4.TraCuuMaThamDuAsync(model.MaThamDu);
+            model.KetQua = string.IsNullOrWhiteSpace(model.DangKy?.MaDangKy)
+                ? new KetQuaThaoTacViewModel
+                {
+                    ThanhCong = false,
+                    ThongBao = model.DangKy?.ThongBao ?? "Mã tham dự không hợp lệ."
+                }
+                : await _dichVuModule4.CheckInAsync(
+                    model.MaThamDu,
+                    HttpContext.Session.GetString("MaTaiKhoan") ?? string.Empty,
+                    model.GhiChu);
 
-            if (model.KetQua.ThanhCong)
+            if (model.KetQua?.ThanhCong == true)
             {
-                // Xóa mã cũ để lễ tân sẵn sàng quét/nhập mã tiếp theo
-                model.MaThamDu = string.Empty;
-                model.GhiChu = string.Empty;
-                ModelState.Clear();
+                model.DangKy = await _dichVuModule4.TraCuuMaThamDuAsync(model.MaThamDu);
             }
         }
         catch (Exception ex) when (ex is DbUpdateException or DbException)
@@ -145,7 +166,7 @@ public class CheckInController : Controller
             .ToListAsync();
     }
 
-    private IActionResult? KiemTraQuyenQuanTri()
+    private IActionResult? KiemTraQuyenTruyCap()
     {
         if (string.IsNullOrWhiteSpace(HttpContext.Session.GetString("MaTaiKhoan")))
         {
@@ -153,7 +174,7 @@ public class CheckInController : Controller
         }
 
         var vaiTro = HttpContext.Session.GetString("VaiTro");
-        if (!KiemTraQuyenModule4.CoQuyenQuanTri(vaiTro))
+        if (!KiemTraQuyenModule4.CoQuyenTiepDon(vaiTro))
         {
             TempData["ThongBaoSaiVaiTro"] = "Bạn không có quyền truy cập vào mục Check-in do sai vai trò!";
             var (ctrl, act) = KiemTraQuyenModule4.LayTrangDieuHuongTheoVaiTro(vaiTro);

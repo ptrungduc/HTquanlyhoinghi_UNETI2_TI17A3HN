@@ -20,9 +20,17 @@ public static class KiemTraQuyenModule4
     }
 
     /// <summary>
-    /// Quyền thao tác tại Module 4 (tiếp đón, check-in, điểm danh) bao gồm Admin, Ban tổ chức và Lễ tân.
+    /// Quyền quản trị hệ thống (Admin & Ban tổ chức)
     /// </summary>
     public static bool CoQuyenQuanTri(string? vaiTro)
+    {
+        return LaAdminHoacBanToChuc(vaiTro);
+    }
+
+    /// <summary>
+    /// Quyền thao tác tại Module 4 (tiếp đón, check-in, điểm danh) bao gồm Admin, Ban tổ chức và Lễ tân.
+    /// </summary>
+    public static bool CoQuyenTiepDon(string? vaiTro)
     {
         if (string.IsNullOrWhiteSpace(vaiTro)) return false;
         var vt = vaiTro.Trim();

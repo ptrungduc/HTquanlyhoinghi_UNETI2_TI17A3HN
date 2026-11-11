@@ -22,6 +22,9 @@ public class CheckInViewModel
     public KetQuaThaoTacViewModel? KetQua { get; set; }
 
     [BindNever]
+    public ChiTietDangKyViewModel? DangKy { get; set; }
+
+    [BindNever]
     public List<NguoiThamDuCheckInItemViewModel> DanhSachSanSang { get; set; } = new();
 
     [BindNever]

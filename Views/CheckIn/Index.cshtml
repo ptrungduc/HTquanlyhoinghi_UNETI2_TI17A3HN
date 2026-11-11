@@ -92,8 +92,55 @@
                         </button>
                     </div>
                 </form>
+
+                @if (Model.DangKy is not null)
+                {
+                    @if (string.IsNullOrWhiteSpace(Model.DangKy.MaDangKy))
+                    {
+                        <div class="alert alert-warning mt-3" role="status">@Model.DangKy.ThongBao</div>
+                    }
+                    else
+                    {
+                        var trangThaiDangKy = Model.DangKy.TrangThai switch
+                        {
+                            "ChoDuyet" => "Chờ duyệt",
+                            "DaDuyet" => "Đã duyệt",
+                            "DaCheckIn" => "Đã check-in",
+                            "HoanThanh" => "Hoàn thành",
+                            "TuChoi" => "Từ chối",
+                            "DaHuy" => "Đã hủy",
+                            _ => Model.DangKy.TrangThai
+                        };
+
+                        <div class="card mt-3 border">
+                            <div class="card-header fw-semibold bg-light">Thông tin đăng ký</div>
+                            <div class="card-body">
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-4">Mã đăng ký</dt>
+                                    <dd class="col-sm-8"><code>@Model.DangKy.MaDangKy</code></dd>
+                                    <dt class="col-sm-4">Người tham dự</dt>
+                                    <dd class="col-sm-8">@Model.DangKy.TenNguoiThamDu</dd>
+                                    <dt class="col-sm-4">Email</dt>
+                                    <dd class="col-sm-8">@Model.DangKy.Email</dd>
+                                    <dt class="col-sm-4">Sự kiện</dt>
+                                    <dd class="col-sm-8">@Model.DangKy.TenSuKien</dd>
+                                    <dt class="col-sm-4">Trạng thái</dt>
+                                    <dd class="col-sm-8">@trangThaiDangKy</dd>
+                                    @if (Model.DangKy.NgayCheckIn.HasValue)
+                                    {
+                                        <dt class="col-sm-4">Đã check-in lúc</dt>
+                                        <dd class="col-sm-8">@Model.DangKy.NgayCheckIn.Value.ToString("dd/MM/yyyy HH:mm:ss")</dd>
+                                        <dt class="col-sm-4">Người thực hiện</dt>
+                                        <dd class="col-sm-8">@Model.DangKy.NguoiCheckIn</dd>
+                                    }
+                                </dl>
+                            </div>
+                        </div>
+                    }
+                }
             </div>
         </div>
+    </div>
     </div>
 
     <!-- Cột phải: Hướng dẫn & Thống kê nhanh -->

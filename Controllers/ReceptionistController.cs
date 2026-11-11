@@ -294,9 +294,7 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Controllers
             }
 
             var vaiTro = HttpContext.Session.GetString("VaiTro");
-            if (!string.Equals(vaiTro, "Le Tan", StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(vaiTro, "Admin", StringComparison.OrdinalIgnoreCase) &&
-                !string.Equals(vaiTro, "Ban To Chuc", StringComparison.OrdinalIgnoreCase))
+            if (!Helper.KiemTraQuyenModule4.CoQuyenTiepDon(vaiTro))
             {
                 TempData["ThongBaoSaiVaiTro"] = "Bạn không có quyền truy cập vào mục Lễ tân do sai vai trò!";
                 var (ctrl, act) = Helper.KiemTraQuyenModule4.LayTrangDieuHuongTheoVaiTro(vaiTro);

@@ -9,6 +9,8 @@ public class DangKyFormViewModel
     public string TenLoaiSuKien { get; set; } = string.Empty;
     public string TenDiaDiem { get; set; } = string.Empty;
     public int SucChuaDiaDiem { get; set; }
+    public int SoLuongToiDaSuKien { get; set; }
+    public int SucChuaDangKy { get; set; }
     public DateTime ThoiGianBatDau { get; set; }
     public DateTime ThoiGianKetThuc { get; set; }
     public string TrangThaiSuKien { get; set; } = string.Empty;

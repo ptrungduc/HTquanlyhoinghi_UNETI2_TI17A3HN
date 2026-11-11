@@ -41,6 +41,10 @@ namespace HTquanlyhoinghi_UNETI2_TI17A3HN.Database
             modelBuilder.Entity<DangKyThamDu>().ToTable("DangKyThamDus");
             modelBuilder.Entity<DangKyPhien>().ToTable("DangKyPhiens");
             modelBuilder.Entity<CheckIn>().ToTable("CheckIns");
+            modelBuilder.Entity<DangKyThamDu>()
+                .HasIndex(d => d.MaThamDu)
+                .IsUnique()
+                .HasFilter("[MaThamDu] IS NOT NULL");
             modelBuilder.Entity<LoaiSuKien>()
                 .HasIndex(l => l.TenLoaiSuKien)
                 .IsUnique();

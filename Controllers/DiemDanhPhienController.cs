@@ -1,5 +1,6 @@
 using System.Data.Common;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Helper;
+using HTquanlyhoinghi_UNETI2_TI17A3HN.Models;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Models.Module4;
 using HTquanlyhoinghi_UNETI2_TI17A3HN.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -21,15 +22,15 @@ public class DiemDanhPhienController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(string? maPhienSuKien)
+    public async Task<IActionResult> Index(string? maPhienSuKien, string? tuKhoa)
     {
-        var ketQuaPhanQuyen = KiemTraQuyenQuanTri();
+        var ketQuaPhanQuyen = KiemTraQuyenTruyCap();
         if (ketQuaPhanQuyen is not null)
             return ketQuaPhanQuyen;
 
         try
         {
-            return View(await _dichVuModule4.LayDiemDanhPhienAsync(maPhienSuKien));
+            return View(await _dichVuModule4.LayDiemDanhPhienAsync(maPhienSuKien, tuKhoa));
         }
         catch (Exception ex) when (ex is DbUpdateException or DbException)
         {
@@ -37,6 +38,7 @@ public class DiemDanhPhienController : Controller
             return View(new DiemDanhPhienViewModel
             {
                 MaPhienSuKien = maPhienSuKien,
+                TuKhoa = tuKhoa,
                 ThongBao = "Không thể tải dữ liệu điểm danh. Vui lòng thử lại."
             });
         }
@@ -44,9 +46,13 @@ public class DiemDanhPhienController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DiemDanh(string? maPhienSuKien, string? maNguoiThamDu)
+    public async Task<IActionResult> DiemDanh(
+        string? maPhienSuKien,
+        string? maNguoiThamDu,
+        string? ketQuaDiemDanh,
+        string? tuKhoa)
     {
-        var ketQuaPhanQuyen = KiemTraQuyenQuanTri();
+        var ketQuaPhanQuyen = KiemTraQuyenTruyCap();
         if (ketQuaPhanQuyen is not null)
             return ketQuaPhanQuyen;
 
@@ -54,13 +60,19 @@ public class DiemDanhPhienController : Controller
         try
         {
             ketQua = string.IsNullOrWhiteSpace(maPhienSuKien) ||
-                string.IsNullOrWhiteSpace(maNguoiThamDu)
+                string.IsNullOrWhiteSpace(maNguoiThamDu) ||
+                !Enum.TryParse<KetQuaDiemDanhPhien>(ketQuaDiemDanh, true, out var ketQuaDiemDanhDaParse) ||
+                !Enum.IsDefined(ketQuaDiemDanhDaParse)
                 ? new KetQuaThaoTacViewModel
                 {
                     ThanhCong = false,
-                    ThongBao = "Phiên hoặc người tham dự không hợp lệ."
+                    ThongBao = "Thông tin điểm danh không hợp lệ."
                 }
-                : await _dichVuModule4.DiemDanhPhienAsync(maPhienSuKien, maNguoiThamDu);
+                : await _dichVuModule4.DiemDanhPhienAsync(
+                    maPhienSuKien,
+                    maNguoiThamDu,
+                    ketQuaDiemDanhDaParse,
+                    HttpContext.Session.GetString("MaTaiKhoan") ?? string.Empty);
         }
         catch (Exception ex) when (ex is DbUpdateException or DbException)
         {
@@ -68,6 +80,7 @@ public class DiemDanhPhienController : Controller
             return View("Index", new DiemDanhPhienViewModel
             {
                 MaPhienSuKien = maPhienSuKien,
+                TuKhoa = tuKhoa,
                 KetQua = new KetQuaThaoTacViewModel
                 {
                     ThanhCong = false,
@@ -79,7 +92,7 @@ public class DiemDanhPhienController : Controller
         DiemDanhPhienViewModel viewModel;
         try
         {
-            viewModel = await _dichVuModule4.LayDiemDanhPhienAsync(maPhienSuKien);
+            viewModel = await _dichVuModule4.LayDiemDanhPhienAsync(maPhienSuKien, tuKhoa);
         }
         catch (Exception ex) when (ex is DbUpdateException or DbException)
         {
@@ -87,6 +100,7 @@ public class DiemDanhPhienController : Controller
             return View("Index", new DiemDanhPhienViewModel
             {
                 MaPhienSuKien = maPhienSuKien,
+                TuKhoa = tuKhoa,
                 KetQua = ketQua,
                 ThongBao = "Không thể tải lại danh sách điểm danh. Vui lòng làm mới trang."
             });
@@ -96,13 +110,73 @@ public class DiemDanhPhienController : Controller
         return View("Index", viewModel);
     }
 
-    private IActionResult? KiemTraQuyenQuanTri()
+    [HttpGet]
+    public async Task<IActionResult> ChoDuyet(string? maPhienSuKien)
+    {
+        var ketQuaPhanQuyen = KiemTraQuyenTruyCap();
+        if (ketQuaPhanQuyen is not null)
+            return ketQuaPhanQuyen;
+
+        try
+        {
+            var viewModel = await _dichVuModule4.LayDangKyPhienChoDuyetAsync(maPhienSuKien);
+            viewModel.KetQua = TempData["KetQuaDuyetPhienThongBao"] is not string thongBao
+                ? null
+                : new KetQuaThaoTacViewModel
+                {
+                    ThanhCong = TempData["KetQuaDuyetPhienThanhCong"] is bool thanhCong && thanhCong,
+                    ThongBao = thongBao
+                };
+            return View("DangKyChoDuyet", viewModel);
+        }
+        catch (Exception ex) when (ex is DbUpdateException or DbException)
+        {
+            _logger.LogError(ex, "Module 4 failed to load pending session registrations.");
+            return View("DangKyChoDuyet", new DangKyPhienChoDuyetViewModel
+            {
+                MaPhienSuKien = maPhienSuKien,
+                ThongBao = "Không thể tải đăng ký phiên. Vui lòng thử lại."
+            });
+        }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DuyetDangKy(string? maDangKyPhien, string? maPhienSuKien)
+    {
+        var ketQuaPhanQuyen = KiemTraQuyenTruyCap();
+        if (ketQuaPhanQuyen is not null)
+            return ketQuaPhanQuyen;
+
+        try
+        {
+            var ketQua = await _dichVuModule4.DuyetDangKyPhienAsync(maDangKyPhien ?? string.Empty);
+            TempData["KetQuaDuyetPhienThongBao"] = ketQua.ThongBao;
+            TempData["KetQuaDuyetPhienThanhCong"] = ketQua.ThanhCong;
+            return RedirectToAction(nameof(ChoDuyet), new { maPhienSuKien });
+        }
+        catch (Exception ex) when (ex is DbUpdateException or DbException)
+        {
+            _logger.LogError(ex, "Module 4 failed to approve a session registration.");
+            return View("DangKyChoDuyet", new DangKyPhienChoDuyetViewModel
+            {
+                MaPhienSuKien = maPhienSuKien,
+                KetQua = new KetQuaThaoTacViewModel
+                {
+                    ThanhCong = false,
+                    ThongBao = "Không thể duyệt đăng ký phiên do lỗi dữ liệu. Vui lòng thử lại."
+                }
+            });
+        }
+    }
+
+    private IActionResult? KiemTraQuyenTruyCap()
     {
         if (string.IsNullOrWhiteSpace(HttpContext.Session.GetString("MaTaiKhoan")))
             return RedirectToAction("DangNhap", "TaiKhoan");
 
         var vaiTro = HttpContext.Session.GetString("VaiTro");
-        if (!KiemTraQuyenModule4.CoQuyenQuanTri(vaiTro))
+        if (!KiemTraQuyenModule4.CoQuyenTiepDon(vaiTro))
         {
             TempData["ThongBaoSaiVaiTro"] = "Bạn không có quyền truy cập vào mục Điểm danh phiên do sai vai trò!";
             var (ctrl, act) = KiemTraQuyenModule4.LayTrangDieuHuongTheoVaiTro(vaiTro);

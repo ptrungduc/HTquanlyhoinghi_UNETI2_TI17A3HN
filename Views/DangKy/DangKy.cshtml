@@ -17,13 +17,16 @@
     <dt class="col-sm-3">Loại sự kiện</dt>
     <dd class="col-sm-9">@Model.TenLoaiSuKien</dd>
     <dt class="col-sm-3">Địa điểm</dt>
-    <dd class="col-sm-9">@Model.TenDiaDiem (sức chứa @Model.SucChuaDiaDiem)</dd>
+    <dd class="col-sm-9">
+        @Model.TenDiaDiem (sức chứa địa điểm @Model.SucChuaDiaDiem,
+        giới hạn sự kiện @Model.SoLuongToiDaSuKien)
+    </dd>
     <dt class="col-sm-3">Thời gian</dt>
     <dd class="col-sm-9">@Model.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm") - @Model.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")</dd>
     <dt class="col-sm-3">Trạng thái</dt>
     <dd class="col-sm-9">@Model.TrangThaiSuKien</dd>
     <dt class="col-sm-3">Đăng ký đang hiệu lực</dt>
-    <dd class="col-sm-9">@Model.SoLuongDangKyHieuLuc / @Model.SucChuaDiaDiem chỗ</dd>
+    <dd class="col-sm-9">@Model.SoLuongDangKyHieuLuc / @Model.SucChuaDangKy chỗ</dd>
 </dl>
 
 <h3>Thông tin người tham dự</h3>
